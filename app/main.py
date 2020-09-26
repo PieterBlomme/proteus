@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 import tritonclient.http as httpclient
 import logging
 #TODO add details on module/def in logger?
@@ -34,7 +34,7 @@ async def get_server_health():
 async def get_model_repository():
     return triton_client.get_model_repository_index()
 
-@app.get("/load/")
+@app.post("/load/")
 async def load_model(model: str):
     if model == 'yolov4':
         logger.info(f'Loading model {model}')
@@ -46,7 +46,7 @@ async def load_model(model: str):
     else:
         return {"success": False, "message": "unknown model"}
 
-@app.get("/unload/")
+@app.post("/unload/")
 async def unload_model(model: str):
     if not triton_client.is_model_ready(model):
         logger.info(f'No model with name {model} loaded')
@@ -55,3 +55,7 @@ async def unload_model(model: str):
         logger.info(f'Unloading model {model}')
         triton_client.unload_model(model)
         return {"success": True, "message": f"model {model} unloaded"}
+
+@app.post("/{model}/predict")
+async def predict(model: str, file: UploadFile = File(...)):
+    return {"filename": file.filename}
