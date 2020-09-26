@@ -1,13 +1,13 @@
 from typing import Optional
-
 from fastapi import FastAPI
-
+import tritonclient.http as httpclient
 import logging
+#TODO add details on module/def in logger?
+logger = logging.getLogger("gunicorn.error")
 
 app = FastAPI()
-logger = logging.getLogger("api")
 
-import tritonclient.http as httpclient
+#set up Triton connection
 TRITONURL = 'host.docker.internal:8000'
 
 try:
