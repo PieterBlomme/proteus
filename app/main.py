@@ -2,21 +2,23 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-import tritonhttpclient
-TRITONURL = 'host.docker.internal:8000'
+import logging
 
 app = FastAPI()
+logger = logging.getLogger("api")
+
+import tritonclient.http as httpclient
+TRITONURL = 'host.docker.internal:8000'
 
 try:
     # Specify large enough concurrency to handle the
     # the number of requests.
     concurrency = 1
-    triton_client = tritonhttpclient.InferenceServerClient(
-                    url=TRITONURL, concurrency=concurrency)
-    print(f'Server ready? {triton_client.is_server_ready()}')
+    triton_client = httpclient.InferenceServerClient(
+                    url=TRITONURL, concurrency=concurrency, verbose=True)
+    logger.info(f'Server ready? {triton_client.is_server_ready()}')
 except Exception as e:
-    print("client creation failed: " + str(e))
-
+    logger.error("client creation failed: " + str(e))
 
 
 @app.get("/")
@@ -25,10 +27,12 @@ def read_root():
 
 
 @app.get("/load_model/")
-def load_model(model: str, version: Optional[int] = 1):
+async def load_model(model: str):
 
     if model == 'yolov4':
+        logger.error('before load')
         triton_client.load_model(model)
+        logger.error('after load')
         return {"success": True, "message": f"model {model} loaded"}
     else:
         return {"success": False, "message": "unknown model"}
