@@ -32,8 +32,6 @@ import sys
 from functools import partial
 import os
 
-import tritongrpcclient
-import tritongrpcclient.model_config_pb2 as mc
 import tritonhttpclient
 from tritonclientutils import triton_to_np_dtype
 from tritonclientutils import InferenceServerException
@@ -44,17 +42,7 @@ else:
     import Queue as queue
 
 MODEL_NAME = 'yolov4'
-
-class UserData:
-
-    def __init__(self):
-        self._completed_requests = queue.Queue()
-
-
-# Callback function used for async_stream_infer()
-def completion_callback(user_data, result, error):
-    # passing error raise and handling out
-    user_data._completed_requests.put((result, error))
+MODEL_VERSION = 1
 
 
 FLAGS = None
@@ -361,7 +349,7 @@ def postprocess(results, output_names, batch_size, batching):
     print_bbox(bboxes)
 
 
-def requestGenerator(batched_image_data, input_name, output_names, dtype, FLAGS):
+def requestGenerator(batched_image_data, input_name, output_names, dtype):
     # Set the input data
     inputs = []
     inputs.append(
@@ -375,85 +363,22 @@ def requestGenerator(batched_image_data, input_name, output_names, dtype, FLAGS)
                 tritonhttpclient.InferRequestedOutput(output_name,
                                                     binary_data=True))
 
-    yield inputs, outputs, MODEL_NAME, FLAGS.model_version
+    yield inputs, outputs, MODEL_NAME, MODEL_VERSION
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v',
-                        '--verbose',
-                        action="store_true",
-                        required=False,
-                        default=False,
-                        help='Enable verbose output')
-    parser.add_argument('-a',
-                        '--async',
-                        dest="async_set",
-                        action="store_true",
-                        required=False,
-                        default=False,
-                        help='Use asynchronous inference API')
-    parser.add_argument(
-        '-x',
-        '--model-version',
-        type=str,
-        required=False,
-        default="",
-        help='Version of model. Default is to use latest version.')
-    parser.add_argument('-b',
-                        '--batch-size',
-                        type=int,
-                        required=False,
-                        default=1,
-                        help='Batch size. Default is 1.')
-    parser.add_argument(
-        '-s',
-        '--scaling',
-        type=str,
-        choices=['NONE', 'INCEPTION', 'VGG'],
-        required=False,
-        default='NONE',
-        help='Type of scaling to apply to image pixels. Default is NONE.')
-    parser.add_argument('-u',
-                        '--url',
-                        type=str,
-                        required=False,
-                        default='localhost:8000',
-                        help='Inference server URL. Default is localhost:8000.')
-    parser.add_argument('image_filename',
-                        type=str,
-                        nargs='?',
-                        default=None,
-                        help='Input image / Input folder.')
-    FLAGS = parser.parse_args()
-
-
-
-    try:
-        # Specify large enough concurrency to handle the
-        # the number of requests.
-        concurrency = 20 if FLAGS.async_set else 1
-        triton_client = tritonhttpclient.InferenceServerClient(
-                url=FLAGS.url, verbose=FLAGS.verbose, concurrency=concurrency)
-    except Exception as e:
-        print("client creation failed: " + str(e))
-        sys.exit(1)
-
+def predict(triton_client: InferenceServerClient, img: Image):
     # Make sure the model matches our requirements, and get some
     # properties of the model that we need for preprocessing
     try:
         model_metadata = triton_client.get_model_metadata(
-            model_name=MODEL_NAME, model_version=FLAGS.model_version)
+            model_name=MODEL_NAME, model_version=MODEL_VERSION)
     except InferenceServerException as e:
-        print("failed to retrieve the metadata: " + str(e))
-        sys.exit(1)
+        raise Exception("failed to retrieve the metadata: " + str(e))
 
     try:
         model_config = triton_client.get_model_config(
-            model_name=MODEL_NAME, model_version=FLAGS.model_version)
+            model_name=MODEL_NAME, model_version=MODEL_VERSION)
     except InferenceServerException as e:
-        print("failed to retrieve the config: " + str(e))
-        sys.exit(1)
+        raise Exception("failed to retrieve the config: " + str(e))
 
     print(model_metadata)
     print(model_config)
@@ -461,27 +386,9 @@ if __name__ == '__main__':
     max_batch_size, input_name, output_names, c, h, w, format, dtype = parse_model_http(
             model_metadata, model_config)
 
-    filenames = []
-    if os.path.isdir(FLAGS.image_filename):
-        filenames = [
-            os.path.join(FLAGS.image_filename, f)
-            for f in os.listdir(FLAGS.image_filename)
-            if os.path.isfile(os.path.join(FLAGS.image_filename, f))
-        ]
-    else:
-        filenames = [
-            FLAGS.image_filename,
-        ]
-
-    filenames.sort()
-
     # Preprocess the images into input data according to model
     # requirements
-    image_data = []
-    for filename in filenames:
-        img = Image.open(filename)
-        image_data.append(
-            preprocess(img, format, dtype, c, h, w, FLAGS.scaling))
+    image_data = [preprocess(img, format, dtype, c, h, w, 'INCEPTION')]#TODO scaling should be param
 
     # Send requests of FLAGS.batch_size images. If the number of
     # images isn't an exact multiple of FLAGS.batch_size then just
@@ -492,19 +399,17 @@ if __name__ == '__main__':
     request_ids = []
     image_idx = 0
     last_request = False
-    user_data = UserData()
 
     # Holds the handles to the ongoing HTTP async requests.
     async_requests = []
 
     sent_count = 0
 
-
     while not last_request:
         input_filenames = []
         repeated_image_data = []
 
-        for idx in range(FLAGS.batch_size):
+        for idx in range(1):
             input_filenames.append(filenames[image_idx])
             repeated_image_data.append(image_data[image_idx])
             image_idx = (image_idx + 1) % len(image_data)
@@ -519,37 +424,21 @@ if __name__ == '__main__':
         # Send request
         try:
             for inputs, outputs, model_name, model_version in requestGenerator(
-                    batched_image_data, input_name, output_names, dtype, FLAGS):
+                    batched_image_data, input_name, output_names, dtype):
                 sent_count += 1
-                if FLAGS.async_set:
-                    async_requests.append(
-                            triton_client.async_infer(
-                                MODEL_NAME,
-                                inputs,
-                                request_id=str(sent_count),
-                                model_version=FLAGS.model_version,
-                                outputs=outputs))
-                else:
-                    responses.append(
+                responses.append(
                         triton_client.infer(MODEL_NAME,
                                             inputs,
                                             request_id=str(sent_count),
-                                            model_version=FLAGS.model_version,
+                                            model_version=MODEL_VERSION,
                                             outputs=outputs))
     
         except InferenceServerException as e:
             print("inference failed: " + str(e))
             sys.exit(1)
-
-    if FLAGS.async_set:
-        # Collect results from the ongoing async requests
-        # for HTTP Async requests.
-        for async_request in async_requests:
-            responses.append(async_request.get_result())
-
     for response in responses:
         this_id = response.get_response()["id"]
-        print("Request {}, batch size {}".format(this_id, FLAGS.batch_size))
-        postprocess(response, output_names, FLAGS.batch_size, max_batch_size > 0)
+        print("Request {}, batch size {}".format(this_id, 1))
+        postprocess(response, output_names, 1, max_batch_size > 0)
 
     print("PASS")
