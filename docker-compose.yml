@@ -4,8 +4,7 @@ services:
   triton:
     image: nvcr.io/nvidia/tritonserver:20.09-py3
     command: tritonserver --model-repository=/models --strict-model-config=False --model-control-mode=explicit
-    environment:
-      - SHM_SIZE=1g
+    shm_size: '2gb'
     ports:
       - "8000:8000"
       - "8001:8001"
