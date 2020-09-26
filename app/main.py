@@ -1,6 +1,8 @@
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException
 import tritonclient.http as httpclient
+from tritonclient.utils import triton_to_np_dtype, InferenceServerException 
+
 import logging
 import numpy as np
 from PIL import Image
@@ -20,7 +22,7 @@ try:
     # the number of requests.
     concurrency = 1
     triton_client = httpclient.InferenceServerClient(
-                    url=TRITONURL, concurrency=concurrency, verbose=True)
+                    url=TRITONURL, concurrency=concurrency)
     logger.info(f'Server ready? {triton_client.is_server_ready()}')
 except Exception as e:
     logger.error("client creation failed: " + str(e))
@@ -68,20 +70,13 @@ import sys
 from functools import partial
 import os
 
-import tritonhttpclient
-from tritonclientutils import triton_to_np_dtype
-from tritonclientutils import InferenceServerException
-
 if sys.version_info >= (3, 0):
     import queue
 else:
     import Queue as queue
 
 MODEL_NAME = 'yolov4'
-MODEL_VERSION = 1
-
-
-FLAGS = None
+MODEL_VERSION = '1'
 
 def parse_model_http(model_metadata, model_config):
     """
@@ -127,9 +122,9 @@ def parse_model_http(model_metadata, model_config):
                 output_batch_dim = False
             elif dim > 1:
                 non_one_cnt += 1
-                if non_one_cnt > 1:
+                #if non_one_cnt > 1:
                     #TODO
-                    print ("expecting model output to be a vector")
+                    #print ("expecting model output to be a vector")
 
     # Model input must have 3 dims (not counting the batch dimension),
     # either CHW or HWC
@@ -163,7 +158,7 @@ def preprocess(img, format, dtype, c, h, w, scaling):
     else:
         sample_img = img.convert('RGB')
 
-    logger.info(sample_img.size)
+    logger.info(f'Original image size: {sample_img.size}')
     resized_img = sample_img.resize((w, h), Image.BILINEAR)
     resized = np.array(resized_img)
     if resized.ndim == 2:
@@ -337,32 +332,17 @@ def print_bbox(bboxes, classes=read_class_names("coco.names"), show_label=True):
     """
     num_classes = len(classes)
     hsv_tuples = [(1.0 * x / num_classes, 1., 1.) for x in range(num_classes)]
-    # colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
-    # colors = list(map(lambda x: (int(x[0] * 255), int(x[1] * 255), int(x[2] * 255)), colors))
 
-    # random.seed(0)
-    # random.shuffle(colors)
-    # random.seed(None)
-
+    results = []
     for i, bbox in enumerate(bboxes):
         coor = np.array(bbox[:4], dtype=np.int32)
-        # fontScale = 0.5
-        score = bbox[4]
+        score = float(bbox[4])
         class_ind = int(bbox[5])
-        # bbox_color = colors[class_ind]
-        # bbox_thick = int(0.6 * (image_h + image_w) / 600)
-        c1, c2 = (coor[0], coor[1]), (coor[2], coor[3])
-        # cv2.rectangle(image, c1, c2, bbox_color, bbox_thick)
+        c1, c2 = (float(coor[0]), float(coor[1])), (float(coor[2]), float(coor[3]))
 
-        if show_label:
-            bbox_mess = '%s: %.2f' % (classes[class_ind], score)
-            # t_size = cv2.getTextSize(bbox_mess, 0, fontScale, thickness=bbox_thick//2)[0]
-            # cv2.rectangle(image, c1, (c1[0] + t_size[0], c1[1] - t_size[1] - 3), bbox_color, -1)  
-
-            # cv2.putText(image, bbox_mess, (c1[0], c1[1]-2), cv2.FONT_HERSHEY_SIMPLEX,
-                        # fontScale, (0, 0, 0), bbox_thick//2, lineType=cv2.LINE_AA)
-
-    logger.info(c1, c2, bbox_mess)
+        result = {'c1' : c1, 'c2' : c2, 'class' : classes[class_ind], 'score' : score}
+        results.append(result)
+    return results
 
 def postprocess(results, output_names, batch_size, batching):
     """
@@ -382,7 +362,7 @@ def postprocess(results, output_names, batch_size, batching):
     pred_bbox = postprocess_bbbox(detections, ANCHORS, STRIDES, XYSCALE)
     bboxes = postprocess_boxes(pred_bbox, original_image_size, input_size, 0.25)
     bboxes = nms(bboxes, 0.213, method='nms')
-    print_bbox(bboxes)
+    bboxes = print_bbox(bboxes)
     return bboxes
 
 
@@ -390,19 +370,19 @@ def requestGenerator(batched_image_data, input_name, output_names, dtype):
     # Set the input data
     inputs = []
     inputs.append(
-            tritonhttpclient.InferInput(input_name, batched_image_data.shape,
+            httpclient.InferInput(input_name, batched_image_data.shape,
                                         dtype))
     inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
 
     outputs = []
     for output_name in output_names:
         outputs.append(
-                tritonhttpclient.InferRequestedOutput(output_name,
+                httpclient.InferRequestedOutput(output_name,
                                                     binary_data=True))
 
     yield inputs, outputs, MODEL_NAME, MODEL_VERSION
 
-def predict(triton_client, img):
+def infer(triton_client, img):
     # Make sure the model matches our requirements, and get some
     # properties of the model that we need for preprocessing
     try:
@@ -417,8 +397,8 @@ def predict(triton_client, img):
     except InferenceServerException as e:
         raise Exception("failed to retrieve the config: " + str(e))
 
-    logger.info(model_metadata)
-    logger.info(model_config)
+    logger.info(f'Model metadata: {model_metadata}')
+    logger.info(f'Model config: {model_config}')
     
     max_batch_size, input_name, output_names, c, h, w, format, dtype = parse_model_http(
             model_metadata, model_config)
@@ -433,6 +413,7 @@ def predict(triton_client, img):
     requests = []
     responses = []
     result_filenames = []
+    repeated_image_data = []
     request_ids = []
     image_idx = 0
     last_request = False
@@ -442,36 +423,27 @@ def predict(triton_client, img):
 
     sent_count = 0
 
-    while not last_request:
-        input_filenames = []
-        repeated_image_data = []
+    repeated_image_data.append(image_data[0])
 
-        for idx in range(1):
-            input_filenames.append(filenames[image_idx])
-            repeated_image_data.append(image_data[image_idx])
-            image_idx = (image_idx + 1) % len(image_data)
-            if image_idx == 0:
-                last_request = True
+    if max_batch_size > 0:
+        batched_image_data = np.stack(repeated_image_data, axis=0)
+    else:
+        batched_image_data = repeated_image_data[0]
 
-        if max_batch_size > 0:
-            batched_image_data = np.stack(repeated_image_data, axis=0)
-        else:
-            batched_image_data = repeated_image_data[0]
-
-        # Send request
-        try:
-            for inputs, outputs, model_name, model_version in requestGenerator(
+    # Send request
+    try:
+        for inputs, outputs, model_name, model_version in requestGenerator(
                     batched_image_data, input_name, output_names, dtype):
-                sent_count += 1
-                responses.append(
-                        triton_client.infer(MODEL_NAME,
+            sent_count += 1
+            responses.append(
+                    triton_client.infer(MODEL_NAME,
                                             inputs,
                                             request_id=str(sent_count),
                                             model_version=MODEL_VERSION,
                                             outputs=outputs))
-    
-        except InferenceServerException as e:
-            logger.info("inference failed: " + str(e))
+    except InferenceServerException as e:
+        logger.info("inference failed: " + str(e))
+
 
     final_responses = []
     for response in responses:
@@ -495,6 +467,6 @@ async def predict(model: str, file: bytes = File(...)):
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to process file",
         )
-    response = predict(triton_client, img)
+    response = infer(triton_client, img)
     logger.info(response)
-    return {"img": img.size}
+    return response
