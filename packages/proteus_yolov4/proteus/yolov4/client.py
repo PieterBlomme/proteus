@@ -123,8 +123,6 @@ def postprocess(results, original_image_size, output_names, batch_size, batching
     ANCHORS = get_anchors()
     STRIDES = np.array(STRIDES)
 
-    #original_image_size = (3361, 2521)  # TODO
-    logger.info(f'original image size {original_image_size}')
     input_size = 416
     pred_bbox = postprocess_bbbox(detections, ANCHORS, STRIDES, XYSCALE)
     bboxes = postprocess_boxes(pred_bbox, original_image_size,
