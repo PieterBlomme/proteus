@@ -2,6 +2,7 @@ import numpy as np
 import os
 from scipy import special
 from pathlib import Path
+from proteus.types import BoundingBox
 
 folder_path = Path(__file__).parent
 
@@ -161,12 +162,12 @@ def print_bbox(bboxes, classes=read_class_names(f"{folder_path}/coco_names.txt")
 
     results = []
     for i, bbox in enumerate(bboxes):
-        coor = np.array(bbox[:4], dtype=np.int32)
-        score = float(bbox[4])
-        class_ind = int(bbox[5])
-        c1, c2 = (float(coor[0]), float(coor[1])), (float(coor[2]), float(coor[3]))
-
-        result = {'c1': c1, 'c2': c2, 'class': classes[class_ind],
-                  'score': score}
-        results.append(result)
+        bbox = BoundingBox(x1=int(bbox[0]),
+                           y1=int(bbox[1]),
+                           x2=int(bbox[2]),
+                           y2=int(bbox[3]),
+                           class_name=classes[int(bbox[5])],
+                           score=float(bbox[4])
+                           )
+        results.append(bbox)
     return results

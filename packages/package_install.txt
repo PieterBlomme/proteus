@@ -1,1 +1,3 @@
+/packages/proteus_types/.
 /packages/proteus_yolov4/.
+/packages/proteus_mobilenet/.

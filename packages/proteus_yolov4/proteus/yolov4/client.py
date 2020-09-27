@@ -208,4 +208,4 @@ def inference_http(triton_client, img):
                                      max_batch_size > 0)
         final_responses.append(final_response)
 
-    return final_response
+    return final_responses
