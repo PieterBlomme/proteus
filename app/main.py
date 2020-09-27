@@ -1,22 +1,19 @@
-from typing import Optional
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, HTTPException
 import tritonclient.http as httpclient
-from tritonclient.utils import triton_to_np_dtype, InferenceServerException 
 
 import logging
-import numpy as np
 from PIL import Image
 from io import BytesIO
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from proteus.yolov4 import inference_http
 
-#TODO add details on module/def in logger?
+# TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
 app = FastAPI()
 
-#set up Triton connection
+# set up Triton connection
 TRITONURL = 'host.docker.internal:8000'
 
 try:
@@ -39,9 +36,11 @@ async def get_server_health():
         logger.info(f'Server is dead')
         return {"success": False}
 
+
 @app.get("/models")
 async def get_model_repository():
     return triton_client.get_model_repository_index()
+
 
 @app.post("/load/")
 async def load_model(model: str):
@@ -49,11 +48,13 @@ async def load_model(model: str):
         logger.info(f'Loading model {model}')
         triton_client.load_model(model)
         if not triton_client.is_model_ready(model):
-            return {"success": False, "message": f"model {model} not ready - check logs"}
+            return {"success": False, 
+                    "message": f"model {model} not ready - check logs"}
         else:
             return {"success": True, "message": f"model {model} loaded"}
     else:
         return {"success": False, "message": "unknown model"}
+
 
 @app.post("/unload/")
 async def unload_model(model: str):
@@ -65,18 +66,20 @@ async def unload_model(model: str):
         triton_client.unload_model(model)
         return {"success": True, "message": f"model {model} unloaded"}
 
+
 @app.post("/{model}/predict")
 async def predict(model: str, file: bytes = File(...)):
     if not triton_client.is_model_ready(model):
         raise HTTPException(status_code=404, detail="model not available")
 
-    #TODO validation of the file
+    # TODO validation of the file
     try:
         img = Image.open(BytesIO(file))
     except Exception as e:
         logger.error(e)
         raise HTTPException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Unable to process file",
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unable to process file",
         )
     response = inference_http(triton_client, img)
     logger.info(response)

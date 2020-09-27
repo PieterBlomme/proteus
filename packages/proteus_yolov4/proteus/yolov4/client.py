@@ -1,29 +1,22 @@
-#TODO clean up and split out
-import argparse
+# TODO clean up and split out
 import numpy as np
 from PIL import Image
-import sys
-from functools import partial
 import os
 import logging
 from pathlib import Path
 
 import tritonclient.http as httpclient
-from tritonclient.utils import triton_to_np_dtype, InferenceServerException 
-
+from tritonclient.utils import triton_to_np_dtype, InferenceServerException
+from scipy import special
 
 folder_path = Path(__file__).parent
-
-if sys.version_info >= (3, 0):
-    import queue
-else:
-    import Queue as queue
 
 MODEL_NAME = 'yolov4'
 MODEL_VERSION = '1'
 
-#TODO add details on module/def in logger?
+# TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
+
 
 def parse_model_http(model_metadata, model_config):
     """
@@ -83,7 +76,7 @@ def parse_model_http(model_metadata, model_config):
             format(expected_input_dims, model_metadata['name'],
                    len(input_metadata['shape'])))
 
-    #FORMAT_NHWC
+    # FORMAT_NHWC
     h = input_metadata['shape'][1 if input_batch_dim else 0]
     w = input_metadata['shape'][2 if input_batch_dim else 1]
     c = input_metadata['shape'][3 if input_batch_dim else 2]
@@ -135,10 +128,6 @@ def preprocess(img, format, dtype, c, h, w, scaling):
     # (like BGR) so we just assume RGB.
     return ordered
 
-from scipy import special
-import colorsys
-import random
-
 
 def get_anchors(anchors_path, tiny=False):
     '''loads the anchors from a file'''
@@ -146,6 +135,7 @@ def get_anchors(anchors_path, tiny=False):
         anchors = f.readline()
     anchors = np.array(anchors.split(','), dtype=np.float32)
     return anchors.reshape(3, 3, 2)
+
 
 def postprocess_bbbox(pred_bbox, ANCHORS, STRIDES, XYSCALE=[1,1,1]):
     '''define anchor boxes'''
@@ -171,7 +161,7 @@ def postprocess_bbbox(pred_bbox, ANCHORS, STRIDES, XYSCALE=[1,1,1]):
 
 def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
     '''remove boundary boxs with a low detection probability'''
-    valid_scale=[0, np.inf]
+    valid_scale = [0, np.inf]
     pred_bbox = np.array(pred_bbox)
 
     pred_xywh = pred_bbox[:, 0:4]
@@ -180,7 +170,8 @@ def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
 
     # (1) (x, y, w, h) --> (xmin, ymin, xmax, ymax)
     pred_coor = np.concatenate([pred_xywh[:, :2] - pred_xywh[:, 2:] * 0.5,
-                                pred_xywh[:, :2] + pred_xywh[:, 2:] * 0.5], axis=-1)
+                                pred_xywh[:, :2] + pred_xywh[:, 2:] * 0.5],
+                                axis=-1)
     # (2) (xmin, ymin, xmax, ymax) -> (xmin_org, ymin_org, xmax_org, ymax_org)
     org_h, org_w = org_img_shape
     resize_ratio = min(input_size / org_w, input_size / org_h)
@@ -193,13 +184,16 @@ def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
 
     # (3) clip some boxes that are out of range
     pred_coor = np.concatenate([np.maximum(pred_coor[:, :2], [0, 0]),
-                                np.minimum(pred_coor[:, 2:], [org_w - 1, org_h - 1])], axis=-1)
-    invalid_mask = np.logical_or((pred_coor[:, 0] > pred_coor[:, 2]), (pred_coor[:, 1] > pred_coor[:, 3]))
+                                np.minimum(pred_coor[:, 2:],
+                                [org_w - 1, org_h - 1])], axis=-1)
+    invalid_mask = np.logical_or((pred_coor[:, 0] > pred_coor[:, 2]),
+                                 (pred_coor[:, 1] > pred_coor[:, 3]))
     pred_coor[invalid_mask] = 0
 
     # (4) discard some invalid boxes
     bboxes_scale = np.sqrt(np.multiply.reduce(pred_coor[:, 2:4] - pred_coor[:, 0:2], axis=-1))
-    scale_mask = np.logical_and((valid_scale[0] < bboxes_scale), (bboxes_scale < valid_scale[1]))
+    scale_mask = np.logical_and((valid_scale[0] < bboxes_scale),
+                                (bboxes_scale < valid_scale[1]))
 
     # (5) discard some boxes with low scores
     classes = np.argmax(pred_prob, axis=-1)
@@ -210,6 +204,7 @@ def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
 
     return np.concatenate([coors, scores[:, np.newaxis], classes[:, np.newaxis]], axis=-1)
 
+
 def bboxes_iou(boxes1, boxes2):
     '''calculate the Intersection Over Union value'''
     boxes1 = np.array(boxes1)
@@ -218,15 +213,16 @@ def bboxes_iou(boxes1, boxes2):
     boxes1_area = (boxes1[..., 2] - boxes1[..., 0]) * (boxes1[..., 3] - boxes1[..., 1])
     boxes2_area = (boxes2[..., 2] - boxes2[..., 0]) * (boxes2[..., 3] - boxes2[..., 1])
 
-    left_up       = np.maximum(boxes1[..., :2], boxes2[..., :2])
-    right_down    = np.minimum(boxes1[..., 2:], boxes2[..., 2:])
+    left_up = np.maximum(boxes1[..., :2], boxes2[..., :2])
+    right_down = np.minimum(boxes1[..., 2:], boxes2[..., 2:])
 
     inter_section = np.maximum(right_down - left_up, 0.0)
-    inter_area    = inter_section[..., 0] * inter_section[..., 1]
-    union_area    = boxes1_area + boxes2_area - inter_area
-    ious          = np.maximum(1.0 * inter_area / union_area, np.finfo(np.float32).eps)
+    inter_area = inter_section[..., 0] * inter_section[..., 1]
+    union_area = boxes1_area + boxes2_area - inter_area
+    ious = np.maximum(1.0 * inter_area / union_area, np.finfo(np.float32).eps)
 
     return ious
+
 
 def nms(bboxes, iou_threshold, sigma=0.3, method='nms'):
     """
@@ -246,7 +242,8 @@ def nms(bboxes, iou_threshold, sigma=0.3, method='nms'):
             max_ind = np.argmax(cls_bboxes[:, 4])
             best_bbox = cls_bboxes[max_ind]
             best_bboxes.append(best_bbox)
-            cls_bboxes = np.concatenate([cls_bboxes[: max_ind], cls_bboxes[max_ind + 1:]])
+            cls_bboxes = np.concatenate([cls_bboxes[: max_ind], 
+                                        cls_bboxes[max_ind + 1:]])
             iou = bboxes_iou(best_bbox[np.newaxis, :4], cls_bboxes[:, :4])
             weight = np.ones((len(iou),), dtype=np.float32)
 
@@ -265,6 +262,7 @@ def nms(bboxes, iou_threshold, sigma=0.3, method='nms'):
 
     return best_bboxes
 
+
 def read_class_names(class_file_name):
     '''loads class name from a file'''
     names = {}
@@ -274,12 +272,12 @@ def read_class_names(class_file_name):
             names[ID] = name.strip('\n')
     return names
 
+
 def print_bbox(bboxes, classes=read_class_names(f"{folder_path}/coco_names.txt"), show_label=True):
     """
-    bboxes: [x_min, y_min, x_max, y_max, probability, cls_id] format coordinates.
+    bboxes: [x_min, y_min, x_max, y_max, probability, cls_id]
+    format coordinates.
     """
-    num_classes = len(classes)
-    hsv_tuples = [(1.0 * x / num_classes, 1., 1.) for x in range(num_classes)]
 
     results = []
     for i, bbox in enumerate(bboxes):
@@ -288,16 +286,19 @@ def print_bbox(bboxes, classes=read_class_names(f"{folder_path}/coco_names.txt")
         class_ind = int(bbox[5])
         c1, c2 = (float(coor[0]), float(coor[1])), (float(coor[2]), float(coor[3]))
 
-        result = {'c1' : c1, 'c2' : c2, 'class' : classes[class_ind], 'score' : score}
+        result = {'c1': c1, 'c2': c2, 'class': classes[class_ind],
+                  'score': score}
         results.append(result)
     return results
+
 
 def postprocess(results, output_names, batch_size, batching):
     """
     Post-process results to show classifications.
     """
 
-    detections = [results.as_numpy(output_name) for output_name in output_names]
+    detections = [results.as_numpy(output_name) for
+                  output_name in output_names]
     ANCHORS = f"{folder_path}/yolov4_anchors.txt"
     STRIDES = [8, 16, 32]
     XYSCALE = [1.2, 1.1, 1.05]
@@ -305,10 +306,11 @@ def postprocess(results, output_names, batch_size, batching):
     ANCHORS = get_anchors(ANCHORS)
     STRIDES = np.array(STRIDES)
 
-    original_image_size = (3361, 2521) #TODO
+    original_image_size = (3361, 2521)  # TODO
     input_size = 416
     pred_bbox = postprocess_bbbox(detections, ANCHORS, STRIDES, XYSCALE)
-    bboxes = postprocess_boxes(pred_bbox, original_image_size, input_size, 0.25)
+    bboxes = postprocess_boxes(pred_bbox, original_image_size,
+                               input_size, 0.25)
     bboxes = nms(bboxes, 0.213, method='nms')
     bboxes = print_bbox(bboxes)
     return bboxes
@@ -319,16 +321,17 @@ def requestGenerator(batched_image_data, input_name, output_names, dtype):
     inputs = []
     inputs.append(
             httpclient.InferInput(input_name, batched_image_data.shape,
-                                        dtype))
+                                  dtype))
     inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
 
     outputs = []
     for output_name in output_names:
         outputs.append(
                 httpclient.InferRequestedOutput(output_name,
-                                                    binary_data=True))
+                                                binary_data=True))
 
     yield inputs, outputs, MODEL_NAME, MODEL_VERSION
+
 
 def inference_http(triton_client, img):
     # Make sure the model matches our requirements, and get some
@@ -353,28 +356,21 @@ def inference_http(triton_client, img):
 
     # Preprocess the images into input data according to model
     # requirements
-    image_data = [preprocess(img, format, dtype, c, h, w, 'INCEPTION')]#TODO scaling should be param
+    # TODO scaling should be param
+    image_data = [preprocess(img, format, dtype, c, h, w, 'INCEPTION')] 
 
     # Send requests of FLAGS.batch_size images. If the number of
     # images isn't an exact multiple of FLAGS.batch_size then just
     # start over with the first images until the batch is filled.
-    requests = []
     responses = []
-    result_filenames = []
     repeated_image_data = []
-    request_ids = []
-    image_idx = 0
-    last_request = False
-
-    # Holds the handles to the ongoing HTTP async requests.
-    async_requests = []
 
     sent_count = 0
 
     repeated_image_data.append(image_data[0])
 
     if max_batch_size > 0:
-        batched_image_data = np.stack(repeated_image_data, axis=0)
+        batched_image_data = np.stack([image_data[0]], axis=0)
     else:
         batched_image_data = repeated_image_data[0]
 
@@ -385,13 +381,12 @@ def inference_http(triton_client, img):
             sent_count += 1
             responses.append(
                     triton_client.infer(MODEL_NAME,
-                                            inputs,
-                                            request_id=str(sent_count),
-                                            model_version=MODEL_VERSION,
-                                            outputs=outputs))
+                                        inputs,
+                                        request_id=str(sent_count),
+                                        model_version=MODEL_VERSION,
+                                        outputs=outputs))
     except InferenceServerException as e:
         logger.info("inference failed: " + str(e))
-
 
     final_responses = []
     for response in responses:
