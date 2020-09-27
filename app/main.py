@@ -30,7 +30,7 @@ except Exception as e:
 @app.get("/health")
 async def get_server_health():
     if triton_client.is_server_live():
-        logger.info(f'Server is alive')
+        logger.info('Server is alive')
         return {"success": True}
     else:
         logger.info(f'Server is dead')
@@ -48,7 +48,7 @@ async def load_model(model: str):
         logger.info(f'Loading model {model}')
         triton_client.load_model(model)
         if not triton_client.is_model_ready(model):
-            return {"success": False, 
+            return {"success": False,
                     "message": f"model {model} not ready - check logs"}
         else:
             return {"success": True, "message": f"model {model} loaded"}
