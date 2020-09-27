@@ -14,7 +14,7 @@ logger = logging.getLogger("gunicorn.error")
 app = FastAPI()
 
 # set up Triton connection
-TRITONURL = 'host.docker.internal:8000'
+TRITONURL = 'triton:8000'
 
 try:
     # Specify large enough concurrency to handle the
