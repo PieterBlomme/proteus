@@ -8,3 +8,10 @@ class BoundingBox:
         self.y2 = y2
         self.class_name = class_name
         self.score = score
+
+
+class Class:
+    def __init__(self, class_name: str,
+                 score: float = None):
+        self.class_name = class_name
+        self.score = score

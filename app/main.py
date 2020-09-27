@@ -6,7 +6,8 @@ from PIL import Image
 from io import BytesIO
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from proteus.yolov4 import inference_http
+from proteus.yolov4 import inference_http as inference_http_yolov4
+from proteus.mobilenet import inference_http as inference_http_mobilenet
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -44,7 +45,7 @@ async def get_model_repository():
 
 @app.post("/load/")
 async def load_model(model: str):
-    if model == 'yolov4':
+    if model in ('yolov4', 'mobilenet'):
         logger.info(f'Loading model {model}')
         triton_client.load_model(model)
         if not triton_client.is_model_ready(model):
@@ -81,6 +82,8 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    response = inference_http(triton_client, img)
-    logger.info(response)
+    if model == 'yolov4':
+        response = inference_http_yolov4(triton_client, img)
+    else:
+        response = inference_http_mobilenet(triton_client, img)
     return response
