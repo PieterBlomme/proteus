@@ -112,7 +112,7 @@ def preprocess(img, format, dtype, c, h, w, scaling):
 
 def postprocess(results, original_image_size, output_names, batch_size, batching):
     """
-    Post-process results to show classifications.
+    Post-process results to show bounding boxes.
     """
 
     detections = [results.as_numpy(output_name) for
