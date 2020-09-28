@@ -12,7 +12,9 @@ services:
     volumes:
       - ./model_repository:/models
   api:
-    build: .
+    build: 
+      context: .
+      dockerfile: proteus_api/Dockerfile
     ports:
       - "80:80"
     depends_on:
