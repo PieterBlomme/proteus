@@ -4,8 +4,6 @@ import NotFound from "@/pages/NotFoundPage.vue";
 
 // Admin pages
 const Dashboard = () => import(/* webpackChunkName: "dashboard" */"@/pages/Dashboard.vue");
-const Notifications = () => import(/* webpackChunkName: "common" */"@/pages/Notifications.vue");
-const TableList = () => import(/* webpackChunkName: "common" */ "@/pages/TableList.vue");
 
 const routes = [
   {
@@ -18,16 +16,6 @@ const routes = [
         name: "dashboard",
         component: Dashboard
       },
-      {
-        path: "notifications",
-        name: "notifications",
-        component: Notifications
-      },
-      {
-        path: "table-list",
-        name: "table-list",
-        component: TableList
-      }
     ]
   },
   { path: "*", component: NotFound },
