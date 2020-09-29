@@ -9,6 +9,10 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from proteus.yolov4 import inference_http as inference_http_yolov4
 from proteus.mobilenet import inference_http as inference_http_mobilenet
 
+from pydantic import BaseModel
+class Model(BaseModel):
+    name: str
+
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
@@ -44,28 +48,28 @@ async def get_model_repository():
 
 
 @app.post("/load/")
-async def load_model(model: str):
-    if model in ('yolov4', 'mobilenet'):
-        logger.info(f'Loading model {model}')
-        triton_client.load_model(model)
-        if not triton_client.is_model_ready(model):
+async def load_model(model: Model):
+    if model.name in ('yolov4', 'mobilenet'):
+        logger.info(f'Loading model {model.name}')
+        triton_client.load_model(model.name)
+        if not triton_client.is_model_ready(model.name):
             return {"success": False,
-                    "message": f"model {model} not ready - check logs"}
+                    "message": f"model {model.name} not ready - check logs"}
         else:
-            return {"success": True, "message": f"model {model} loaded"}
+            return {"success": True, "message": f"model {model.name} loaded"}
     else:
         return {"success": False, "message": "unknown model"}
 
 
 @app.post("/unload/")
-async def unload_model(model: str):
-    if not triton_client.is_model_ready(model):
-        logger.info(f'No model with name {model} loaded')
+async def unload_model(model: Model):
+    if not triton_client.is_model_ready(model.name):
+        logger.info(f'No model with name {model.name} loaded')
         return {"success": False, "message": "model not loaded"}
     else:
-        logger.info(f'Unloading model {model}')
-        triton_client.unload_model(model)
-        return {"success": True, "message": f"model {model} unloaded"}
+        logger.info(f'Unloading model {model.name}')
+        triton_client.unload_model(model.name)
+        return {"success": True, "message": f"model {model.name} unloaded"}
 
 
 @app.post("/{model}/predict")

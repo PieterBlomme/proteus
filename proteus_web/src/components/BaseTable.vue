@@ -1,4 +1,4 @@
-<template>
+<template><div><div>
   <table class="table tablesorter" :class="tableClass">
     <thead :class="theadClasses">
     <tr>
@@ -10,23 +10,27 @@
     <tbody :class="tbodyClasses">
     <tr v-for="(item, index) in data" :key="index">
       <slot :row="item">
-        <td v-for="(column, index) in columns"
-            :key="index"
-            v-if="hasValue(item, column)">
-          {{itemValue(item, column)}}
-        </td>
+        <td>{{itemValue(item, 'name')}}</td>
+        <td><base-button  @click="toggleState(item)" >{{stateValue(item)}}</base-button></td>
+
       </slot>
     </tr>
     </tbody>
-  </table>
+  </table></div>
+  </div>
 </template>
 <script>
+  import { BaseButton } from "@/components";
+  import axios from 'axios';
   export default {
+    components: {
+      BaseButton
+    },
     name: 'base-table',
     props: {
       columns: {
         type: Array,
-        default: () => [],
+        default: () => ['name', 'state'],
         description: "Table columns"
       },
       data: {
@@ -59,9 +63,38 @@
       hasValue(item, column) {
         return item[column.toLowerCase()] !== "undefined";
       },
+      stateColumn(column) {
+        console.log('hello there');
+        console.log(column.toLowerCase())
+        return column.toLowerCase() == "state";
+      },
       itemValue(item, column) {
         return item[column.toLowerCase()];
-      }
+      },
+      toggleState(item) {
+        const model = { name: item['name'] };
+        if(item['state'] == 'READY')
+        {
+          axios
+            .post('http://localhost:8080/unload/', model)
+                .then(response => (console.log(response.url)))
+        }
+        else{
+          axios
+            .post('http://localhost:8080/load/', model)
+                .then(response => (console.log(response.url)))
+        }
+      },
+      stateValue(item, column) {
+        if(item['state'] == 'READY')
+        {
+          return 'unload'
+        }
+        else{
+          return 'load'
+        }
+      },
+      
     }
   };
 </script>
