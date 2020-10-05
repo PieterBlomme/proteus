@@ -8,7 +8,9 @@ with open("README.rst") as readme_file:
     readme = readme_file.read()
 
 requirements = [
+    "opencv-python-headless==4.4.0.40"
 ]
+
 
 test_requirements = ["pytest>=3"]
 
