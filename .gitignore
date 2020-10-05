@@ -153,3 +153,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+
+# model files
+*.onnx
