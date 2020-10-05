@@ -2,3 +2,4 @@
 /packages/proteus_yolov4/.
 /packages/proteus_mobilenet/.
 /packages/proteus_resnet50/.
+/packages/proteus_efficientnetlite4/.
