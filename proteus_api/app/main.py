@@ -2,12 +2,16 @@ from fastapi import FastAPI, File, HTTPException
 import tritonclient.http as httpclient
 
 import logging
+import importlib
 from PIL import Image
 from io import BytesIO
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from proteus.yolov4 import inference_http as inference_http_yolov4
-from proteus.mobilenet import inference_http as inference_http_mobilenet
+#factory
+def get_inference_http(model):
+    module = importlib.import_module(f"proteus.{model}")
+    return module.inference_http
+
 
 from pydantic import BaseModel
 class Model(BaseModel):
@@ -86,8 +90,6 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    if model == 'yolov4':
-        response = inference_http_yolov4(triton_client, img)
-    else:
-        response = inference_http_mobilenet(triton_client, img)
+    inference_http = get_inference_http(model)
+    response = inference_http(triton_client, img)
     return response
