@@ -2,12 +2,16 @@ from fastapi import FastAPI, File, HTTPException
 import tritonclient.http as httpclient
 
 import logging
+import importlib
 from PIL import Image
 from io import BytesIO
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from proteus.yolov4 import inference_http as inference_http_yolov4
-from proteus.mobilenet import inference_http as inference_http_mobilenet
+#factory
+def get_inference_http(model):
+    module = importlib.import_module(f"proteus.{model}")
+    return module.inference_http
+
 
 from pydantic import BaseModel
 class Model(BaseModel):
@@ -49,7 +53,10 @@ async def get_model_repository():
 
 @app.post("/load/")
 async def load_model(model: Model):
-    if model.name in ('yolov4', 'mobilenet'):
+
+    try:
+        importlib.import_module(f"proteus.{model.name}")
+        # Make things with supposed existing module
         logger.info(f'Loading model {model.name}')
         triton_client.load_model(model.name)
         if not triton_client.is_model_ready(model.name):
@@ -57,9 +64,11 @@ async def load_model(model: Model):
                     "message": f"model {model.name} not ready - check logs"}
         else:
             return {"success": True, "message": f"model {model.name} loaded"}
-    else:
-        return {"success": False, "message": "unknown model"}
+    except ImportError as e:
+        return {"success": False, "message": f"unknown model {model.name}"}
 
+
+        
 
 @app.post("/unload/")
 async def unload_model(model: Model):
@@ -86,8 +95,6 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    if model == 'yolov4':
-        response = inference_http_yolov4(triton_client, img)
-    else:
-        response = inference_http_mobilenet(triton_client, img)
+    inference_http = get_inference_http(model)
+    response = inference_http(triton_client, img)
     return response

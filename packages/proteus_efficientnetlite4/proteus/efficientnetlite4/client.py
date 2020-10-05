@@ -1,9 +1,10 @@
 # TODO clean up and split out
 import numpy as np
+import math
+
 from PIL import Image
 import logging
 import cv2
-import math
 
 import tritonclient.http as httpclient
 from tritonclient.utils import triton_to_np_dtype, InferenceServerException
@@ -11,7 +12,7 @@ from pathlib import Path
 from .helpers import read_class_names
 from proteus.types import Class
 
-MODEL_NAME = 'mobilenet'
+MODEL_NAME = 'efficientnetlite4'
 MODEL_VERSION = '1'
 
 # TODO add details on module/def in logger?
@@ -61,14 +62,14 @@ def parse_model_http(model_metadata, model_config):
             format(expected_input_dims, model_metadata['name'],
                    len(input_metadata['shape'])))
 
-    # FORMAT_NCHW
-    c = input_metadata['shape'][1 if input_batch_dim else 0]
-    h = input_metadata['shape'][2 if input_batch_dim else 1]
-    w = input_metadata['shape'][3 if input_batch_dim else 2]
+    # FORMAT_NHWC
+    h = input_metadata['shape'][1 if input_batch_dim else 0]
+    w = input_metadata['shape'][2 if input_batch_dim else 1]
+    c = input_metadata['shape'][3 if input_batch_dim else 2]
 
     return (max_batch_size, input_metadata['name'], output_metadata['name'], c,
             h, w, input_config['format'], input_metadata['datatype'])
-
+            
 
 # set image file dimensions to 224x224 by resizing and cropping image from center 
 def pre_process_edgetpu(img, dims):
@@ -124,7 +125,6 @@ def preprocess(img, format, dtype, c, h, w, scaling):
 
     #preprocess
     img = pre_process_edgetpu(sample_img, (224, 224, 3))
-    img = np.transpose(img, (2, 0, 1))
     return img
 
 def softmax(x):
@@ -137,7 +137,6 @@ def postprocess(results, output_name, batch_size, batching, topk=5):
     Post-process results to show classifications.
     """
     output_array = results.as_numpy(output_name)
-    results = output_array[0]
 
     # Include special handling for non-batching models
     responses = []
@@ -147,7 +146,7 @@ def postprocess(results, output_name, batch_size, batching, topk=5):
 
         #softmax
         results = softmax(results)
-
+        
         # get sorted topk
         idx = np.argpartition(results, -topk)[-topk:]
         response = [Class(class_name=classes[i], score=float(results[i])) for i in idx]

@@ -11,13 +11,12 @@ requirements = [
     "opencv-python-headless==4.4.0.40"
 ]
 
-
 test_requirements = ["pytest>=3"]
 
 setup(
-    name="proteus.mobilenet",
+    name="proteus.efficientnetlite4",
     version="0.0.1",
-    description="Proteus mobilenet",
+    description="Proteus EfficientNet-Lite4",
     author="Pieter Blomme",
     author_email="pieter.blomme@gmail.com",
     python_requires=">=3.6",

@@ -1,9 +1,9 @@
 # TODO clean up and split out
 import numpy as np
+import math
+import cv2
 from PIL import Image
 import logging
-import cv2
-import math
 
 import tritonclient.http as httpclient
 from tritonclient.utils import triton_to_np_dtype, InferenceServerException
@@ -11,7 +11,7 @@ from pathlib import Path
 from .helpers import read_class_names
 from proteus.types import Class
 
-MODEL_NAME = 'mobilenet'
+MODEL_NAME = 'resnet50'
 MODEL_VERSION = '1'
 
 # TODO add details on module/def in logger?
@@ -68,7 +68,7 @@ def parse_model_http(model_metadata, model_config):
 
     return (max_batch_size, input_metadata['name'], output_metadata['name'], c,
             h, w, input_config['format'], input_metadata['datatype'])
-
+            
 
 # set image file dimensions to 224x224 by resizing and cropping image from center 
 def pre_process_edgetpu(img, dims):
@@ -137,7 +137,6 @@ def postprocess(results, output_name, batch_size, batching, topk=5):
     Post-process results to show classifications.
     """
     output_array = results.as_numpy(output_name)
-    results = output_array[0]
 
     # Include special handling for non-batching models
     responses = []
@@ -147,7 +146,7 @@ def postprocess(results, output_name, batch_size, batching, topk=5):
 
         #softmax
         results = softmax(results)
-
+        
         # get sorted topk
         idx = np.argpartition(results, -topk)[-topk:]
         response = [Class(class_name=classes[i], score=float(results[i])) for i in idx]
