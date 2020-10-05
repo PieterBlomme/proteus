@@ -118,18 +118,26 @@ def preprocess(img, format, dtype, c, h, w, scaling):
     # (like BGR) so we just assume RGB.
     return ordered
 
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0) # only difference
+
 def postprocess(results, output_name, batch_size, batching, topk=5):
     """
     Post-process results to show classifications.
     """
     output_array = results.as_numpy(output_name)
-    results = output_array[0]
 
     # Include special handling for non-batching models
     responses = []
     for results in output_array:
         if not batching:
             results = [results]
+
+        #softmax
+        results = softmax(results)
+        
         # get sorted topk
         idx = np.argpartition(results, -topk)[-topk:]
         response = [Class(class_name=classes[i], score=float(results[i])) for i in idx]
