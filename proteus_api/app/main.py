@@ -53,7 +53,10 @@ async def get_model_repository():
 
 @app.post("/load/")
 async def load_model(model: Model):
-    if model.name in ('yolov4', 'mobilenet'):
+
+    try:
+        importlib.import_module(f"proteus.{model.name}")
+        # Make things with supposed existing module
         logger.info(f'Loading model {model.name}')
         triton_client.load_model(model.name)
         if not triton_client.is_model_ready(model.name):
@@ -61,9 +64,11 @@ async def load_model(model: Model):
                     "message": f"model {model.name} not ready - check logs"}
         else:
             return {"success": True, "message": f"model {model.name} loaded"}
-    else:
-        return {"success": False, "message": "unknown model"}
+    except ImportError as e:
+        return {"success": False, "message": f"unknown model {model.name}"}
 
+
+        
 
 @app.post("/unload/")
 async def unload_model(model: Model):

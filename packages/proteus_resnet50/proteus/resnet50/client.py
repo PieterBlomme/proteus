@@ -9,7 +9,7 @@ from pathlib import Path
 from .helpers import read_class_names
 from proteus.types import Class
 
-MODEL_NAME = 'mobilenet'
+MODEL_NAME = 'resnet50'
 MODEL_VERSION = '1'
 
 # TODO add details on module/def in logger?
@@ -66,13 +66,14 @@ def parse_model_http(model_metadata, model_config):
 
     return (max_batch_size, input_metadata['name'], output_metadata['name'], c,
             h, w, input_config['format'], input_metadata['datatype'])
-
+            
 
 def preprocess(img, format, dtype, c, h, w, scaling):
     """
     Pre-process an image to meet the size, type and format
     requirements specified by the parameters.
-    https://github.com/onnx/models/tree/master/vision/classification/mobilenet
+    https://github.com/onnx/models/tree/master/vision/classification/mobilenet used iso https://github.com/onnx/models/tree/master/vision/classification/resnet
+
     """
     if c == 1:
         sample_img = img.convert('L')
@@ -116,7 +117,6 @@ def preprocess(img, format, dtype, c, h, w, scaling):
     # doesn't provide any information as to other channel orderings
     # (like BGR) so we just assume RGB.
     return ordered
-
 
 def postprocess(results, output_name, batch_size, batching, topk=5):
     """
