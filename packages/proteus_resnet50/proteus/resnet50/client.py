@@ -1,5 +1,7 @@
 # TODO clean up and split out
 import numpy as np
+import math
+import cv2
 from PIL import Image
 import logging
 
@@ -68,12 +70,46 @@ def parse_model_http(model_metadata, model_config):
             h, w, input_config['format'], input_metadata['datatype'])
             
 
+# set image file dimensions to 224x224 by resizing and cropping image from center 
+def pre_process_edgetpu(img, dims):
+    output_height, output_width, _ = dims
+    img = resize_with_aspectratio(img, output_height, output_width, inter_pol=cv2.INTER_LINEAR)
+    img = center_crop(img, output_height, output_width)
+    img = np.asarray(img, dtype='float32')
+    # converts jpg pixel value from [0 - 255] to float array [-1.0 - 1.0]
+    img -= [127.0, 127.0, 127.0]
+    img /= [128.0, 128.0, 128.0]
+    return img
+    
+# resize the image with a proportional scale
+def resize_with_aspectratio(img, out_height, out_width, scale=87.5, inter_pol=cv2.INTER_LINEAR):
+    height, width, _ = img.shape
+    new_height = int(100. * out_height / scale)
+    new_width = int(100. * out_width / scale)
+    if height > width:
+        w = new_width
+        h = int(new_height * height / width)
+    else:
+        h = new_height
+        w = int(new_width * width / height)
+    img = cv2.resize(img, (w, h), interpolation=inter_pol)
+    return img
+
+# crop the image around the center based on given height and width 
+def center_crop(img, out_height, out_width):
+    height, width, _ = img.shape
+    left = int((width - out_width) / 2)
+    right = int((width + out_width) / 2)
+    top = int((height - out_height) / 2)
+    bottom = int((height + out_height) / 2)
+    img = img[top:bottom, left:right]
+    return img
+
 def preprocess(img, format, dtype, c, h, w, scaling):
     """
     Pre-process an image to meet the size, type and format
     requirements specified by the parameters.
-    https://github.com/onnx/models/tree/master/vision/classification/mobilenet used iso https://github.com/onnx/models/tree/master/vision/classification/resnet
-
+    https://github.com/onnx/models/tree/master/vision/classification/efficientnet-lite4
     """
     if c == 1:
         sample_img = img.convert('L')
@@ -81,42 +117,15 @@ def preprocess(img, format, dtype, c, h, w, scaling):
         sample_img = img.convert('RGB')
 
     logger.info(f'Original image size: {sample_img.size}')
-    resized_img = sample_img.resize((w, h), Image.BILINEAR)
-    resized = np.array(resized_img)
-    if resized.ndim == 2:
-        resized = resized[:, :, np.newaxis]
 
-    npdtype = triton_to_np_dtype(dtype)
-    typed = resized.astype(npdtype)
+    #pillow to cv2
+    sample_img = np.array(sample_img)
+    sample_img = sample_img[:, :, ::-1].copy()
 
-    if scaling == 'INCEPTION':
-        scaled = (typed / 128) - 1
-    elif scaling == 'VGG':
-        if c == 1:
-            scaled = typed - np.asarray((128,), dtype=npdtype)
-        else:
-            scaled = typed - np.asarray((123, 117, 104), dtype=npdtype)
-    else:
-        scaled = typed
-
-    # Normalize
-    # TODO check?
-    scaled = scaled - [0.485, 0.456, 0.406]
-    scaled = scaled / [0.229, 0.224, 0.225]
-    scaled = scaled.astype(npdtype)  # seems like type changes somewhere
-
-    # Swap to CHW if necessary
-    # necessary TODO cleanup, use reshape and FORMAT_NCHW?
-    ordered = np.transpose(scaled, (2, 0, 1))
-    # if format == "FORMAT_NCHW":
-    #     ordered = np.transpose(scaled, (2, 0, 1))
-    # else:
-    #     ordered = scaled
-
-    # Channels are in RGB order. Currently model configuration data
-    # doesn't provide any information as to other channel orderings
-    # (like BGR) so we just assume RGB.
-    return ordered
+    #preprocess
+    img = pre_process_edgetpu(sample_img, (224, 224, 3))
+    img = np.transpose(img, (2, 0, 1))
+    return img
 
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
