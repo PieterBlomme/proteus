@@ -5,6 +5,7 @@ from proteus.types import Class
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
 
+# TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
 

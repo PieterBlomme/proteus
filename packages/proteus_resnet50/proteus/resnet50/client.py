@@ -1,12 +1,6 @@
-# TODO clean up and split out
-import logging
-
 from pathlib import Path
 from .helpers import read_class_names
 from proteus.models import ClassificationModel
-
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
 
 folder_path = Path(__file__).parent
 
