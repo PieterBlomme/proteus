@@ -3,6 +3,7 @@ import numpy as np
 import logging
 from proteus.types import Class
 import tritonclient.http as httpclient
+from tritonclient.utils import InferenceServerException
 
 logger = logging.getLogger("gunicorn.error")
 
@@ -156,14 +157,13 @@ class ClassificationModel:
 
 
     @classmethod
-    def postprocess(cls, results, output_name, classes, batch_size,
+    def postprocess(cls, results, output_name, batch_size,
                     batching, topk=5):
         """
         Post-process results to show classifications.
 
         :param results: raw results
         :param output_name: name of the output to process
-        :param classes: list of classes
         :param batch_size TODO
         :param batching TODO
         :param topk: how many results to return
@@ -181,7 +181,7 @@ class ClassificationModel:
 
             # get sorted topk
             idx = np.argpartition(results, -topk)[-topk:]
-            response = [Class(class_name=classes[i], score=float(results[i]))
+            response = [Class(class_name=cls.CLASSES[i], score=float(results[i]))
                         for i in idx]
             response.sort(key=lambda x: x.score, reverse=True)
             responses.append(response)
@@ -210,4 +210,65 @@ class ClassificationModel:
 
         :return: results
         """
-        pass
+        # Make sure the model matches our requirements, and get some
+        # properties of the model that we need for preprocessing
+        try:
+            model_metadata = triton_client.get_model_metadata(
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+        except InferenceServerException as e:
+            raise Exception("failed to retrieve the metadata: " + str(e))
+
+        try:
+            model_config = triton_client.get_model_config(
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+        except InferenceServerException as e:
+            raise Exception("failed to retrieve the config: " + str(e))
+
+        logger.info(f'Model metadata: {model_metadata}')
+        logger.info(f'Model config: {model_config}')
+
+        input_name, output_name, dtype = cls.parse_model_http(model_metadata,
+                                                              model_config)
+
+        # Preprocess the images into input data according to model
+        # requirements
+        image_data = [cls.preprocess(img)]
+
+        # Send requests of batch_size=1 images. If the number of
+        # images isn't an exact multiple of batch_size then just
+        # start over with the first images until the batch is filled.
+        # TODO batching
+        responses = []
+
+        sent_count = 0
+
+        if cls.MAX_BATCH_SIZE > 0:
+            batched_image_data = np.stack([image_data[0]], axis=0)
+        else:
+            batched_image_data = image_data[0]
+
+        # Send request
+        try:
+            for inputs, outputs in cls.requestGenerator(
+                        batched_image_data, input_name, output_name, dtype):
+                sent_count += 1
+                responses.append(
+                        triton_client.infer(cls.MODEL_NAME,
+                                            inputs,
+                                            request_id=str(sent_count),
+                                            model_version=cls.MODEL_VERSION,
+                                            outputs=outputs))
+        except InferenceServerException as e:
+            logger.info("inference failed: " + str(e))
+
+        final_responses = []
+        for response in responses:
+            this_id = response.get_response()["id"]
+            logger.info("Request {}, batch size {}".format(this_id, 1))
+            final_response = cls.postprocess(response, output_name,
+                                             1,
+                                             cls.MAX_BATCH_SIZE > 0)
+            logger.info(final_response)
+            final_responses.append(final_response)
+
+        return final_responses
