@@ -107,16 +107,6 @@ def preprocess(img, format, dtype, c, h, w, scaling):
     npdtype = triton_to_np_dtype(dtype)
     image = image.astype(npdtype)
 
-
-    # # Swap to CHW if necessary
-    # if format == "FORMAT_NCHW":
-    #     ordered = np.transpose(scaled, (2, 0, 1))
-    # else:
-    #     ordered = scaled
-
-    # Channels are in RGB order. Currently model configuration data
-    # doesn't provide any information as to other channel orderings
-    # (like BGR) so we just assume RGB.
     return image
 
 
@@ -127,17 +117,14 @@ def postprocess(results, original_image_size, output_names, batch_size, batching
     logger.error(output_names)
     detections = [results.as_numpy(output_name) for
                   output_name in output_names]
-    logger.error("Output shape:")
     logger.error(list(map(lambda detection: detection.shape, detections)))
     STRIDES = [8, 16, 32]
     XYSCALE = [1.2, 1.1, 1.05]
 
     ANCHORS = get_anchors()
-    logger.error(f'Anchors: {ANCHORS}')
     STRIDES = np.array(STRIDES)
 
     input_size = 416
-    logger.info(f'Original image size in postprocess:{original_image_size}' )
 
     #swap?
     (h, w) = original_image_size
