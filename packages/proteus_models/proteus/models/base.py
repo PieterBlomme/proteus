@@ -1,4 +1,5 @@
 import logging
+import tritonclient.http as httpclient
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -56,3 +57,16 @@ class BaseModel:
                        len(input_metadata['shape'])))
 
         return (input_metadata['name'], output_metadatas, input_metadata['datatype'])
+
+    @classmethod
+    def requestGenerator(cls, batched_image_data, input_name, 
+                         output_names, dtype):
+        """ Set the input data """
+        inputs = [httpclient.InferInput(input_name, batched_image_data.shape,
+                                        dtype)]
+        inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
+
+        outputs = [httpclient.InferRequestedOutput(output_name,
+                                                   binary_data=True)
+                   for output_name in output_names]
+        yield inputs, outputs

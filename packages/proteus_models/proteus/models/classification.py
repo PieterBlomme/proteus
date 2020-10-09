@@ -4,7 +4,7 @@ import logging
 from proteus.types import Class
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
-from base import BaseModel
+from .base import BaseModel
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -141,7 +141,7 @@ class ClassificationModel(BaseModel):
 
             # because of "output_names"??
             results = results[0]
-            
+
             # softmax
             results = softmax(results)
 
@@ -153,18 +153,6 @@ class ClassificationModel(BaseModel):
             responses.append(response)
         return responses
 
-    @classmethod
-    def requestGenerator(cls, batched_image_data, input_name, 
-                         output_names, dtype):
-        """ Set the input data """
-        inputs = [httpclient.InferInput(input_name, batched_image_data.shape,
-                                        dtype)]
-        inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
-
-        outputs = [httpclient.InferRequestedOutput(output_name,
-                                                   binary_data=True)
-                   for output_name in output_names]
-        yield inputs, outputs
 
     @classmethod
     def inference_http(cls, triton_client, img):
