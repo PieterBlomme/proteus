@@ -1,8 +1,8 @@
 person
 bicycle
 car
-motorbike
-aeroplane
+motorcycle
+airplane
 bus
 train
 truck
@@ -55,12 +55,12 @@ pizza
 donut
 cake
 chair
-sofa
+couch
 potted plant
 bed
 dining table
 toilet
-tvmonitor
+tv
 laptop
 mouse
 remote
