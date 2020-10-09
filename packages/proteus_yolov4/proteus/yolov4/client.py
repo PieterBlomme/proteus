@@ -85,7 +85,7 @@ def image_preprocess(image, target_size):
     return image_padded
 
 
-def preprocess(img, format, dtype, c, h, w, scaling):
+def preprocess(img, format, dtype, c, h, w):
     """
     Pre-process an image to meet the size, type and format
     requirements specified by the parameters.
@@ -126,7 +126,7 @@ def postprocess(results, original_image_size, output_names, batch_size, batching
 
     input_size = 416
 
-    #swap?
+    # swap TODO check why this is needed...
     (h, w) = original_image_size
 
     pred_bbox = postprocess_bbbox(detections, ANCHORS, STRIDES, XYSCALE)
@@ -176,7 +176,7 @@ def inference_http(triton_client, img):
     # Preprocess the images into input data according to model
     # requirements
     # TODO scaling should be param
-    image_data = [preprocess(img, format, dtype, c, h, w, 'INCEPTION')]
+    image_data = [preprocess(img, format, dtype, c, h, w)]
 
     # Send requests of batch_size=1 images. If the number of
     # images isn't an exact multiple of batch_size then just
