@@ -55,7 +55,7 @@ pizza
 donut
 cake
 chair
-sofa
+couch
 potted plant
 bed
 dining table
