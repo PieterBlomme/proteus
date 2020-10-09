@@ -4,6 +4,7 @@ import logging
 from proteus.types import Class
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
+from .base import BaseModel
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -15,7 +16,7 @@ def softmax(x):
     return e_x / e_x.sum(axis=0)
 
 
-class ClassificationModel:
+class ClassificationModel(BaseModel):
 
     # Defaults
     MODEL_NAME = 'classification'
@@ -25,47 +26,7 @@ class ClassificationModel:
     DTYPE = 'float32'
     MAX_BATCH_SIZE = 1
     CLASSES = []
-
-    @classmethod
-    def parse_model_http(cls, model_metadata, model_config):
-        """
-        TODO check if this is still relevant
-        Check the configuration of a model to make sure it meets the
-        requirements for an image classification network (as expected by
-        this client)
-        """
-        if len(model_metadata['inputs']) != 1:
-            raise Exception("expecting 1 input, got {}".format(
-                len(model_metadata['inputs'])))
-        if len(model_metadata['outputs']) != 1:
-            raise Exception("expecting 1 output, got {}".format(
-                len(model_metadata['outputs'])))
-
-        if len(model_config['input']) != 1:
-            raise Exception(
-                "expecting 1 input in model configuration, got {}".format(
-                    len(model_config['input'])))
-
-        input_metadata = model_metadata['inputs'][0]
-        all_output_metadata = model_metadata['outputs']
-
-        for output_metadata in all_output_metadata:
-            if output_metadata['datatype'] != "FP32":
-                raise Exception("expecting output datatype to be FP32, model '" +
-                                model_metadata['name'] + "' output type is " +
-                                output_metadata['datatype'])
-
-        # Model input must have 3 dims (not counting the batch dimension),
-        # either CHW or HWC
-        input_batch_dim = (cls.MAX_BATCH_SIZE > 0)
-        expected_input_dims = 3 + (1 if input_batch_dim else 0)
-        if len(input_metadata['shape']) != expected_input_dims:
-            raise Exception(
-                "expecting input to have {} dimensions, model '{}' input has {}".
-                format(expected_input_dims, model_metadata['name'],
-                       len(input_metadata['shape'])))
-
-        return (input_metadata['name'], output_metadata['name'], input_metadata['datatype'])
+    NUM_OUTPUTS = 1
 
     @classmethod
     def _pre_process_edgetpu(cls, img, dims):
@@ -158,7 +119,7 @@ class ClassificationModel:
 
 
     @classmethod
-    def postprocess(cls, results, output_name, batch_size,
+    def postprocess(cls, results, output_names, batch_size,
                     batching, topk=5):
         """
         Post-process results to show classifications.
@@ -169,13 +130,17 @@ class ClassificationModel:
         :param batching TODO
         :param topk: how many results to return
         """
-        output_array = results.as_numpy(output_name)
-
+        output_array = [results.as_numpy(output_name) for
+                        output_name in output_names]
+                      
         # Include special handling for non-batching models
         responses = []
         for results in output_array:
             if not batching:
                 results = [results]
+
+            # because of "output_names"??
+            results = results[0]
 
             # softmax
             results = softmax(results)
@@ -188,18 +153,6 @@ class ClassificationModel:
             responses.append(response)
         return responses
 
-    @classmethod
-    def requestGenerator(cls, batched_image_data, input_name, 
-                         output_name, dtype):
-        """ Set the input data """
-        inputs = [httpclient.InferInput(input_name, batched_image_data.shape,
-                                        dtype)]
-        inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
-
-        outputs = []
-        outputs.append(
-                httpclient.InferRequestedOutput(output_name, binary_data=True))
-        yield inputs, outputs
 
     @classmethod
     def inference_http(cls, triton_client, img):
@@ -228,7 +181,7 @@ class ClassificationModel:
         logger.info(f'Model metadata: {model_metadata}')
         logger.info(f'Model config: {model_config}')
 
-        input_name, output_name, dtype = cls.parse_model_http(model_metadata,
+        input_name, output_names, dtype = cls.parse_model_http(model_metadata,
                                                               model_config)
 
         # Preprocess the images into input data according to model
@@ -251,7 +204,7 @@ class ClassificationModel:
         # Send request
         try:
             for inputs, outputs in cls.requestGenerator(
-                        batched_image_data, input_name, output_name, dtype):
+                        batched_image_data, input_name, output_names, dtype):
                 sent_count += 1
                 responses.append(
                         triton_client.infer(cls.MODEL_NAME,
@@ -266,7 +219,7 @@ class ClassificationModel:
         for response in responses:
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
-            final_response = cls.postprocess(response, output_name,
+            final_response = cls.postprocess(response, output_names,
                                              1,
                                              cls.MAX_BATCH_SIZE > 0)
             logger.info(final_response)
