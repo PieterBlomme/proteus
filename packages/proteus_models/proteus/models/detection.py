@@ -1,11 +1,8 @@
-import cv2
 import numpy as np
 import logging
-from proteus.types import BoundingBox
-import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException, triton_to_np_dtype
-from .detection_helpers import postprocess_bbbox, postprocess_boxes, nms
 from .base import BaseModel
+
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
@@ -20,24 +17,8 @@ class DetectionModel(BaseModel):
     DTYPE = 'float32'
     MAX_BATCH_SIZE = 1
     CLASSES = []
-    ANCHORS = None
     NUM_OUTPUTS = 3
 
-    @classmethod
-    def _image_preprocess(cls, image, target_size):
-
-        ih, iw = target_size
-        h, w, _ = image.shape
-
-        scale = min(iw/w, ih/h)
-        nw, nh = int(scale * w), int(scale * h)
-        image_resized = cv2.resize(image, (nw, nh))
-
-        image_padded = np.full(shape=[ih, iw, 3], fill_value=128.0)
-        dw, dh = (iw - nw) // 2, (ih-nh) // 2
-        image_padded[dh:nh+dh, dw:nw+dw, :] = image_resized
-        image_padded = image_padded / 255.
-        return image_padded
 
     @classmethod
     def preprocess(cls, img, dtype):
@@ -59,19 +40,18 @@ class DetectionModel(BaseModel):
         open_cv_image = np.array(sample_img)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-        image = cls._image_preprocess(open_cv_image, (cls.SHAPE[0], cls.SHAPE[1]))
-
         npdtype = triton_to_np_dtype(dtype)
-        image = image.astype(npdtype)
+        open_cv_image = open_cv_image.astype(npdtype)
 
         # channels first if needed
         if cls.CHANNEL_FIRST:
             img = np.transpose(img, (2, 0, 1))
 
-        return image
+        return open_cv_image
+
 
     @classmethod
-    def postprocess(cls, results, original_image_size, output_names, 
+    def postprocess(cls, results, original_image_size, output_names,
                     batch_size, batching):
         """
         Post-process results to show bounding boxes.
@@ -80,35 +60,7 @@ class DetectionModel(BaseModel):
         detections = [results.as_numpy(output_name) for
                       output_name in output_names]
         logger.info(list(map(lambda detection: detection.shape, detections)))
-
-        STRIDES = np.array([8, 16, 32])
-        XYSCALE = [1.2, 1.1, 1.05]
-
-        input_size = cls.SHAPE[0]
-
-        # swap TODO check why this is needed...
-        (h, w) = original_image_size
-
-        pred_bbox = postprocess_bbbox(detections, cls.ANCHORS, 
-                                      STRIDES, XYSCALE)
-        bboxes = postprocess_boxes(pred_bbox, (w, h),
-                                   input_size, 0.25)
-        bboxes = nms(bboxes, 0.213, method='nms')
-
-        # bboxes: [x_min, y_min, x_max, y_max, probability, cls_id]
-        results = []
-        for i, bbox in enumerate(bboxes):
-            bbox = BoundingBox(x1=int(bbox[0]),
-                               y1=int(bbox[1]),
-                               x2=int(bbox[2]),
-                               y2=int(bbox[3]),
-                               class_name=cls.CLASSES[int(bbox[5])],
-                               score=float(bbox[4])
-                               )
-            results.append(bbox)
-
-        return results
-
+        return None
 
     @classmethod
     def inference_http(cls, triton_client, img):
@@ -137,8 +89,8 @@ class DetectionModel(BaseModel):
         logger.info(f'Model metadata: {model_metadata}')
         logger.info(f'Model config: {model_config}')
 
-        input_name, output_names, dtype = cls.parse_model_http(model_metadata, 
-                                                        model_config)
+        input_name, output_names, dtype = cls.parse_model_http(model_metadata,
+                                                               model_config)
 
         # Preprocess the images into input data according to model
         # requirements
@@ -175,7 +127,8 @@ class DetectionModel(BaseModel):
         for response in responses:
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
-            final_response = cls.postprocess(response, img.size, output_names, 1,
-                                        cls.MAX_BATCH_SIZE > 0)
+            final_response = cls.postprocess(response, img.size,
+                                             output_names, 1,
+                                             cls.MAX_BATCH_SIZE > 0)
             final_responses.append(final_response)
         return final_responses
