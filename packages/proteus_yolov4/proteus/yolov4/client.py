@@ -7,8 +7,13 @@ from proteus.models import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
-from .helpers import (get_anchors, nms, postprocess_bbbox, postprocess_boxes,
-                      read_class_names)
+from .helpers import (
+    get_anchors,
+    nms,
+    postprocess_bbbox,
+    postprocess_boxes,
+    read_class_names,
+)
 
 folder_path = Path(__file__).parent
 
