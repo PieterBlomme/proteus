@@ -1,21 +1,25 @@
-from fastapi import FastAPI, File, HTTPException
-import tritonclient.http as httpclient
-
-import logging
 import importlib
-from PIL import Image
+import logging
 from io import BytesIO
+
+import tritonclient.http as httpclient
+from fastapi import FastAPI, File, HTTPException
+from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-#factory
+
+# factory
 def get_inference_http(model):
     module = importlib.import_module(f"proteus.{model}")
     return module.inference_http
 
 
 from pydantic import BaseModel
+
+
 class Model(BaseModel):
     name: str
+
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -23,15 +27,16 @@ logger = logging.getLogger("gunicorn.error")
 app = FastAPI()
 
 # set up Triton connection
-TRITONURL = 'triton:8000'
+TRITONURL = "triton:8000"
 
 try:
     # Specify large enough concurrency to handle the
     # the number of requests.
     concurrency = 1
     triton_client = httpclient.InferenceServerClient(
-                    url=TRITONURL, concurrency=concurrency)
-    logger.info(f'Server ready? {triton_client.is_server_ready()}')
+        url=TRITONURL, concurrency=concurrency
+    )
+    logger.info(f"Server ready? {triton_client.is_server_ready()}")
 except Exception as e:
     logger.error("client creation failed: " + str(e))
 
@@ -39,10 +44,10 @@ except Exception as e:
 @app.get("/health")
 async def get_server_health():
     if triton_client.is_server_live():
-        logger.info('Server is alive')
+        logger.info("Server is alive")
         return {"success": True}
     else:
-        logger.info(f'Server is dead')
+        logger.info(f"Server is dead")
         return {"success": False}
 
 
@@ -57,26 +62,26 @@ async def load_model(model: Model):
     try:
         importlib.import_module(f"proteus.{model.name}")
         # Make things with supposed existing module
-        logger.info(f'Loading model {model.name}')
+        logger.info(f"Loading model {model.name}")
         triton_client.load_model(model.name)
         if not triton_client.is_model_ready(model.name):
-            return {"success": False,
-                    "message": f"model {model.name} not ready - check logs"}
+            return {
+                "success": False,
+                "message": f"model {model.name} not ready - check logs",
+            }
         else:
             return {"success": True, "message": f"model {model.name} loaded"}
     except ImportError as e:
         return {"success": False, "message": f"unknown model {model.name}"}
 
 
-        
-
 @app.post("/unload/")
 async def unload_model(model: Model):
     if not triton_client.is_model_ready(model.name):
-        logger.info(f'No model with name {model.name} loaded')
+        logger.info(f"No model with name {model.name} loaded")
         return {"success": False, "message": "model not loaded"}
     else:
-        logger.info(f'Unloading model {model.name}')
+        logger.info(f"Unloading model {model.name}")
         triton_client.unload_model(model.name)
         return {"success": True, "message": f"model {model.name} unloaded"}
 

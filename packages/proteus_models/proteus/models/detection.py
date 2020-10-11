@@ -1,6 +1,8 @@
-import numpy as np
 import logging
+
+import numpy as np
 from tritonclient.utils import InferenceServerException, triton_to_np_dtype
+
 from .base import BaseModel
 
 # TODO add details on module/def in logger?
@@ -10,15 +12,14 @@ logger = logging.getLogger("gunicorn.error")
 class DetectionModel(BaseModel):
 
     # Defaults
-    MODEL_NAME = 'detection'
-    MODEL_VERSION = '1'
+    MODEL_NAME = "detection"
+    MODEL_VERSION = "1"
     CHANNEL_FIRST = False
     SHAPE = (416, 416, 3)
-    DTYPE = 'float32'
+    DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
     NUM_OUTPUTS = 3
-
 
     @classmethod
     def preprocess(cls, img, dtype):
@@ -30,11 +31,11 @@ class DetectionModel(BaseModel):
         :param img: image as array in HWC format
         """
         if cls.SHAPE[2] == 1:
-            sample_img = img.convert('L')
+            sample_img = img.convert("L")
         else:
-            sample_img = img.convert('RGB')
+            sample_img = img.convert("RGB")
 
-        logger.info(f'Original image size: {sample_img.size}')
+        logger.info(f"Original image size: {sample_img.size}")
 
         # convert to cv2
         open_cv_image = np.array(sample_img)
@@ -49,16 +50,15 @@ class DetectionModel(BaseModel):
 
         return open_cv_image
 
-
     @classmethod
-    def postprocess(cls, results, original_image_size, output_names,
-                    batch_size, batching):
+    def postprocess(
+        cls, results, original_image_size, output_names, batch_size, batching
+    ):
         """
         Post-process results to show bounding boxes.
         """
         logger.info(output_names)
-        detections = [results.as_numpy(output_name) for
-                      output_name in output_names]
+        detections = [results.as_numpy(output_name) for output_name in output_names]
         logger.info(list(map(lambda detection: detection.shape, detections)))
         return None
 
@@ -76,21 +76,24 @@ class DetectionModel(BaseModel):
         # properties of the model that we need for preprocessing
         try:
             model_metadata = triton_client.get_model_metadata(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the metadata: " + str(e))
 
         try:
             model_config = triton_client.get_model_config(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the config: " + str(e))
 
-        logger.info(f'Model metadata: {model_metadata}')
-        logger.info(f'Model config: {model_config}')
+        logger.info(f"Model metadata: {model_metadata}")
+        logger.info(f"Model config: {model_config}")
 
-        input_name, output_names, dtype = cls.parse_model_http(model_metadata,
-                                                               model_config)
+        input_name, output_names, dtype = cls.parse_model_http(
+            model_metadata, model_config
+        )
 
         # Preprocess the images into input data according to model
         # requirements
@@ -112,14 +115,18 @@ class DetectionModel(BaseModel):
         # Send request
         try:
             for inputs, outputs in cls.requestGenerator(
-                        batched_image_data, input_name, output_names, dtype):
+                batched_image_data, input_name, output_names, dtype
+            ):
                 sent_count += 1
                 responses.append(
-                        triton_client.infer(cls.MODEL_NAME,
-                                            inputs,
-                                            request_id=str(sent_count),
-                                            model_version=cls.MODEL_VERSION,
-                                            outputs=outputs))
+                    triton_client.infer(
+                        cls.MODEL_NAME,
+                        inputs,
+                        request_id=str(sent_count),
+                        model_version=cls.MODEL_VERSION,
+                        outputs=outputs,
+                    )
+                )
         except InferenceServerException as e:
             logger.info("inference failed: " + str(e))
 
@@ -127,8 +134,8 @@ class DetectionModel(BaseModel):
         for response in responses:
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
-            final_response = cls.postprocess(response, img.size,
-                                             output_names, 1,
-                                             cls.MAX_BATCH_SIZE > 0)
+            final_response = cls.postprocess(
+                response, img.size, output_names, 1, cls.MAX_BATCH_SIZE > 0
+            )
             final_responses.append(final_response)
         return final_responses
