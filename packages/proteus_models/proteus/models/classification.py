@@ -1,9 +1,11 @@
+import logging
+
 import cv2
 import numpy as np
-import logging
-from proteus.types import Class
 import tritonclient.http as httpclient
+from proteus.types import Class
 from tritonclient.utils import InferenceServerException
+
 from .base import BaseModel
 
 # TODO add details on module/def in logger?
@@ -19,11 +21,11 @@ def softmax(x):
 class ClassificationModel(BaseModel):
 
     # Defaults
-    MODEL_NAME = 'classification'
-    MODEL_VERSION = '1'
+    MODEL_NAME = "classification"
+    MODEL_VERSION = "1"
     CHANNEL_FIRST = False
     SHAPE = (224, 224, 3)
-    DTYPE = 'float32'
+    DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
     NUM_OUTPUTS = 1
@@ -38,8 +40,9 @@ class ClassificationModel(BaseModel):
         :param dims: dims as tuple in HWC order
         """
         output_height, output_width, _ = dims
-        img = cls._resize_with_aspectratio(img, output_height, output_width,
-                                           inter_pol=cv2.INTER_LINEAR)
+        img = cls._resize_with_aspectratio(
+            img, output_height, output_width, inter_pol=cv2.INTER_LINEAR
+        )
         img = cls._center_crop(img, output_height, output_width)
         img = np.asarray(img, dtype=cls.DTYPE)
         # converts jpg pixel value from [0 - 255] to float array [-1.0 - 1.0]
@@ -48,8 +51,9 @@ class ClassificationModel(BaseModel):
         return img
 
     @classmethod
-    def _resize_with_aspectratio(cls, img, out_height, out_width, scale=87.5,
-                                 inter_pol=cv2.INTER_LINEAR):
+    def _resize_with_aspectratio(
+        cls, img, out_height, out_width, scale=87.5, inter_pol=cv2.INTER_LINEAR
+    ):
         """
         resize the image with a proportional scale
 
@@ -60,8 +64,8 @@ class ClassificationModel(BaseModel):
         :param inter_pol: type of interpolation for resize
         """
         height, width, _ = img.shape
-        new_height = int(100. * out_height / scale)
-        new_width = int(100. * out_width / scale)
+        new_height = int(100.0 * out_height / scale)
+        new_width = int(100.0 * out_width / scale)
         if height > width:
             w = new_width
             h = int(new_height * height / width)
@@ -99,11 +103,11 @@ class ClassificationModel(BaseModel):
         :param img: image as array in HWC format
         """
         if cls.SHAPE[2] == 1:
-            sample_img = img.convert('L')
+            sample_img = img.convert("L")
         else:
-            sample_img = img.convert('RGB')
+            sample_img = img.convert("RGB")
 
-        logger.info(f'Original image size: {sample_img.size}')
+        logger.info(f"Original image size: {sample_img.size}")
 
         # pillow to cv2
         sample_img = np.array(sample_img)
@@ -117,10 +121,8 @@ class ClassificationModel(BaseModel):
             img = np.transpose(img, (2, 0, 1))
         return img
 
-
     @classmethod
-    def postprocess(cls, results, output_names, batch_size,
-                    batching, topk=5):
+    def postprocess(cls, results, output_names, batch_size, batching, topk=5):
         """
         Post-process results to show classifications.
 
@@ -130,9 +132,8 @@ class ClassificationModel(BaseModel):
         :param batching TODO
         :param topk: how many results to return
         """
-        output_array = [results.as_numpy(output_name) for
-                        output_name in output_names]
-                      
+        output_array = [results.as_numpy(output_name) for output_name in output_names]
+
         # Include special handling for non-batching models
         responses = []
         for results in output_array:
@@ -147,12 +148,12 @@ class ClassificationModel(BaseModel):
 
             # get sorted topk
             idx = np.argpartition(results, -topk)[-topk:]
-            response = [Class(class_name=cls.CLASSES[i], score=float(results[i]))
-                        for i in idx]
+            response = [
+                Class(class_name=cls.CLASSES[i], score=float(results[i])) for i in idx
+            ]
             response.sort(key=lambda x: x.score, reverse=True)
             responses.append(response)
         return responses
-
 
     @classmethod
     def inference_http(cls, triton_client, img):
@@ -168,21 +169,24 @@ class ClassificationModel(BaseModel):
         # properties of the model that we need for preprocessing
         try:
             model_metadata = triton_client.get_model_metadata(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the metadata: " + str(e))
 
         try:
             model_config = triton_client.get_model_config(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION)
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the config: " + str(e))
 
-        logger.info(f'Model metadata: {model_metadata}')
-        logger.info(f'Model config: {model_config}')
+        logger.info(f"Model metadata: {model_metadata}")
+        logger.info(f"Model config: {model_config}")
 
-        input_name, output_names, dtype = cls.parse_model_http(model_metadata,
-                                                              model_config)
+        input_name, output_names, dtype = cls.parse_model_http(
+            model_metadata, model_config
+        )
 
         # Preprocess the images into input data according to model
         # requirements
@@ -204,14 +208,18 @@ class ClassificationModel(BaseModel):
         # Send request
         try:
             for inputs, outputs in cls.requestGenerator(
-                        batched_image_data, input_name, output_names, dtype):
+                batched_image_data, input_name, output_names, dtype
+            ):
                 sent_count += 1
                 responses.append(
-                        triton_client.infer(cls.MODEL_NAME,
-                                            inputs,
-                                            request_id=str(sent_count),
-                                            model_version=cls.MODEL_VERSION,
-                                            outputs=outputs))
+                    triton_client.infer(
+                        cls.MODEL_NAME,
+                        inputs,
+                        request_id=str(sent_count),
+                        model_version=cls.MODEL_VERSION,
+                        outputs=outputs,
+                    )
+                )
         except InferenceServerException as e:
             logger.info("inference failed: " + str(e))
 
@@ -219,9 +227,9 @@ class ClassificationModel(BaseModel):
         for response in responses:
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
-            final_response = cls.postprocess(response, output_names,
-                                             1,
-                                             cls.MAX_BATCH_SIZE > 0)
+            final_response = cls.postprocess(
+                response, output_names, 1, cls.MAX_BATCH_SIZE > 0
+            )
             logger.info(final_response)
             final_responses.append(final_response)
 

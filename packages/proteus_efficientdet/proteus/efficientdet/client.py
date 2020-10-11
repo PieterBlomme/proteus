@@ -1,10 +1,12 @@
+import logging
 from pathlib import Path
-from .helpers import read_class_names
+
+import numpy as np
 from proteus.models import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
-import numpy as np
-import logging
+
+from .helpers import read_class_names
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -14,7 +16,7 @@ folder_path = Path(__file__).parent
 
 class EfficientDet(DetectionModel):
 
-    MODEL_NAME = 'efficientdet'
+    MODEL_NAME = "efficientdet"
     CHANNEL_FIRST = False
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     NUM_OUTPUTS = 1
@@ -30,11 +32,11 @@ class EfficientDet(DetectionModel):
         :param img: image as array in HWC format
         """
         if cls.SHAPE[2] == 1:
-            sample_img = img.convert('L')
+            sample_img = img.convert("L")
         else:
-            sample_img = img.convert('RGB')
+            sample_img = img.convert("RGB")
 
-        logger.info(f'Original image size: {sample_img.size}')
+        logger.info(f"Original image size: {sample_img.size}")
 
         # convert to cv2
         open_cv_image = np.array(sample_img)
@@ -49,18 +51,17 @@ class EfficientDet(DetectionModel):
 
         return open_cv_image
 
-
     @classmethod
-    def postprocess(cls, results, original_image_size, output_names,
-                    batch_size, batching):
+    def postprocess(
+        cls, results, original_image_size, output_names, batch_size, batching
+    ):
         """
         Post-process results to show bounding boxes.
         Based on this (very few postprocess needed):
         https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
         """
         logger.info(output_names)
-        detections = [results.as_numpy(output_name) for
-                      output_name in output_names]
+        detections = [results.as_numpy(output_name) for output_name in output_names]
         # only one output, so
         detections = detections[0]
         logger.info(list(map(lambda detection: detection.shape, detections)))
@@ -70,14 +71,15 @@ class EfficientDet(DetectionModel):
         for bbox in detections[0]:
             logger.info(bbox)
             # bbox[0] is the image id
-            #ymin, xmin, ymax, xmax = bbox[1=5]
-            bbox = BoundingBox(x1=int(bbox[2]),
-                               y1=int(bbox[1]),
-                               x2=int(bbox[4]),
-                               y2=int(bbox[3]),
-                               class_name=cls.CLASSES[int(bbox[6])],
-                               score=float(bbox[5])
-                               )
+            # ymin, xmin, ymax, xmax = bbox[1=5]
+            bbox = BoundingBox(
+                x1=int(bbox[2]),
+                y1=int(bbox[1]),
+                x2=int(bbox[4]),
+                y2=int(bbox[3]),
+                class_name=cls.CLASSES[int(bbox[6])],
+                score=float(bbox[5]),
+            )
             results.append(bbox)
         return results
 
