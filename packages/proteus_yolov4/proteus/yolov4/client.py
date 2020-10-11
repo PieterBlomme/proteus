@@ -7,6 +7,7 @@ from proteus.models import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
+# isort: skip
 from .helpers import (
     get_anchors,
     nms,
