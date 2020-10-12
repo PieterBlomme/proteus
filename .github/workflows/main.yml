@@ -38,4 +38,6 @@ jobs:
 
       - name: Test with pytest
         run: |
+          pip install requests pytest
+          pip install /packages/proteus_datasets/.
           pytest
