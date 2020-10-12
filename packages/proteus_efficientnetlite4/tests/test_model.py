@@ -4,8 +4,15 @@ import random
 import pytest
 import requests
 from proteus.datasets import ImageNette
+from PIL import Image
 
 model = "efficientnetlite4"
+
+
+@pytest.fixture
+def setup():
+    response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    assert response.json()["success"]
 
 
 @pytest.fixture
@@ -14,9 +21,6 @@ def dataset():
 
 
 def test_speed(dataset):
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
-    assert response.json()["success"]
-
     fpath, _ = dataset[0]
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -28,14 +32,53 @@ def test_speed(dataset):
         )
     assert response.elapsed.total_seconds() < 0.25
 
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
-    assert response.json()["success"]
+
+def test_jpg():
+    fpath = "image.jpg"
+    Image.new("RGB", (800, 1280)).save(fpath)
+
+    with open(fpath, "rb") as f:
+        jsonfiles = {"file": f}
+        payload = {"file_id": fpath}
+        response = requests.post(
+            f"http://localhost/{model}/predict",
+            files=jsonfiles,
+            data=payload,
+        )
+    assert response.status_code == requests.codes.ok
+
+
+def test_png():
+    fpath = "image.png"
+    Image.new("RGBA", (800, 1280)).save(fpath)
+
+    with open(fpath, "rb") as f:
+        jsonfiles = {"file": f}
+        payload = {"file_id": fpath}
+        response = requests.post(
+            f"http://localhost/{model}/predict",
+            files=jsonfiles,
+            data=payload,
+        )
+    assert response.status_code == requests.codes.ok
+
+
+def test_bmp():
+    fpath = "image.bmp"
+    Image.new("RGB", (800, 1280)).save(fpath)
+
+    with open(fpath, "rb") as f:
+        jsonfiles = {"file": f}
+        payload = {"file_id": fpath}
+        response = requests.post(
+            f"http://localhost/{model}/predict",
+            files=jsonfiles,
+            data=payload,
+        )
+    assert response.status_code == requests.codes.ok
 
 
 def test_score(dataset):
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
-    assert response.json()["success"]
-
     ids = [i for i in range(len(dataset))]
     ids = random.sample(ids, 100)
 
@@ -55,5 +98,8 @@ def test_score(dataset):
 
     assert correct > 70
 
+
+@pytest.fixture
+def teardown():
     response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
