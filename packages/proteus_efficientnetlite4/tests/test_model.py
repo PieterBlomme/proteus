@@ -15,7 +15,7 @@ def dataset():
 
 def test_speed(dataset):
     response = requests.post(
-        "http://host.docker.internal/load", json.dumps({"name": model})
+        "http://localhost/load", json.dumps({"name": model})
     )
     assert response.json()["success"]
 
@@ -24,21 +24,21 @@ def test_speed(dataset):
         jsonfiles = {"file": f}
         payload = {"file_id": fpath}
         response = requests.post(
-            f"http://host.docker.internal/{model}/predict",
+            f"http://localhost/{model}/predict",
             files=jsonfiles,
             data=payload,
         )
-    assert response.elapsed.total_seconds() < 1.0
+    assert response.elapsed.total_seconds() < 0.1
 
     response = requests.post(
-        "http://host.docker.internal/unload", json.dumps({"name": model})
+        "http://localhost/unload", json.dumps({"name": model})
     )
     assert response.json()["success"]
 
 
 def test_score(dataset):
     response = requests.post(
-        "http://host.docker.internal/load", json.dumps({"name": model})
+        "http://localhost/load", json.dumps({"name": model})
     )
     assert response.json()["success"]
 
@@ -52,7 +52,7 @@ def test_score(dataset):
             jsonfiles = {"file": f}
             payload = {"file_id": fpath}
             response = requests.post(
-                f"http://host.docker.internal/{model}/predict",
+                f"http://localhost/{model}/predict",
                 files=jsonfiles,
                 data=payload,
             )
@@ -62,6 +62,6 @@ def test_score(dataset):
     assert correct > 70
 
     response = requests.post(
-        "http://host.docker.internal/unload", json.dumps({"name": model})
+        "http://localhost/unload", json.dumps({"name": model})
     )
     assert response.json()["success"]
