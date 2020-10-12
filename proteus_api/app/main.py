@@ -60,10 +60,10 @@ async def get_model_repository():
 async def load_model(model: Model):
 
     try:
-        importlib.import_module(f"proteus.{model.name}")
-        # Make things with supposed existing module
+        module = importlib.import_module(f"proteus.{model.name}")
         logger.info(f"Loading model {model.name}")
-        triton_client.load_model(model.name)
+        module.load_model(triton_client)
+
         if not triton_client.is_model_ready(model.name):
             return {
                 "success": False,
@@ -72,6 +72,7 @@ async def load_model(model: Model):
         else:
             return {"success": True, "message": f"model {model.name} loaded"}
     except ImportError as e:
+        logger.info(e)
         return {"success": False, "message": f"unknown model {model.name}"}
 
 
