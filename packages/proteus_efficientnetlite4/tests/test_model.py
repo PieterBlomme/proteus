@@ -14,9 +14,7 @@ def dataset():
 
 
 def test_speed(dataset):
-    response = requests.post(
-        "http://localhost/load", json.dumps({"name": model})
-    )
+    response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
     fpath, _ = dataset[0]
@@ -30,16 +28,12 @@ def test_speed(dataset):
         )
     assert response.elapsed.total_seconds() < 0.1
 
-    response = requests.post(
-        "http://localhost/unload", json.dumps({"name": model})
-    )
+    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
 
 
 def test_score(dataset):
-    response = requests.post(
-        "http://localhost/load", json.dumps({"name": model})
-    )
+    response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
     ids = [i for i in range(len(dataset))]
@@ -61,7 +55,5 @@ def test_score(dataset):
 
     assert correct > 70
 
-    response = requests.post(
-        "http://localhost/unload", json.dumps({"name": model})
-    )
+    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
