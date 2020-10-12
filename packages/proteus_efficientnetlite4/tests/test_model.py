@@ -26,7 +26,7 @@ def test_speed(dataset):
             files=jsonfiles,
             data=payload,
         )
-    assert response.elapsed.total_seconds() < 0.1
+    assert response.elapsed.total_seconds() < 0.25
 
     response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
