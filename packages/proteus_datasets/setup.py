@@ -7,14 +7,14 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = ["opencv-python-headless==4.4.0.40"]
+requirements = []
 
-test_requirements = ["pytest>=3", "proteus.datasets"]
+test_requirements = ["pytest>=3"]
 
 setup(
-    name="proteus.efficientnetlite4",
+    name="proteus.datasets",
     version="0.0.1",
-    description="Proteus EfficientNet-Lite4",
+    description="Proteus datasets",
     author="Pieter Blomme",
     author_email="pieter.blomme@gmail.com",
     python_requires=">=3.6",
