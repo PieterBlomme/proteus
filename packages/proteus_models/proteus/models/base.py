@@ -1,5 +1,7 @@
 import logging
+import os
 
+import requests
 import tritonclient.http as httpclient
 
 # TODO add details on module/def in logger?
@@ -13,6 +15,29 @@ class BaseModel:
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1
     NUM_OUTPUTS = 1
+    MODEL_URL = ""
+
+    @classmethod
+    def _maybe_download(cls):
+        target_path = f"/models/{cls.MODEL_NAME}/1/model.onnx"
+        if not os.path.isfile(target_path):
+            url = cls.MODEL_URL
+            r = requests.get(url)
+            try:
+                os.mkdir(f"/models/{cls.MODEL_NAME}")
+            except Exception as e:
+                print(e)
+            try:
+                os.mkdir(f"/models/{cls.MODEL_NAME}/1")
+            except Exception as e:
+                print(e)
+            with open(target_path, "wb") as f:
+                f.write(r.content)
+
+    @classmethod
+    def load_model(cls, triton_client):
+        cls._maybe_download()
+        triton_client.load_model(cls.MODEL_NAME)
 
     @classmethod
     def parse_model_http(cls, model_metadata, model_config):
