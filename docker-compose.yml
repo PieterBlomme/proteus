@@ -10,7 +10,7 @@ services:
       - "8001:8001"
       - "8002:8002"
     volumes:
-      - ./model_repository:/models
+      - model-repository:/models
   api:
     build: 
       context: .
@@ -19,3 +19,8 @@ services:
       - "80:80"
     depends_on:
       - triton
+    volumes:
+      - model-repository:/models
+
+volumes:
+  model-repository: 
