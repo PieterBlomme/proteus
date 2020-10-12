@@ -3,8 +3,8 @@ import random
 
 import pytest
 import requests
-from proteus.datasets import ImageNette
 from PIL import Image
+from proteus.datasets import ImageNette
 
 model = "efficientnetlite4"
 
