@@ -6,12 +6,15 @@ import requests
 from PIL import Image
 from proteus.datasets import ImageNette
 
-model = "efficientnetlite4"
-
 
 @pytest.fixture
-def setup():
+def model():
+    model = "efficientnetlite4"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    assert response.json()["success"]
+
+    yield model
+    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
 
 
@@ -20,7 +23,7 @@ def dataset():
     return ImageNette()
 
 
-def test_speed(dataset):
+def test_speed(dataset, model):
     fpath, _ = dataset[0]
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -33,7 +36,7 @@ def test_speed(dataset):
     assert response.elapsed.total_seconds() < 0.25
 
 
-def test_jpg():
+def test_jpg(model):
     fpath = "image.jpg"
     Image.new("RGB", (800, 1280)).save(fpath)
 
@@ -48,7 +51,7 @@ def test_jpg():
     assert response.status_code == requests.codes.ok
 
 
-def test_png():
+def test_png(model):
     fpath = "image.png"
     Image.new("RGBA", (800, 1280)).save(fpath)
 
@@ -63,7 +66,7 @@ def test_png():
     assert response.status_code == requests.codes.ok
 
 
-def test_bmp():
+def test_bmp(model):
     fpath = "image.bmp"
     Image.new("RGB", (800, 1280)).save(fpath)
 
@@ -78,7 +81,7 @@ def test_bmp():
     assert response.status_code == requests.codes.ok
 
 
-def test_score(dataset):
+def test_score(dataset, model):
     ids = [i for i in range(len(dataset))]
     ids = random.sample(ids, 100)
 
@@ -97,9 +100,3 @@ def test_score(dataset):
             correct += 1
 
     assert correct > 70
-
-
-@pytest.fixture
-def teardown():
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
-    assert response.json()["success"]
