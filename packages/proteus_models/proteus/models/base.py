@@ -3,6 +3,7 @@ import os
 
 import requests
 import tritonclient.http as httpclient
+from tritonclient.utils import InferenceServerException
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -16,6 +17,9 @@ class BaseModel:
     MAX_BATCH_SIZE = 1
     NUM_OUTPUTS = 1
     MODEL_URL = ""
+    input_name = None
+    output_names = None
+    dtype = None
 
     @classmethod
     def _maybe_download(cls):
@@ -38,6 +42,31 @@ class BaseModel:
     def load_model(cls, triton_client):
         cls._maybe_download()
         triton_client.load_model(cls.MODEL_NAME)
+
+    @classmethod
+    def load_model_info(cls, triton_client):
+        # Make sure the model matches our requirements, and get some
+        # properties of the model that we need for preprocessing
+        try:
+            model_metadata = triton_client.get_model_metadata(
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
+        except InferenceServerException as e:
+            raise Exception("failed to retrieve the metadata: " + str(e))
+
+        try:
+            model_config = triton_client.get_model_config(
+                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+            )
+        except InferenceServerException as e:
+            raise Exception("failed to retrieve the config: " + str(e))
+
+        logger.info(f"Model metadata: {model_metadata}")
+        logger.info(f"Model config: {model_config}")
+
+        cls.input_name, cls.output_names, cls.dtype = cls.parse_model_http(
+            model_metadata, model_config
+        )
 
     @classmethod
     def parse_model_http(cls, model_metadata, model_config):

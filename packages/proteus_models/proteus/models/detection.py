@@ -72,32 +72,13 @@ class DetectionModel(BaseModel):
 
         :return: results
         """
-        # Make sure the model matches our requirements, and get some
-        # properties of the model that we need for preprocessing
-        try:
-            model_metadata = triton_client.get_model_metadata(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
-            )
-        except InferenceServerException as e:
-            raise Exception("failed to retrieve the metadata: " + str(e))
-
-        try:
-            model_config = triton_client.get_model_config(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
-            )
-        except InferenceServerException as e:
-            raise Exception("failed to retrieve the config: " + str(e))
-
-        logger.info(f"Model metadata: {model_metadata}")
-        logger.info(f"Model config: {model_config}")
-
-        input_name, output_names, dtype = cls.parse_model_http(
-            model_metadata, model_config
-        )
-
+        # do if not instantiated
+        if cls.input_name is None:
+            cls.load_model_info(triton_client)
+            
         # Preprocess the images into input data according to model
         # requirements
-        image_data = [cls.preprocess(img, dtype)]
+        image_data = [cls.preprocess(img, cls.dtype)]
 
         # Send requests of batch_size=1 images. If the number of
         # images isn't an exact multiple of batch_size then just
@@ -115,7 +96,7 @@ class DetectionModel(BaseModel):
         # Send request
         try:
             for inputs, outputs in cls.requestGenerator(
-                batched_image_data, input_name, output_names, dtype
+                batched_image_data, cls.input_name, cls.output_names, cls.dtype
             ):
                 sent_count += 1
                 responses.append(
@@ -135,7 +116,7 @@ class DetectionModel(BaseModel):
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
             final_response = cls.postprocess(
-                response, img.size, output_names, 1, cls.MAX_BATCH_SIZE > 0
+                response, img.size, cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
         return final_responses
