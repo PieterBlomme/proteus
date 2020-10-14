@@ -170,6 +170,7 @@ class ClassificationModel(BaseModel):
 
         # Preprocess the images into input data according to model
         # requirements
+        # TODO preprocessing takes about half the throughput time ...
         image_data = [cls.preprocess(img)]
 
         # Send requests of batch_size=1 images. If the number of
