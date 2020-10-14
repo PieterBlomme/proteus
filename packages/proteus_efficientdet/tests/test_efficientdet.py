@@ -32,7 +32,7 @@ def test_speed(dataset, model):
             files=jsonfiles,
             data=payload,
         )
-    assert response.elapsed.total_seconds() < 10.0
+    assert response.elapsed.total_seconds() < 25.0
 
 
 def test_jpg(model):
