@@ -75,7 +75,7 @@ class DetectionModel(BaseModel):
         # do if not instantiated
         if cls.input_name is None:
             cls.load_model_info(triton_client)
-            
+
         # Preprocess the images into input data according to model
         # requirements
         image_data = [cls.preprocess(img, cls.dtype)]
