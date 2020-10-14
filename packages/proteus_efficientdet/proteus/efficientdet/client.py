@@ -20,6 +20,9 @@ class EfficientDet(DetectionModel):
     CHANNEL_FIRST = False
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     NUM_OUTPUTS = 1
+    MODEL_URL = (
+        "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/model.onnx"
+    )
 
     @classmethod
     def preprocess(cls, img, dtype):
@@ -85,3 +88,4 @@ class EfficientDet(DetectionModel):
 
 
 inference_http = EfficientDet.inference_http
+load_model = EfficientDet.load_model

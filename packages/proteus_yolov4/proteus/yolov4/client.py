@@ -28,6 +28,7 @@ class YoloV4(DetectionModel):
     CHANNEL_FIRST = False
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
+    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/yolov4/model/yolov4.onnx"
 
     @classmethod
     def _image_preprocess(cls, image, target_size):
@@ -116,3 +117,4 @@ class YoloV4(DetectionModel):
 
 
 inference_http = YoloV4.inference_http
+load_model = YoloV4.load_model
