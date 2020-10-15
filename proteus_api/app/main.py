@@ -117,6 +117,6 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    MODEL = model_dict[model.name]
+    MODEL = model_dict[model]
     response = MODEL.inference_http(triton_client, img)
     return response

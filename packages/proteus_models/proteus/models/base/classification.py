@@ -20,7 +20,6 @@ def softmax(x):
 class ClassificationModel(BaseModel):
 
     # Defaults
-    MODEL_NAME = "classification"
     MODEL_VERSION = "1"
     CHANNEL_FIRST = False
     SHAPE = (224, 224, 3)
@@ -194,7 +193,7 @@ class ClassificationModel(BaseModel):
                 sent_count += 1
                 responses.append(
                     triton_client.infer(
-                        cls.MODEL_NAME,
+                        cls.__name__,
                         inputs,
                         request_id=str(sent_count),
                         model_version=cls.MODEL_VERSION,

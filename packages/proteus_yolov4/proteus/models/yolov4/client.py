@@ -24,7 +24,6 @@ logger = logging.getLogger("gunicorn.error")
 
 class YoloV4(DetectionModel):
 
-    MODEL_NAME = "yolov4"
     CHANNEL_FIRST = False
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")

@@ -16,7 +16,6 @@ folder_path = Path(__file__).parent
 
 class EfficientDet(DetectionModel):
 
-    MODEL_NAME = "efficientdet"
     CHANNEL_FIRST = False
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     NUM_OUTPUTS = 1
