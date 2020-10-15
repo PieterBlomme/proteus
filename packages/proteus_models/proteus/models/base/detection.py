@@ -13,6 +13,7 @@ class DetectionModel(BaseModel):
 
     # Defaults
     MODEL_VERSION = "1"
+    DESCRIPTION = "Base DetectionModel"
     CHANNEL_FIRST = False
     SHAPE = (416, 416, 3)
     DTYPE = "float32"

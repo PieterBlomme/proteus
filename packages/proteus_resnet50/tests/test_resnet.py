@@ -9,7 +9,7 @@ from proteus.datasets import ImageNette
 
 @pytest.fixture
 def model():
-    model = "Resnet50"
+    model = "Resnet50V2"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -79,6 +79,7 @@ def test_bmp(model):
             data=payload,
         )
     assert response.status_code == requests.codes.ok
+
 
 @pytest.mark.long_running
 def test_score(dataset, model):

@@ -80,6 +80,7 @@ def test_bmp(model):
         )
     assert response.status_code == requests.codes.ok
 
+
 @pytest.mark.long_running
 def test_score(dataset, model):
     ids = [i for i in range(len(dataset))]

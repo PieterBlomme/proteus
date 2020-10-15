@@ -25,6 +25,13 @@ logger = logging.getLogger("gunicorn.error")
 class YoloV4(DetectionModel):
 
     CHANNEL_FIRST = False
+    DESCRIPTION = (
+        "YOLOv4 optimizes the speed and accuracy of object detection. "
+        "It is two times faster than EfficientDet. It improves YOLOv3's "
+        "AP and FPS by 10% and 12%, respectively, with mAP50 of 52.32 "
+        "on the COCO 2017 dataset and FPS of 41.7 on Tesla 100."
+        "Taken from https://github.com/onnx/models."
+    )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/yolov4/model/yolov4.onnx"
