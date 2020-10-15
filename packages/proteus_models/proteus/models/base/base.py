@@ -17,6 +17,7 @@ class BaseModel:
     MAX_BATCH_SIZE = 1
     NUM_OUTPUTS = 1
     MODEL_URL = ""
+    DESCRIPTION = "This is a model"
     input_name = None
     output_names = None
     dtype = None

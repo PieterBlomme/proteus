@@ -6,3 +6,5 @@ from .classification import ClassificationModel
 from .detection import DetectionModel
 
 __all__ = ["DetectionModel", "ClassificationModel"]
+
+model_dict = {}

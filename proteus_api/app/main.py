@@ -1,5 +1,7 @@
 import importlib
+import pkgutil
 import logging
+import proteus.models
 from io import BytesIO
 
 import tritonclient.http as httpclient
@@ -7,6 +9,23 @@ from fastapi import FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
+# TODO add details on module/def in logger?
+logger = logging.getLogger("gunicorn.error")
+
+# discover models
+def iter_namespace(ns_pkg):
+    # Specifying the second argument (prefix) to iter_modules makes the
+    # returned name an absolute name instead of a relative one. This allows
+    # import_module to work without having to do additional modification to
+    # the name.
+    return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
+
+
+model_dict = {}
+for finder, name, ispkg in iter_namespace(proteus.models):
+    module = importlib.import_module(name)
+    model_dict.update(module.model_dict)
+logger.info(model_dict)
 
 # factory
 def get_inference_http(model):
@@ -21,14 +40,11 @@ class Model(BaseModel):
     name: str
 
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
-
 app = FastAPI()
 
 # set up Triton connection
 TRITONURL = "triton:8000"
-
+# TODO check that always available ...
 try:
     # Specify large enough concurrency to handle the
     # the number of requests.
@@ -53,16 +69,16 @@ async def get_server_health():
 
 @app.get("/models")
 async def get_model_repository():
-    return triton_client.get_model_repository_index()
+    return {k: v.DESCRIPTION for (k, v) in model_dict.items()}
 
 
 @app.post("/load/")
 async def load_model(model: Model):
 
     try:
-        module = importlib.import_module(f"proteus.models.{model.name}")
+        model = model_dict[model.name]
         logger.info(f"Loading model {model.name}")
-        module.load_model(triton_client)
+        model.load_model(triton_client)
 
         if not triton_client.is_model_ready(model.name):
             return {
@@ -101,6 +117,6 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    inference_http = get_inference_http(model)
-    response = inference_http(triton_client, img)
+    model = model_dict[model.name]
+    response = model.inference_http(triton_client, img)
     return response
