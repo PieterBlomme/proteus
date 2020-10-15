@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from proteus.models import ClassificationModel
+from proteus.models.base import ClassificationModel
 
 from .helpers import read_class_names
 

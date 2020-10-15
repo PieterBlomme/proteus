@@ -3,7 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from proteus.models import DetectionModel
+from proteus.models.base import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 

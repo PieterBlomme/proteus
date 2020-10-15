@@ -1,1 +1,1 @@
-recursive-include proteus/resnet50 *.txt *.py
+recursive-include proteus/models/resnet50 *.txt *.py

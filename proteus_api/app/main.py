@@ -10,7 +10,7 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 # factory
 def get_inference_http(model):
-    module = importlib.import_module(f"proteus.{model}")
+    module = importlib.import_module(f"proteus.models.{model}")
     return module.inference_http
 
 
@@ -60,7 +60,7 @@ async def get_model_repository():
 async def load_model(model: Model):
 
     try:
-        module = importlib.import_module(f"proteus.{model.name}")
+        module = importlib.import_module(f"proteus.models.{model.name}")
         logger.info(f"Loading model {model.name}")
         module.load_model(triton_client)
 
