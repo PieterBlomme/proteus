@@ -9,7 +9,7 @@ from proteus.datasets import ImageNette
 
 @pytest.fixture
 def model():
-    model = "efficientnetlite4"
+    model = "EfficientNetLite4"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -80,7 +80,7 @@ def test_bmp(model):
         )
     assert response.status_code == requests.codes.ok
 
-
+@pytest.mark.long_running
 def test_score(dataset, model):
     ids = [i for i in range(len(dataset))]
     ids = random.sample(ids, 100)
