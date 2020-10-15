@@ -8,9 +8,11 @@ import tritonclient.http as httpclient
 from fastapi import FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from pydantic import BaseModel
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
+
 
 # discover models
 def iter_namespace(ns_pkg):
@@ -27,13 +29,6 @@ for finder, name, ispkg in iter_namespace(proteus.models):
     model_dict.update(module.model_dict)
 logger.info(model_dict)
 
-# factory
-def get_inference_http(model):
-    module = importlib.import_module(f"proteus.models.{model}")
-    return module.inference_http
-
-
-from pydantic import BaseModel
 
 
 class Model(BaseModel):

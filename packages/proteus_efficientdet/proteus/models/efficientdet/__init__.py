@@ -6,12 +6,7 @@ from .client import (
     EfficientDetD0,
     EfficientDetD2,
     EfficientDetD7,
-    inference_http,
-    load_model,
 )
-
-__all__ = ["inference_http", "load_model"]
-
 
 model_dict = {
     EfficientDetD0.__name__: EfficientDetD0,

@@ -16,7 +16,3 @@ class MobileNetV2(ClassificationModel):
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/mobilenet/model/mobilenetv2-7.onnx"
-
-
-inference_http = MobileNetV2.inference_http
-load_model = MobileNetV2.load_model

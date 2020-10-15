@@ -120,7 +120,3 @@ class YoloV4(DetectionModel):
             results.append(bbox)
 
         return results
-
-
-inference_http = YoloV4.inference_http
-load_model = YoloV4.load_model

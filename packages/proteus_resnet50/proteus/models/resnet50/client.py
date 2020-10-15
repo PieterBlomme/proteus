@@ -17,7 +17,3 @@ class Resnet50V2(ClassificationModel):
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/resnet/model/resnet50-v2-7.onnx"
-
-
-inference_http = Resnet50V2.inference_http
-load_model = Resnet50V2.load_model

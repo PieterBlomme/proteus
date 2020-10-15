@@ -90,10 +90,6 @@ class EfficientDetD0(DetectionModel):
         return results
 
 
-inference_http = EfficientDet.inference_http
-load_model = EfficientDet.load_model
-
-
 class EfficientDetD2(EfficientDetD0):
 
     CHANNEL_FIRST = False
