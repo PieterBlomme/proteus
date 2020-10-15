@@ -76,9 +76,9 @@ async def get_model_repository():
 async def load_model(model: Model):
 
     try:
-        model = model_dict[model.name]
+        MODEL = model_dict[model.name]
         logger.info(f"Loading model {model.name}")
-        model.load_model(triton_client)
+        MODEL.load_model(triton_client)
 
         if not triton_client.is_model_ready(model.name):
             return {
@@ -117,6 +117,6 @@ async def predict(model: str, file: bytes = File(...)):
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Unable to process file",
         )
-    model = model_dict[model.name]
-    response = model.inference_http(triton_client, img)
+    MODEL = model_dict[model.name]
+    response = MODEL.inference_http(triton_client, img)
     return response
