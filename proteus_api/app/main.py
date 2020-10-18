@@ -1,14 +1,14 @@
 import importlib
-import pkgutil
 import logging
-import proteus.models
+import pkgutil
 from io import BytesIO
 
+import proteus.models
 import tritonclient.http as httpclient
 from fastapi import FastAPI, File, HTTPException
 from PIL import Image
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from pydantic import BaseModel
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -28,7 +28,6 @@ for finder, name, ispkg in iter_namespace(proteus.models):
     module = importlib.import_module(name)
     model_dict.update(module.model_dict)
 logger.info(model_dict)
-
 
 
 class Model(BaseModel):
