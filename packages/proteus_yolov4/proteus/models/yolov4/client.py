@@ -3,7 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from proteus.models import DetectionModel
+from proteus.models.base import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
@@ -24,8 +24,14 @@ logger = logging.getLogger("gunicorn.error")
 
 class YoloV4(DetectionModel):
 
-    MODEL_NAME = "yolov4"
     CHANNEL_FIRST = False
+    DESCRIPTION = (
+        "YOLOv4 optimizes the speed and accuracy of object detection. "
+        "It is two times faster than EfficientDet. It improves YOLOv3's "
+        "AP and FPS by 10% and 12%, respectively, with mAP50 of 52.32 "
+        "on the COCO 2017 dataset and FPS of 41.7 on Tesla 100."
+        "Taken from https://github.com/onnx/models."
+    )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/yolov4/model/yolov4.onnx"
@@ -114,7 +120,3 @@ class YoloV4(DetectionModel):
             results.append(bbox)
 
         return results
-
-
-inference_http = YoloV4.inference_http
-load_model = YoloV4.load_model

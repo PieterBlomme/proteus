@@ -8,7 +8,7 @@ from proteus.datasets import CocoVal
 
 @pytest.fixture
 def model():
-    model = "yolov4"
+    model = "YoloV4"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -80,6 +80,7 @@ def test_bmp(model):
     assert response.status_code == requests.codes.ok
 
 
+@pytest.mark.long_running
 def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:

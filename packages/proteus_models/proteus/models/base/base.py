@@ -12,27 +12,27 @@ logger = logging.getLogger("gunicorn.error")
 class BaseModel:
 
     # Defaults
-    MODEL_NAME = "base"
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1
     NUM_OUTPUTS = 1
     MODEL_URL = ""
+    DESCRIPTION = "This is a model"
     input_name = None
     output_names = None
     dtype = None
 
     @classmethod
     def _maybe_download(cls):
-        target_path = f"/models/{cls.MODEL_NAME}/1/model.onnx"
+        target_path = f"/models/{cls.__name__}/1/model.onnx"
         if not os.path.isfile(target_path):
             url = cls.MODEL_URL
             r = requests.get(url)
             try:
-                os.mkdir(f"/models/{cls.MODEL_NAME}")
+                os.mkdir(f"/models/{cls.__name__}")
             except Exception as e:
                 print(e)
             try:
-                os.mkdir(f"/models/{cls.MODEL_NAME}/1")
+                os.mkdir(f"/models/{cls.__name__}/1")
             except Exception as e:
                 print(e)
             with open(target_path, "wb") as f:
@@ -41,7 +41,7 @@ class BaseModel:
     @classmethod
     def load_model(cls, triton_client):
         cls._maybe_download()
-        triton_client.load_model(cls.MODEL_NAME)
+        triton_client.load_model(cls.__name__)
 
     @classmethod
     def load_model_info(cls, triton_client):
@@ -49,14 +49,14 @@ class BaseModel:
         # properties of the model that we need for preprocessing
         try:
             model_metadata = triton_client.get_model_metadata(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+                model_name=cls.__name__, model_version=cls.MODEL_VERSION
             )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the metadata: " + str(e))
 
         try:
             model_config = triton_client.get_model_config(
-                model_name=cls.MODEL_NAME, model_version=cls.MODEL_VERSION
+                model_name=cls.__name__, model_version=cls.MODEL_VERSION
             )
         except InferenceServerException as e:
             raise Exception("failed to retrieve the config: " + str(e))

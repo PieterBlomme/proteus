@@ -12,7 +12,7 @@ requirements = ["opencv-python-headless==4.4.0.40"]
 test_requirements = ["pytest>=3", "proteus.datasets"]
 
 setup(
-    name="proteus.efficientnetlite4",
+    name="proteus.models.efficientnetlite4",
     version="0.0.1",
     description="Proteus EfficientNet-Lite4",
     author="Pieter Blomme",
@@ -24,7 +24,7 @@ setup(
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    namespace_packages=["proteus"],
+    namespace_packages=["proteus.models"],
     packages=find_namespace_packages(exclude=["tests"]),
     test_suite="tests",
     tests_require=test_requirements,
