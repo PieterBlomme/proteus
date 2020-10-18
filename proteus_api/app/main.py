@@ -62,9 +62,12 @@ async def get_server_health():
 
 
 @app.get("/models")
-async def get_model_repository():
+async def get_models():
     return {k: v.DESCRIPTION for (k, v) in model_dict.items()}
 
+@app.get("/models/status")
+async def get_model_repository():
+    return triton_client.get_model_repository_index()
 
 @app.post("/load/")
 async def load_model(model: Model):
