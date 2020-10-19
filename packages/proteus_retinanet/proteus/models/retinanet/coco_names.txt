@@ -1,4 +1,3 @@
-__background__
 person
 bicycle
 car
