@@ -75,11 +75,8 @@ class RetinaNet(DetectionModel):
         img = img[:, :, ::-1].copy()
 
         img = cls._image_resize(img, cls.SHAPE[1:])
-        logger.info(img.shape)
         img = cls._image_preprocess(img)
-        logger.info(img.shape)
 
-        logger.info(f'dtype: {dtype}')
         npdtype = triton_to_np_dtype(dtype)
         img = img.astype(npdtype)
 
@@ -116,7 +113,6 @@ class RetinaNet(DetectionModel):
         Post-process results to show bounding boxes.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
         """
-        logger.info(output_names)
 
         #sort output names
         output_names = [f'output{i}' for i in range(1,11) ]
@@ -131,9 +127,6 @@ class RetinaNet(DetectionModel):
         results = []
         #TODO add another loop if batching
         for score,box,cat in zip(scores[0], boxes[0], labels[0]):
-            logger.info(score)
-            logger.info(box)
-            logger.info(cat)
             x1, y1, x2, y2 = box.data.tolist()
             bbox = BoundingBox(
                 x1=int(x1),
