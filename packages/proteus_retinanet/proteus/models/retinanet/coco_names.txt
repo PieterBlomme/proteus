@@ -9,7 +9,6 @@ truck
 boat
 traffic light
 fire hydrant
-bad class
 stop sign
 parking meter
 bench
@@ -23,11 +22,8 @@ elephant
 bear
 zebra
 giraffe
-bad class
 backpack
 umbrella
-bad class
-bad class
 handbag
 tie
 suitcase
@@ -42,7 +38,6 @@ skateboard
 surfboard
 tennis racket
 bottle
-bad class
 wine glass
 cup
 fork
@@ -63,12 +58,8 @@ chair
 couch
 potted plant
 bed
-bad class
 dining table
-bad class
-bad class
 toilet
-bad class
 tv
 laptop
 mouse
@@ -80,7 +71,6 @@ oven
 toaster
 sink
 refrigerator
-bad class
 book
 clock
 vase
