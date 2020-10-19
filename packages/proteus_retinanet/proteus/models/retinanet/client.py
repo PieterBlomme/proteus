@@ -2,88 +2,146 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import torch
+import cv2
 from proteus.models.base import DetectionModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
+from torchvision import transforms
 
-from .helpers import read_class_names
+from .helpers import read_class_names, nms, decode, generate_anchors
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
 folder_path = Path(__file__).parent
 
-
 class RetinaNet(DetectionModel):
 
-    CHANNEL_FIRST = False
     DESCRIPTION = (
         "RetinaNet is a single-stage object detection model.  "
         "This version uses ResNet101 backbone.  mAP 0.376"
         "Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 1
+    NUM_OUTPUTS = 10
+    SHAPE = (3, 480, 640)
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
+
+    @classmethod
+    def _image_resize(cls, image, target_size):
+
+        ih, iw = target_size
+        h, w, _ = image.shape
+
+        scale = min(iw / w, ih / h)
+        nw, nh = int(scale * w), int(scale * h)
+        image_resized = cv2.resize(image, (nw, nh))
+
+        image_padded = np.full(shape=[ih, iw, 3], fill_value=128.0)
+        dw, dh = (iw - nw) // 2, (ih - nh) // 2
+        image_padded[dh : nh + dh, dw : nw + dw, :] = image_resized
+        image_padded = image_padded / 255.0
+        return image_padded
+
+    @classmethod
+    def _image_preprocess(cls, input_image):
+        preprocess = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        input_tensor = preprocess(input_image)
+        # Create a mini-batch as expected by the model.
+        return input_tensor.numpy()
+
 
     @classmethod
     def preprocess(cls, img, dtype):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
-        Based on this (very few preprocess needed):
-        https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
 
         :param img: image as array in HWC format
         """
         if cls.SHAPE[2] == 1:
-            sample_img = img.convert("L")
+            img = img.convert("L")
         else:
-            sample_img = img.convert("RGB")
+            img = img.convert("RGB")
 
-        logger.info(f"Original image size: {sample_img.size}")
+        logger.info(f"Original image size: {img.size}")
 
         # convert to cv2
-        open_cv_image = np.array(sample_img)
-        open_cv_image = open_cv_image[:, :, ::-1].copy()
+        img = np.array(img)
+        img = img[:, :, ::-1].copy()
 
+        img = cls._image_resize(img, cls.SHAPE[1:])
+        logger.info(img.shape)
+        img = cls._image_preprocess(img)
+        logger.info(img.shape)
+
+        logger.info(f'dtype: {dtype}')
         npdtype = triton_to_np_dtype(dtype)
-        open_cv_image = open_cv_image.astype(npdtype)
+        img = img.astype(npdtype)
 
-        # channels first if needed
-        if cls.CHANNEL_FIRST:
-            img = np.transpose(img, (2, 0, 1))
-
-        return open_cv_image
+        return img
 
     @classmethod
+    def _detection_postprocess(cls, original_image_size, cls_heads, box_heads):
+        # Inference post-processing
+        anchors = {}
+        decoded = []
+        
+        for cls_head, box_head in zip(cls_heads, box_heads):
+            # Generate level's anchors
+            stride = original_image_size[-1] // cls_head.shape[-1]
+            if stride not in anchors:
+                anchors[stride] = generate_anchors(stride, ratio_vals=[1.0, 2.0, 0.5],
+                                                scales_vals=[4 * 2 ** (i / 3) for i in range(3)])
+            # Decode and filter boxes
+            decoded.append(decode(cls_head, box_head, stride,
+                                threshold=0.05, top_n=1000, anchors=anchors[stride]))
+        
+        # Perform non-maximum suppression
+        decoded = [torch.cat(tensors, 1) for tensors in zip(*decoded)]
+        # NMS threshold = 0.5
+        scores, boxes, labels = nms(*decoded, nms=0.5, ndetections=100)
+        return scores, boxes, labels
+
+    @classmethod
+
     def postprocess(
         cls, results, original_image_size, output_names, batch_size, batching
     ):
         """
         Post-process results to show bounding boxes.
-        Based on this (very few postprocess needed):
-        https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
+        https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
         """
         logger.info(output_names)
-        detections = [results.as_numpy(output_name) for output_name in output_names]
-        # only one output, so
-        detections = detections[0]
-        logger.info(list(map(lambda detection: detection.shape, detections)))
+
+        #sort output names
+        output_names = [f'output{i}' for i in range(1,11) ]
+
+        cls_heads = [torch.from_numpy(results.as_numpy(output_name)) for output_name in output_names[:5]]
+        logger.info(list(map(lambda detection: detection.shape, cls_heads)))
+        box_heads = [torch.from_numpy(results.as_numpy(output_name)) for output_name in output_names[5:]]
+        logger.info(list(map(lambda detection: detection.shape, box_heads)))
+
+        scores, boxes, labels = cls._detection_postprocess(original_image_size, cls_heads, box_heads)
 
         results = []
-        # first dimension is the batch TODO
-        for bbox in detections[0]:
-            logger.info(bbox)
-            # bbox[0] is the image id
-            # ymin, xmin, ymax, xmax = bbox[1=5]
+        #TODO add another loop if batching
+        for score,box,cat in zip(scores[0], boxes[0], labels[0]):
+            logger.info(score)
+            logger.info(box)
+            logger.info(cat)
+            x1, y1, x2, y2 = box.data.tolist()
             bbox = BoundingBox(
-                x1=int(bbox[2]),
-                y1=int(bbox[1]),
-                x2=int(bbox[4]),
-                y2=int(bbox[3]),
-                class_name=cls.CLASSES[int(bbox[6])],
-                score=float(bbox[5]),
+                x1=int(x1),
+                y1=int(y1),
+                x2=int(x2),
+                y2=int(y2),
+                class_name=cls.CLASSES[int(cat.item())],
+                score=float(score.item()),
             )
             results.append(bbox)
         return results
