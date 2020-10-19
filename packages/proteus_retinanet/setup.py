@@ -7,7 +7,10 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = []
+requirements = [
+    "torch==1.4.0",
+    "torchvision==0.5.0"
+]
 
 test_requirements = ["pytest>=3"]
 
