@@ -1,0 +1,19 @@
+platform: "onnxruntime_onnx"
+max_batch_size : 0 
+input [
+  {
+    name: "data"
+    data_type: TYPE_FP32
+    dims: [1, 3, 224, 224]
+  }
+]
+output [
+  {
+    name: "resnetv24_dense0_fwd"
+    data_type: TYPE_FP32
+    dims: [1, 1000]
+  }
+]
+optimization { execution_accelerators {
+  gpu_execution_accelerator : [ { name : "tensorrt" } ]
+}}
