@@ -8,7 +8,7 @@ from proteus.datasets import CocoVal
 
 @pytest.fixture
 def model():
-    model = "EfficientDetD2"
+    model = "RetinaNet"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -110,4 +110,4 @@ def test_score(dataset, model):
                 except Exception as e:
                     print(e)
     mAP = dataset.eval(preds)
-    assert mAP > 0.4
+    assert mAP > 0.25
