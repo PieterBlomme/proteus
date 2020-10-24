@@ -122,8 +122,8 @@ class RetinaNet(DetectionModel):
         box_heads = [torch.from_numpy(results.as_numpy(output_name)) for output_name in output_names[5:]]
         logger.info(list(map(lambda detection: detection.shape, box_heads)))
 
-        # TODO is this the issue? original size is probably resized with aspect ratio?
-        #scores, boxes, labels = cls._detection_postprocess(original_image_size, cls_heads, box_heads)
+        # Size here is input size of the model !! 
+        # Still postprocessing needed to invert padding and scaling.
         scores, boxes, labels = cls._detection_postprocess(cls.SHAPE[1:], cls_heads, box_heads)
 
 
@@ -135,7 +135,7 @@ class RetinaNet(DetectionModel):
             logger.info(cls.SHAPE)
             logger.info(original_image_size)
             _, ih, iw = cls.SHAPE
-            h, w = original_image_size
+            w, h = original_image_size #TODO check, same issue as with yolo?
 
             scale = min(iw / w, ih / h)
             logger.info(f'Scale={scale}')
@@ -147,14 +147,14 @@ class RetinaNet(DetectionModel):
             logger.info(f'delta width: {dw}')
             logger.info(f'delta height: {dh}')
 
-            # #unpad bbox
-            # x1 = max(x1-dw, 0)
-            # x2 = min(x2, iw-dw) - dw
-            # y1 = max(y1+dh, 0)
-            # y2 = min(y2, ih-dh) - dh
+            #unpad bbox
+            x1 = max(x1-dw, 0)
+            x2 = min(x2-dw, w) 
+            y1 = max(y1-dh, 0)
+            y2 = min(y2-dh, h)
 
-            # #scale
-            # x1, x2, y1, y2 = x1/scale, x2/scale, y1/scale, y2/scale
+            #scale
+            x1, x2, y1, y2 = x1/scale, x2/scale, y1/scale, y2/scale
 
             bbox = BoundingBox(
                 x1=int(x1),
