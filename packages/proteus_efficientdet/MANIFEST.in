@@ -1,1 +1,1 @@
-recursive-include proteus/models/efficientdet *.txt *.py
+recursive-include proteus/models/* *.txt *.py *.pbtxt

@@ -1,1 +1,1 @@
-recursive-include proteus/models/mobilenet *.txt *.py
+recursive-include proteus/models/* *.txt *.py *.pbtxt

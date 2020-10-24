@@ -1,1 +1,1 @@
-recursive-include proteus/models//yolov4 *.txt *.py
+recursive-include proteus/models//* *.txt *.py *.pbtxt

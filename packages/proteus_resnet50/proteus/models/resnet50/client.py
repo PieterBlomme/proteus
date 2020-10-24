@@ -17,3 +17,7 @@ class Resnet50V2(ClassificationModel):
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/resnet/model/resnet50-v2-7.onnx"
+    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    input_name = "data"
+    output_names = ["resnetv24_dense0_fwd"]
+    dtype = "FP32"

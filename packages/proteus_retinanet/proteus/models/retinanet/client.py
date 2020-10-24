@@ -28,6 +28,21 @@ class RetinaNet(DetectionModel):
     NUM_OUTPUTS = 10
     SHAPE = (3, 480, 640)
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
+    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    input_name = "input"
+    output_names = [
+        "output1",
+        "output10",
+        "output2",
+        "output3",
+        "output4",
+        "output5",
+        "output6",
+        "output7",
+        "output8",
+        "output9",
+    ]
+    dtype = "FP32"
 
     @classmethod
     def _image_resize(cls, image, target_size):

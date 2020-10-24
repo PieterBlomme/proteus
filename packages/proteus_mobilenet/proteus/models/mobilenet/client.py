@@ -16,3 +16,7 @@ class MobileNetV2(ClassificationModel):
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/mobilenet/model/mobilenetv2-7.onnx"
+    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    input_name = "data"
+    output_names = ["mobilenetv20_output_flatten0_reshape0"]
+    dtype = "FP32"

@@ -14,14 +14,13 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 # global logging level
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
-    if os.environ.get("DEBUG") == 1:
+    if os.environ.get("DEBUG") == "1":
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.ERROR)
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
-
 
 # discover models
 def iter_namespace(ns_pkg):
