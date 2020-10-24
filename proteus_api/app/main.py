@@ -14,7 +14,6 @@ from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 # global logging level
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
-    continue
     if os.environ.get("DEBUG") == '1':
         logger.setLevel(logging.DEBUG)
     else:
