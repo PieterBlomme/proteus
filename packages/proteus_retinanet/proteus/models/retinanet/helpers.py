@@ -1,8 +1,9 @@
-import torch
 import numpy as np
+import torch
+
 
 def generate_anchors(stride, ratio_vals, scales_vals, angles_vals=None):
-    'Generate anchors coordinates from scales/ratios'
+    "Generate anchors coordinates from scales/ratios"
 
     scales = torch.FloatTensor(scales_vals).repeat(len(ratio_vals), 1)
     scales = scales.transpose(0, 1).contiguous().view(-1, 1)
@@ -17,7 +18,7 @@ def generate_anchors(stride, ratio_vals, scales_vals, angles_vals=None):
 
 
 def delta2box(deltas, anchors, size, stride):
-    'Convert deltas from anchors to boxes'
+    "Convert deltas from anchors to boxes"
 
     anchors_wh = anchors[:, 2:] - anchors[:, :2] + 1
     ctr = anchors[:, :2] + 0.5 * anchors_wh
@@ -25,22 +26,29 @@ def delta2box(deltas, anchors, size, stride):
     pred_wh = torch.exp(deltas[:, 2:]) * anchors_wh
 
     m = torch.zeros([2], device=deltas.device, dtype=deltas.dtype)
-    M = (torch.tensor([size], device=deltas.device, dtype=deltas.dtype) * stride - 1)
+    M = torch.tensor([size], device=deltas.device, dtype=deltas.dtype) * stride - 1
     clamp = lambda t: torch.max(m, torch.min(t, M))
-    return torch.cat([
-        clamp(pred_ctr - 0.5 * pred_wh),
-        clamp(pred_ctr + 0.5 * pred_wh - 1)
-    ], 1)
+    return torch.cat(
+        [clamp(pred_ctr - 0.5 * pred_wh), clamp(pred_ctr + 0.5 * pred_wh - 1)], 1
+    )
 
 
-def decode(all_cls_head, all_box_head, stride=1, threshold=0.05, top_n=1000, anchors=None, rotated=False):
-    'Box Decoding and Filtering'
+def decode(
+    all_cls_head,
+    all_box_head,
+    stride=1,
+    threshold=0.05,
+    top_n=1000,
+    anchors=None,
+    rotated=False,
+):
+    "Box Decoding and Filtering"
 
     if rotated:
         anchors = anchors[0]
     num_boxes = 4 if not rotated else 6
 
-    device = 'cpu'
+    device = "cpu"
     anchors = anchors.to(device).type(all_cls_head.type())
     num_anchors = anchors.size()[0] if anchors is not None else 1
     num_classes = all_cls_head.size()[1] // num_anchors
@@ -76,20 +84,23 @@ def decode(all_cls_head, all_box_head, stride=1, threshold=0.05, top_n=1000, anc
         boxes = box_head[a, :, y, x]
 
         if anchors is not None:
-            grid = torch.stack([x, y, x, y], 1).type(all_cls_head.type()) * stride + anchors[a, :]
+            grid = (
+                torch.stack([x, y, x, y], 1).type(all_cls_head.type()) * stride
+                + anchors[a, :]
+            )
             boxes = delta2box(boxes, grid, [width, height], stride)
 
-        out_scores[batch, :scores.size()[0]] = scores
-        out_boxes[batch, :boxes.size()[0], :] = boxes
-        out_classes[batch, :classes.size()[0]] = classes
+        out_scores[batch, : scores.size()[0]] = scores
+        out_boxes[batch, : boxes.size()[0], :] = boxes
+        out_classes[batch, : classes.size()[0]] = classes
 
     return out_scores, out_boxes, out_classes
 
 
 def nms(all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
-    'Non Maximum Suppression'
+    "Non Maximum Suppression"
 
-    device = 'cpu'
+    device = "cpu"
     batch_size = all_scores.size()[0]
     out_scores = torch.zeros((batch_size, ndetections), device=device)
     out_boxes = torch.zeros((batch_size, ndetections, 4), device=device)
@@ -109,7 +120,9 @@ def nms(all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
         # Sort boxes
         scores, indices = torch.sort(scores, descending=True)
         boxes, classes = boxes[indices], classes[indices]
-        areas = (boxes[:, 2] - boxes[:, 0] + 1) * (boxes[:, 3] - boxes[:, 1] + 1).view(-1)
+        areas = (boxes[:, 2] - boxes[:, 0] + 1) * (boxes[:, 3] - boxes[:, 1] + 1).view(
+            -1
+        )
         keep = torch.ones(scores.nelement(), device=device, dtype=torch.uint8).view(-1)
 
         for i in range(ndetections):
@@ -121,9 +134,11 @@ def nms(all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
             xy1 = torch.max(boxes[:, :2], boxes[i, :2])
             xy2 = torch.min(boxes[:, 2:], boxes[i, 2:])
             inter = torch.prod((xy2 - xy1 + 1).clamp(0), 1)
-            criterion = ((scores > scores[i]) |
-                         (inter / (areas + areas[i] - inter) <= nms) |
-                         (classes != classes[i]))
+            criterion = (
+                (scores > scores[i])
+                | (inter / (areas + areas[i] - inter) <= nms)
+                | (classes != classes[i])
+            )
             criterion[i] = 1
 
             # Only keep relevant boxes
@@ -133,9 +148,9 @@ def nms(all_scores, all_boxes, all_classes, nms=0.5, ndetections=100):
             areas = areas[criterion.nonzero()].view(-1)
             keep[(~criterion).nonzero()] = 0
 
-        out_scores[batch, :i + 1] = scores[:i + 1]
-        out_boxes[batch, :i + 1, :] = boxes[:i + 1, :]
-        out_classes[batch, :i + 1] = classes[:i + 1]
+        out_scores[batch, : i + 1] = scores[: i + 1]
+        out_boxes[batch, : i + 1, :] = boxes[: i + 1, :]
+        out_classes[batch, : i + 1] = classes[: i + 1]
 
     return out_scores, out_boxes, out_classes
 

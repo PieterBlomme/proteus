@@ -1,20 +1,21 @@
 import logging
 from pathlib import Path
 
+import cv2
 import numpy as np
 import torch
-import cv2
 from proteus.models.base import DetectionModel
 from proteus.types import BoundingBox
-from tritonclient.utils import triton_to_np_dtype
 from torchvision import transforms
+from tritonclient.utils import triton_to_np_dtype
 
-from .helpers import read_class_names, nms, decode, generate_anchors
+from .helpers import decode, generate_anchors, nms, read_class_names
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
 
 folder_path = Path(__file__).parent
+
 
 class RetinaNet(DetectionModel):
 
@@ -46,14 +47,17 @@ class RetinaNet(DetectionModel):
 
     @classmethod
     def _image_preprocess(cls, input_image):
-        preprocess = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        preprocess = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
         input_tensor = preprocess(input_image)
         # Create a mini-batch as expected by the model.
         return input_tensor.numpy()
-
 
     @classmethod
     def preprocess(cls, img, dtype):
@@ -87,17 +91,28 @@ class RetinaNet(DetectionModel):
         # Inference post-processing
         anchors = {}
         decoded = []
-        
+
         for cls_head, box_head in zip(cls_heads, box_heads):
             # Generate level's anchors
             stride = original_image_size[-1] // cls_head.shape[-1]
             if stride not in anchors:
-                anchors[stride] = generate_anchors(stride, ratio_vals=[1.0, 2.0, 0.5],
-                                                scales_vals=[4 * 2 ** (i / 3) for i in range(3)])
+                anchors[stride] = generate_anchors(
+                    stride,
+                    ratio_vals=[1.0, 2.0, 0.5],
+                    scales_vals=[4 * 2 ** (i / 3) for i in range(3)],
+                )
             # Decode and filter boxes
-            decoded.append(decode(cls_head, box_head, stride,
-                                threshold=0.05, top_n=1000, anchors=anchors[stride]))
-        
+            decoded.append(
+                decode(
+                    cls_head,
+                    box_head,
+                    stride,
+                    threshold=0.05,
+                    top_n=1000,
+                    anchors=anchors[stride],
+                )
+            )
+
         # Perform non-maximum suppression
         decoded = [torch.cat(tensors, 1) for tensors in zip(*decoded)]
         # NMS threshold = 0.5
@@ -105,7 +120,6 @@ class RetinaNet(DetectionModel):
         return scores, boxes, labels
 
     @classmethod
-
     def postprocess(
         cls, results, original_image_size, output_names, batch_size, batching
     ):
@@ -114,19 +128,27 @@ class RetinaNet(DetectionModel):
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
         """
 
-        #sort output names
-        output_names = [f'output{i}' for i in range(1,11) ]
+        # sort output names
+        output_names = [f"output{i}" for i in range(1, 11)]
 
-        cls_heads = [torch.from_numpy(results.as_numpy(output_name)) for output_name in output_names[:5]]
+        cls_heads = [
+            torch.from_numpy(results.as_numpy(output_name))
+            for output_name in output_names[:5]
+        ]
         logger.info(list(map(lambda detection: detection.shape, cls_heads)))
-        box_heads = [torch.from_numpy(results.as_numpy(output_name)) for output_name in output_names[5:]]
+        box_heads = [
+            torch.from_numpy(results.as_numpy(output_name))
+            for output_name in output_names[5:]
+        ]
         logger.info(list(map(lambda detection: detection.shape, box_heads)))
 
-        # Size here is input size of the model !! 
+        # Size here is input size of the model !!
         # Still postprocessing needed to invert padding and scaling.
-        scores, boxes, labels = cls._detection_postprocess(cls.SHAPE[1:], cls_heads, box_heads)
+        scores, boxes, labels = cls._detection_postprocess(
+            cls.SHAPE[1:], cls_heads, box_heads
+        )
 
-        #scale, delta width, delta height
+        # scale, delta width, delta height
         _, ih, iw = cls.SHAPE
         h, w = original_image_size
         scale = min(iw / w, ih / h)
@@ -134,18 +156,18 @@ class RetinaNet(DetectionModel):
         dw, dh = (iw - nw) // 2, (ih - nh) // 2
 
         results = []
-        #TODO add another loop if batching
-        for score,box,cat in zip(scores[0], boxes[0], labels[0]):
+        # TODO add another loop if batching
+        for score, box, cat in zip(scores[0], boxes[0], labels[0]):
             x1, y1, x2, y2 = box.data.tolist()
 
-            #unpad bbox
-            x1 = max(x1-dw, 0)
-            x2 = min(x2-dw, w) 
-            y1 = max(y1-dh, 0)
-            y2 = min(y2-dh, h)
+            # unpad bbox
+            x1 = max(x1 - dw, 0)
+            x2 = min(x2 - dw, w)
+            y1 = max(y1 - dh, 0)
+            y2 = min(y2 - dh, h)
 
-            #scale
-            x1, x2, y1, y2 = x1/scale, x2/scale, y1/scale, y2/scale
+            # scale
+            x1, x2, y1, y2 = x1 / scale, x2 / scale, y1 / scale, y2 / scale
 
             bbox = BoundingBox(
                 x1=int(x1),
