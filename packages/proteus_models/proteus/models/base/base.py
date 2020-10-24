@@ -2,6 +2,7 @@ import logging
 import os
 
 import requests
+from shutil import copyfile
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
 
@@ -16,6 +17,7 @@ class BaseModel:
     MAX_BATCH_SIZE = 1
     NUM_OUTPUTS = 1
     MODEL_URL = ""
+    MODEL_CONFIG = None
     DESCRIPTION = "This is a model"
     input_name = None
     output_names = None
@@ -23,6 +25,7 @@ class BaseModel:
 
     @classmethod
     def _maybe_download(cls):
+        # Download model
         target_path = f"/models/{cls.__name__}/1/model.onnx"
         if not os.path.isfile(target_path):
             url = cls.MODEL_URL
@@ -37,6 +40,14 @@ class BaseModel:
                 print(e)
             with open(target_path, "wb") as f:
                 f.write(r.content)
+        # Download config
+        target_path = f"/models/{cls.__name__}/config.pbtxt"
+        if cls.MODEL_CONFIG and not os.path.isfile(target_path):
+            # if cls has MODEL_CONFIG:
+            # no api calls to triton_client to load model metadata
+            # load_model_info and parse_model_http should never be needed
+            # this should, in its own, already give a performance boost
+            copyfile(cls.CONFIG_PATH, target_path)
 
     @classmethod
     def load_model(cls, triton_client):
@@ -67,6 +78,9 @@ class BaseModel:
         cls.input_name, cls.output_names, cls.dtype = cls.parse_model_http(
             model_metadata, model_config
         )
+        logger.info(f'Input name: {cls.input_name}')
+        logger.info(f'output names: {cls.output_names}')
+        logger.info(f'dtype: {cls.dtype}')
 
     @classmethod
     def parse_model_http(cls, model_metadata, model_config):
