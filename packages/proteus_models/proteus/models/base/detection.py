@@ -68,13 +68,16 @@ class DetectionModel(BaseModel):
         Run inference on an img
 
         :param triton_client : the client to use
-        :param img: the img to process
+        :param img: the img to process (Pillow)
 
         :return: results
         """
         # do if not instantiated
         if cls.input_name is None:
             cls.load_model_info(triton_client)
+
+        # Careful, Pillow has (w,h) format but most models expect (h,w)
+        w, h = img.size
 
         # Preprocess the images into input data according to model
         # requirements
@@ -116,7 +119,7 @@ class DetectionModel(BaseModel):
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
             final_response = cls.postprocess(
-                response, img.size, cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
+                response, (h, w), cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
         return final_responses

@@ -126,26 +126,17 @@ class RetinaNet(DetectionModel):
         # Still postprocessing needed to invert padding and scaling.
         scores, boxes, labels = cls._detection_postprocess(cls.SHAPE[1:], cls_heads, box_heads)
 
+        #scale, delta width, delta height
+        _, ih, iw = cls.SHAPE
+        h, w = original_image_size
+        scale = min(iw / w, ih / h)
+        nw, nh = int(scale * w), int(scale * h)
+        dw, dh = (iw - nw) // 2, (ih - nh) // 2
 
         results = []
         #TODO add another loop if batching
         for score,box,cat in zip(scores[0], boxes[0], labels[0]):
             x1, y1, x2, y2 = box.data.tolist()
-            #inverse resize
-            logger.info(cls.SHAPE)
-            logger.info(original_image_size)
-            _, ih, iw = cls.SHAPE
-            w, h = original_image_size #TODO check, same issue as with yolo?
-
-            scale = min(iw / w, ih / h)
-            logger.info(f'Scale={scale}')
-            nw, nh = int(scale * w), int(scale * h)
-            logger.info(f'Intermediate size = {nw, nh}')
-
-            #delta-width, delta-height
-            dw, dh = (iw - nw) // 2, (ih - nh) // 2
-            logger.info(f'delta width: {dw}')
-            logger.info(f'delta height: {dh}')
 
             #unpad bbox
             x1 = max(x1-dw, 0)
