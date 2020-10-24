@@ -99,11 +99,8 @@ class YoloV4(DetectionModel):
 
         input_size = cls.SHAPE[0]
 
-        # swap TODO check why this is needed...
-        (h, w) = original_image_size
-
         pred_bbox = postprocess_bbbox(detections, cls.ANCHORS, STRIDES, XYSCALE)
-        bboxes = postprocess_boxes(pred_bbox, (w, h), input_size, 0.25)
+        bboxes = postprocess_boxes(pred_bbox, original_image_size, input_size, 0.25)
         bboxes = nms(bboxes, 0.213, method="nms")
 
         # bboxes: [x_min, y_min, x_max, y_max, probability, cls_id]

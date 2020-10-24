@@ -21,6 +21,8 @@ services:
       - triton
     volumes:
       - model-repository:/models
+    environment:
+      - DEBUG=0
 
 volumes:
   model-repository: 
