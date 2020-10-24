@@ -1,5 +1,6 @@
 import importlib
 import logging
+import os
 import pkgutil
 from io import BytesIO
 
@@ -9,6 +10,14 @@ from fastapi import FastAPI, File, HTTPException
 from PIL import Image
 from pydantic import BaseModel
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+
+# global logging level
+loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+for logger in loggers:
+    if os.environ.get("DEBUG") == 1:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.ERROR)
 
 # TODO add details on module/def in logger?
 logger = logging.getLogger("gunicorn.error")
@@ -65,9 +74,11 @@ async def get_server_health():
 async def get_models():
     return {k: v.DESCRIPTION for (k, v) in model_dict.items()}
 
+
 @app.get("/models/status")
 async def get_model_repository():
     return triton_client.get_model_repository_index()
+
 
 @app.post("/load/")
 async def load_model(model: Model):
