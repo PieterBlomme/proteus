@@ -1,8 +1,8 @@
 import logging
 import os
+from shutil import copyfile
 
 import requests
-from shutil import copyfile
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
 
@@ -78,9 +78,9 @@ class BaseModel:
         cls.input_name, cls.output_names, cls.dtype = cls.parse_model_http(
             model_metadata, model_config
         )
-        logger.info(f'Input name: {cls.input_name}')
-        logger.info(f'output names: {cls.output_names}')
-        logger.info(f'dtype: {cls.dtype}')
+        logger.info(f"Input name: {cls.input_name}")
+        logger.info(f"output names: {cls.output_names}")
+        logger.info(f"dtype: {cls.dtype}")
 
     @classmethod
     def parse_model_http(cls, model_metadata, model_config):

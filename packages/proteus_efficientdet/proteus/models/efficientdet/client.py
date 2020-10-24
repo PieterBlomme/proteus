@@ -27,9 +27,9 @@ class EfficientDetD0(DetectionModel):
     NUM_OUTPUTS = 1
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d0.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = 'image_arrays:0'
-    output_names = ['detections:0']
-    dtype = 'UINT8'
+    input_name = "image_arrays:0"
+    output_names = ["detections:0"]
+    dtype = "UINT8"
 
     @classmethod
     def preprocess(cls, img, dtype):

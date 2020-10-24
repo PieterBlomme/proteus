@@ -36,9 +36,9 @@ class YoloV4(DetectionModel):
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/yolov4/model/yolov4.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = 'input_1:0'
-    output_names = ['Identity:0', 'Identity_1:0', 'Identity_2:0']
-    dtype = 'FP32'
+    input_name = "input_1:0"
+    output_names = ["Identity:0", "Identity_1:0", "Identity_2:0"]
+    dtype = "FP32"
 
     @classmethod
     def _image_preprocess(cls, image, target_size):
