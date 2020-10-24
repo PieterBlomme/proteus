@@ -42,7 +42,7 @@ class BaseModel:
                 f.write(r.content)
         # Download config
         target_path = f"/models/{cls.__name__}/config.pbtxt"
-        if cls.MODEL_CONFIG and not os.path.isfile(target_path):
+        if cls.CONFIG_PATH and not os.path.isfile(target_path):
             # if cls has MODEL_CONFIG:
             # no api calls to triton_client to load model metadata
             # load_model_info and parse_model_http should never be needed
