@@ -6,3 +6,4 @@
 /packages/proteus_efficientnetlite4/.
 /packages/proteus_efficientdet/.
 /packages/proteus_retinanet/.
+/packages/proteus_maskrcnn/.
