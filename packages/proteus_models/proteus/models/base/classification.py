@@ -19,12 +19,8 @@ def softmax(x):
 class ClassificationModel(BaseModel):
 
     # Defaults
-    MODEL_VERSION = "1"
     DESCRIPTION = "Base ClassificationModel"
-    CHANNEL_FIRST = False
     SHAPE = (224, 224, 3)
-    MAX_BATCH_SIZE = 1
-    CLASSES = []
 
     @classmethod
     def _pre_process_edgetpu(cls, img, dims):

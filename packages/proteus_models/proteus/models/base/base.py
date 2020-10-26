@@ -18,6 +18,8 @@ class BaseModel:
     MODEL_URL = ""
     CONFIG_PATH = None
     DESCRIPTION = "This is a model"
+    CHANNEL_FIRST = False
+    CLASSES = []
     input_name = None
     output_names = None
     dtype = None
