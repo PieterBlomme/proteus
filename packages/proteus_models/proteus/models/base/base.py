@@ -6,8 +6,7 @@ import requests
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
 
 
 class BaseModel:

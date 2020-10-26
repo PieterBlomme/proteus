@@ -17,9 +17,8 @@ from .helpers import (
 )
 
 folder_path = Path(__file__).parent
+logger = logging.getLogger(__name__)
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
 
 
 class YoloV4(DetectionModel):
