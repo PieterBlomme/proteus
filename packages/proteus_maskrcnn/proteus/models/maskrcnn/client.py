@@ -7,9 +7,8 @@ import math
 import cv2
 from PIL import Image
 from proteus.models.base import DetectionModel
-from proteus.types import BoundingBox
+from proteus.types import BoundingBox, Segmentation
 from tritonclient.utils import InferenceServerException, triton_to_np_dtype
-from imantics import Mask
 
 from .helpers import decode, generate_anchors, nms, read_class_names
 
@@ -86,6 +85,7 @@ class MaskRCNN(DetectionModel):
     @classmethod
     def _detection_postprocess(cls, original_image_size, boxes, labels, scores, masks, score_threshold=0.7):
         # Resize boxes
+        logger.info(original_image_size)
         ratio = 800.0 / min(original_image_size[0], original_image_size[1])
         boxes /= ratio
 
@@ -98,6 +98,7 @@ class MaskRCNN(DetectionModel):
             # Finding contour based on mask
             mask = mask[0, :, :, None]
             int_box = [int(i) for i in box]
+            logger.info(int_box)
             mask = cv2.resize(mask, (int_box[2]-int_box[0]+1, int_box[3]-int_box[1]+1))
             mask = mask > 0.5
             im_mask = np.zeros((original_image_size[0], original_image_size[1]), dtype=np.uint8)
@@ -113,12 +114,9 @@ class MaskRCNN(DetectionModel):
                 mask_y_0 : mask_y_1, mask_x_0 : mask_x_1
             ]
             im_mask = im_mask[:, :, None]
+
             bbox = [box[0], box[1], box[2] - box[0], box[3] - box[1]]
-            logger.info(bbox)
-            logger.info(im_mask)
-            logger.info(score)
-            logger.info(cls.CLASSES[label])
-            results.append((score, bbox, cls.CLASSES[label], im_mask))
+            results.append((score, bbox, label, im_mask))
         return results
 
     @classmethod
@@ -136,13 +134,13 @@ class MaskRCNN(DetectionModel):
         scores = results.as_numpy(output_names[2])
         masks = results.as_numpy(output_names[3])
 
-        results = cls._detection_postprocess(
+        postprocess_results = cls._detection_postprocess(
             cls.SHAPE[1:], boxes, labels, scores, masks
         )
 
         results = []
         # TODO add another loop if batching
-        for (score, box, cat, mask) in results:
+        for (score, box, cat, mask) in postprocess_results:
             x1, y1, x2, y2 = box
 
             bbox = BoundingBox(
@@ -150,10 +148,20 @@ class MaskRCNN(DetectionModel):
                 y1=int(y1),
                 x2=int(x2),
                 y2=int(y2),
-                class_name=cls.CLASSES[int(cat.item())],
-                score=float(score.item()),
+                class_name=cls.CLASSES[int(cat)],
+                score=float(score),
             )
-            results.append(bbox)
+            
+            ret, thresh = cv2.threshold(mask, 0.5, 1, cv2.THRESH_BINARY)
+            contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            logger.info(contours)
+
+            segmentation = Segmentation(
+                segmentation=contours,
+                class_name=cls.CLASSES[int(cat)],
+                score=float(score),
+            )
+            results.append({'bounding_box': bbox, 'segmentation': segmentation})
         return results
 
     @classmethod

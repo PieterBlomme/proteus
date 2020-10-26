@@ -20,3 +20,15 @@ class Class:
     def __init__(self, class_name: str, score: float = None):
         self.class_name = class_name
         self.score = score
+
+
+class Segmentation:
+    def __init__(
+        self,
+        segmentation: list,
+        class_name: str = None,
+        score: float = None,
+    ):
+        self.segmentation = segmentation
+        self.class_name = class_name
+        self.score = score
