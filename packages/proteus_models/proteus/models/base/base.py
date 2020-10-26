@@ -1,5 +1,6 @@
 import logging
 import os
+import numpy as np
 from shutil import copyfile
 
 import requests
@@ -134,7 +135,6 @@ class BaseModel:
             final_response = cls.postprocess(
                 response, (h, w), cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
             )
-            logger.info(final_response)
             final_responses.append(final_response)
 
         return final_responses
