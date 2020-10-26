@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 # global logging level
+logging.basicConfig(level=logging.INFO)
 loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
 for logger in loggers:
     if os.environ.get("DEBUG") == "1":
