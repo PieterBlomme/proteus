@@ -19,7 +19,6 @@ class DetectionModel(BaseModel):
     DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
-    NUM_OUTPUTS = 3
 
     @classmethod
     def preprocess(cls, img, dtype):
@@ -72,9 +71,6 @@ class DetectionModel(BaseModel):
 
         :return: results
         """
-        # do if not instantiated
-        if cls.input_name is None:
-            cls.load_model_info(triton_client)
 
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size

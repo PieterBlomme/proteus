@@ -27,7 +27,6 @@ class ClassificationModel(BaseModel):
     DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
-    NUM_OUTPUTS = 1
 
     @classmethod
     def _pre_process_edgetpu(cls, img, dims):
@@ -164,9 +163,6 @@ class ClassificationModel(BaseModel):
 
         :return: results
         """
-        # do if not instantiated
-        if cls.input_name is None:
-            cls.load_model_info(triton_client)
 
         # Preprocess the images into input data according to model
         # requirements

@@ -25,7 +25,6 @@ class RetinaNet(DetectionModel):
         "Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 10
     SHAPE = (3, 480, 640)
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
