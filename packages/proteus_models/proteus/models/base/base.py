@@ -1,8 +1,8 @@
 import logging
 import os
-import numpy as np
 from shutil import copyfile
 
+import numpy as np
 import requests
 import tritonclient.http as httpclient
 from tritonclient.utils import InferenceServerException
@@ -46,7 +46,26 @@ class BaseModel:
             copyfile(cls.CONFIG_PATH, target_path)
 
     @classmethod
+    def _request_generator(cls, batched_image_data):
+        """ Set the input data """
+        inputs = [
+            httpclient.InferInput(cls.input_name, batched_image_data.shape, cls.dtype)
+        ]
+        inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
+
+        outputs = [
+            httpclient.InferRequestedOutput(output_name, binary_data=True)
+            for output_name in cls.output_names
+        ]
+        yield inputs, outputs
+
+    @classmethod
     def load_model(cls, triton_client):
+        """
+        Download (if needed) model files and load model in Triton
+
+        :param triton_client : the client to use
+        """
         cls._maybe_download()
         triton_client.load_model(cls.__name__)
 
@@ -55,6 +74,8 @@ class BaseModel:
         """
         Function to be called to get model_metadata from Triton
         Useful if config.pbtxt is not available
+
+        :param triton_client : the client to use
         """
         try:
             model_metadata = triton_client.get_model_metadata(
@@ -66,18 +87,6 @@ class BaseModel:
         raise Exception(
             f"Please create a config.pbtxt with model metadata {model_metadata}"
         )
-
-    @classmethod
-    def requestGenerator(cls, batched_image_data, input_name, output_names, dtype):
-        """ Set the input data """
-        inputs = [httpclient.InferInput(input_name, batched_image_data.shape, dtype)]
-        inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
-
-        outputs = [
-            httpclient.InferRequestedOutput(output_name, binary_data=True)
-            for output_name in output_names
-        ]
-        yield inputs, outputs
 
     @classmethod
     def inference_http(cls, triton_client, img):
@@ -112,8 +121,8 @@ class BaseModel:
 
         # Send request
         try:
-            for inputs, outputs in cls.requestGenerator(
-                batched_image_data, cls.input_name, cls.output_names, cls.dtype
+            for inputs, outputs in cls._request_generator(
+                batched_image_data
             ):
                 sent_count += 1
                 responses.append(
