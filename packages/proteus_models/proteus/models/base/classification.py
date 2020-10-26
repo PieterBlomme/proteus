@@ -120,7 +120,9 @@ class ClassificationModel(BaseModel):
         return img
 
     @classmethod
-    def postprocess(cls, results, original_image_size, output_names, batch_size, batching, topk=5):
+    def postprocess(
+        cls, results, original_image_size, output_names, batch_size, batching, topk=5
+    ):
         """
         Post-process results to show classifications.
 
@@ -152,4 +154,3 @@ class ClassificationModel(BaseModel):
             response.sort(key=lambda x: x.score, reverse=True)
             responses.append(response)
         return responses
-

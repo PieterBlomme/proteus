@@ -51,7 +51,7 @@ class BaseModel:
 
     @classmethod
     def load_model_info(cls, triton_client):
-        """ 
+        """
         Function to be called to get model_metadata from Triton
         Useful if config.pbtxt is not available
         """
@@ -62,7 +62,9 @@ class BaseModel:
         except InferenceServerException as e:
             raise Exception("failed to retrieve the metadata: " + str(e))
 
-        raise Exception(f'Please create a config.pbtxt with model metadata {model_metadata}')
+        raise Exception(
+            f"Please create a config.pbtxt with model metadata {model_metadata}"
+        )
 
     @classmethod
     def requestGenerator(cls, batched_image_data, input_name, output_names, dtype):
