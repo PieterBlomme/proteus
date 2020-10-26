@@ -5,8 +5,7 @@ from tritonclient.utils import InferenceServerException, triton_to_np_dtype
 
 from .base import BaseModel
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
 
 
 class DetectionModel(BaseModel):

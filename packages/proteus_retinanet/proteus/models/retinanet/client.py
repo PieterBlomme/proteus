@@ -11,8 +11,8 @@ from tritonclient.utils import triton_to_np_dtype
 
 from .helpers import decode, generate_anchors, nms, read_class_names
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
+
 
 folder_path = Path(__file__).parent
 

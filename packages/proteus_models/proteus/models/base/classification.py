@@ -7,8 +7,7 @@ from tritonclient.utils import InferenceServerException
 
 from .base import BaseModel
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
 
 
 def softmax(x):
