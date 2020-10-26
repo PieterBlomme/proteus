@@ -86,9 +86,7 @@ class YoloV4(DetectionModel):
         return image
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         """

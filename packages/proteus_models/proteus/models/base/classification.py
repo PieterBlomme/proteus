@@ -115,9 +115,7 @@ class ClassificationModel(BaseModel):
         return img
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, batch_size, batching, topk=5
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching, topk=5):
         """
         Post-process results to show classifications.
 
@@ -127,7 +125,9 @@ class ClassificationModel(BaseModel):
         :param batching TODO
         :param topk: how many results to return
         """
-        output_array = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
+        output_array = [
+            results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES
+        ]
 
         # Include special handling for non-batching models
         responses = []

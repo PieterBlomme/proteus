@@ -39,7 +39,7 @@ class RetinaNet(DetectionModel):
         "output7",
         "output8",
         "output9",
-        "output10"
+        "output10",
     ]
     DTYPE = "FP32"
 
@@ -134,9 +134,7 @@ class RetinaNet(DetectionModel):
         return scores, boxes, labels
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet

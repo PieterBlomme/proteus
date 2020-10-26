@@ -44,9 +44,7 @@ class DetectionModel(BaseModel):
         return open_cv_image
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         """
