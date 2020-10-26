@@ -15,7 +15,6 @@ class DetectionModel(BaseModel):
     DESCRIPTION = "Base DetectionModel"
     CHANNEL_FIRST = False
     SHAPE = (416, 416, 3)
-    DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
 

@@ -3,7 +3,7 @@ import logging
 import cv2
 import numpy as np
 from proteus.types import Class
-from tritonclient.utils import InferenceServerException
+from tritonclient.utils import InferenceServerException, triton_to_np_dtype
 
 from .base import BaseModel
 
@@ -23,7 +23,6 @@ class ClassificationModel(BaseModel):
     DESCRIPTION = "Base ClassificationModel"
     CHANNEL_FIRST = False
     SHAPE = (224, 224, 3)
-    DTYPE = "float32"
     MAX_BATCH_SIZE = 1
     CLASSES = []
 
@@ -41,7 +40,8 @@ class ClassificationModel(BaseModel):
             img, output_height, output_width, inter_pol=cv2.INTER_LINEAR
         )
         img = cls._center_crop(img, output_height, output_width)
-        img = np.asarray(img, dtype=cls.DTYPE)
+        npdtype = triton_to_np_dtype(cls.dtype)
+        img = np.asarray(img, dtype=npdtype)
         # converts jpg pixel value from [0 - 255] to float array [-1.0 - 1.0]
         img -= [127.0, 127.0, 127.0]
         img /= [128.0, 128.0, 128.0]
