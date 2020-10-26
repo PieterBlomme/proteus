@@ -75,3 +75,64 @@ class BaseModel:
             for output_name in output_names
         ]
         yield inputs, outputs
+
+    @classmethod
+    def inference_http(cls, triton_client, img):
+        """
+        Run inference on an img
+
+        :param triton_client : the client to use
+        :param img: the img to process (Pillow)
+
+        :return: results
+        """
+
+        # Careful, Pillow has (w,h) format but most models expect (h,w)
+        w, h = img.size
+
+        # Preprocess the images into input data according to model
+        # requirements
+        image_data = [cls.preprocess(img)]
+
+        # Send requests of batch_size=1 images. If the number of
+        # images isn't an exact multiple of batch_size then just
+        # start over with the first images until the batch is filled.
+        # TODO batching
+        responses = []
+
+        sent_count = 0
+
+        if cls.MAX_BATCH_SIZE > 0:
+            batched_image_data = np.stack([image_data[0]], axis=0)
+        else:
+            batched_image_data = image_data[0]
+
+        # Send request
+        try:
+            for inputs, outputs in cls.requestGenerator(
+                batched_image_data, cls.input_name, cls.output_names, cls.dtype
+            ):
+                sent_count += 1
+                responses.append(
+                    triton_client.infer(
+                        cls.__name__,
+                        inputs,
+                        request_id=str(sent_count),
+                        model_version=cls.MODEL_VERSION,
+                        outputs=outputs,
+                    )
+                )
+        except InferenceServerException as e:
+            logger.info("inference failed: " + str(e))
+
+        final_responses = []
+        for response in responses:
+            this_id = response.get_response()["id"]
+            logger.info("Request {}, batch size {}".format(this_id, 1))
+            final_response = cls.postprocess(
+                response, (h, w), cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
+            )
+            logger.info(final_response)
+            final_responses.append(final_response)
+
+        return final_responses

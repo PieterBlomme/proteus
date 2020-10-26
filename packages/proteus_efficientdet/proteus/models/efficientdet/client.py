@@ -31,7 +31,7 @@ class EfficientDetD0(DetectionModel):
     dtype = "UINT8"
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -51,7 +51,7 @@ class EfficientDetD0(DetectionModel):
         open_cv_image = np.array(sample_img)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.dtype)
         open_cv_image = open_cv_image.astype(npdtype)
 
         # channels first if needed

@@ -74,7 +74,7 @@ class RetinaNet(DetectionModel):
         return input_tensor.numpy()
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -95,7 +95,7 @@ class RetinaNet(DetectionModel):
         img = cls._image_resize(img, cls.SHAPE[1:])
         img = cls._image_preprocess(img)
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.dtype)
         img = img.astype(npdtype)
 
         return img

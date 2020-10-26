@@ -57,7 +57,7 @@ class YoloV4(DetectionModel):
         return image_padded
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -78,7 +78,7 @@ class YoloV4(DetectionModel):
 
         image = cls._image_preprocess(open_cv_image, (cls.SHAPE[0], cls.SHAPE[1]))
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.dtype)
         image = image.astype(npdtype)
 
         # channels first if needed
