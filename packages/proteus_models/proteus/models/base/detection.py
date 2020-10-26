@@ -11,12 +11,8 @@ logger = logging.getLogger(__name__)
 class DetectionModel(BaseModel):
 
     # Defaults
-    MODEL_VERSION = "1"
     DESCRIPTION = "Base DetectionModel"
-    CHANNEL_FIRST = False
     SHAPE = (416, 416, 3)
-    MAX_BATCH_SIZE = 1
-    CLASSES = []
 
     @classmethod
     def preprocess(cls, img):
@@ -38,7 +34,7 @@ class DetectionModel(BaseModel):
         open_cv_image = np.array(sample_img)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-        npdtype = triton_to_np_dtype(cls.dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         open_cv_image = open_cv_image.astype(npdtype)
 
         # channels first if needed
@@ -49,12 +45,12 @@ class DetectionModel(BaseModel):
 
     @classmethod
     def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
+        cls, results, original_image_size, batch_size, batching
     ):
         """
         Post-process results to show bounding boxes.
         """
-        logger.info(output_names)
-        detections = [results.as_numpy(output_name) for output_name in output_names]
+        logger.info(cls.OUTPUT_NAMES)
+        detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         logger.info(list(map(lambda detection: detection.shape, detections)))
         return None

@@ -36,7 +36,7 @@ class ClassificationModel(BaseModel):
             img, output_height, output_width, inter_pol=cv2.INTER_LINEAR
         )
         img = cls._center_crop(img, output_height, output_width)
-        npdtype = triton_to_np_dtype(cls.dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         img = np.asarray(img, dtype=npdtype)
         # converts jpg pixel value from [0 - 255] to float array [-1.0 - 1.0]
         img -= [127.0, 127.0, 127.0]
@@ -116,7 +116,7 @@ class ClassificationModel(BaseModel):
 
     @classmethod
     def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching, topk=5
+        cls, results, original_image_size, batch_size, batching, topk=5
     ):
         """
         Post-process results to show classifications.
@@ -127,7 +127,7 @@ class ClassificationModel(BaseModel):
         :param batching TODO
         :param topk: how many results to return
         """
-        output_array = [results.as_numpy(output_name) for output_name in output_names]
+        output_array = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
 
         # Include special handling for non-batching models
         responses = []

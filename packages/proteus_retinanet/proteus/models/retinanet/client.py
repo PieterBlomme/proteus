@@ -28,10 +28,9 @@ class RetinaNet(DetectionModel):
     SHAPE = (3, 480, 640)
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = "input"
-    output_names = [
+    INPUT_NAME = "input"
+    OUTPUT_NAMES = [
         "output1",
-        "output10",
         "output2",
         "output3",
         "output4",
@@ -40,8 +39,9 @@ class RetinaNet(DetectionModel):
         "output7",
         "output8",
         "output9",
+        "output10"
     ]
-    dtype = "FP32"
+    DTYPE = "FP32"
 
     @classmethod
     def _image_resize(cls, image, target_size):
@@ -95,7 +95,7 @@ class RetinaNet(DetectionModel):
         img = cls._image_resize(img, cls.SHAPE[1:])
         img = cls._image_preprocess(img)
 
-        npdtype = triton_to_np_dtype(cls.dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         img = img.astype(npdtype)
 
         return img
@@ -135,24 +135,21 @@ class RetinaNet(DetectionModel):
 
     @classmethod
     def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
+        cls, results, original_image_size, batch_size, batching
     ):
         """
         Post-process results to show bounding boxes.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
         """
 
-        # sort output names
-        output_names = [f"output{i}" for i in range(1, 11)]
-
         cls_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in output_names[:5]
+            for output_name in OUTPUT_NAMES[:5]
         ]
         logger.info(list(map(lambda detection: detection.shape, cls_heads)))
         box_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in output_names[5:]
+            for output_name in OUTPUT_NAMES[5:]
         ]
         logger.info(list(map(lambda detection: detection.shape, box_heads)))
 

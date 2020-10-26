@@ -20,9 +20,9 @@ class BaseModel:
     DESCRIPTION = "This is a model"
     CHANNEL_FIRST = False
     CLASSES = []
-    input_name = None
-    output_names = None
-    dtype = None
+    INPUT_NAME = None
+    OUTPUT_NAMES = None
+    DTYPE = None
 
     @classmethod
     def _maybe_download(cls):
@@ -50,13 +50,13 @@ class BaseModel:
     def _request_generator(cls, batched_image_data):
         """ Set the input data """
         inputs = [
-            httpclient.InferInput(cls.input_name, batched_image_data.shape, cls.dtype)
+            httpclient.InferInput(cls.INPUT_NAME, batched_image_data.shape, cls.DTYPE)
         ]
         inputs[0].set_data_from_numpy(batched_image_data, binary_data=True)
 
         outputs = [
             httpclient.InferRequestedOutput(output_name, binary_data=True)
-            for output_name in cls.output_names
+            for output_name in cls.OUTPUT_NAMES
         ]
         yield inputs, outputs
 
@@ -141,7 +141,7 @@ class BaseModel:
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
             final_response = cls.postprocess(
-                response, (h, w), cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
+                response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
 
