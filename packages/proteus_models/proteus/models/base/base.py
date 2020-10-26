@@ -120,9 +120,7 @@ class BaseModel:
 
         # Send request
         try:
-            for inputs, outputs in cls._request_generator(
-                batched_image_data
-            ):
+            for inputs, outputs in cls._request_generator(batched_image_data):
                 sent_count += 1
                 responses.append(
                     triton_client.infer(
