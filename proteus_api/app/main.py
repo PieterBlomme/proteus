@@ -19,8 +19,8 @@ for logger in loggers:
     else:
         logger.setLevel(logging.ERROR)
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
+
 
 # discover models
 def iter_namespace(ns_pkg):
