@@ -3,7 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
@@ -17,12 +17,10 @@ from .helpers import (
 )
 
 folder_path = Path(__file__).parent
-
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
 
 
-class YoloV4(DetectionModel):
+class YoloV4(BaseModel):
 
     CHANNEL_FIRST = False
     DESCRIPTION = (
@@ -36,9 +34,10 @@ class YoloV4(DetectionModel):
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/yolov4/model/yolov4.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = "input_1:0"
-    output_names = ["Identity:0", "Identity_1:0", "Identity_2:0"]
-    dtype = "FP32"
+    INPUT_NAME = "input_1:0"
+    OUTPUT_NAMES = ["Identity:0", "Identity_1:0", "Identity_2:0"]
+    DTYPE = "FP32"
+    SHAPE = (416, 416, 3)
 
     @classmethod
     def _image_preprocess(cls, image, target_size):
@@ -57,7 +56,7 @@ class YoloV4(DetectionModel):
         return image_padded
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -78,7 +77,7 @@ class YoloV4(DetectionModel):
 
         image = cls._image_preprocess(open_cv_image, (cls.SHAPE[0], cls.SHAPE[1]))
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         image = image.astype(npdtype)
 
         # channels first if needed
@@ -88,14 +87,12 @@ class YoloV4(DetectionModel):
         return image
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         """
-        logger.info(output_names)
-        detections = [results.as_numpy(output_name) for output_name in output_names]
+        logger.info(cls.OUTPUT_NAMES)
+        detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         logger.info(list(map(lambda detection: detection.shape, detections)))
 
         STRIDES = np.array([8, 16, 32])

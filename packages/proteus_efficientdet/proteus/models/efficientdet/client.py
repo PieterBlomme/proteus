@@ -2,19 +2,18 @@ import logging
 from pathlib import Path
 
 import numpy as np
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
 from .helpers import read_class_names
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
 
 folder_path = Path(__file__).parent
 
 
-class EfficientDetD0(DetectionModel):
+class EfficientDetD0(BaseModel):
 
     CHANNEL_FIRST = False
     DESCRIPTION = (
@@ -24,15 +23,15 @@ class EfficientDetD0(DetectionModel):
         "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 1
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d0.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = "image_arrays:0"
-    output_names = ["detections:0"]
-    dtype = "UINT8"
+    INPUT_NAME = "image_arrays:0"
+    OUTPUT_NAMES = ["detections:0"]
+    DTYPE = "UINT8"
+    SHAPE = (416, 416, 3)
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -52,7 +51,7 @@ class EfficientDetD0(DetectionModel):
         open_cv_image = np.array(sample_img)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         open_cv_image = open_cv_image.astype(npdtype)
 
         # channels first if needed
@@ -62,16 +61,14 @@ class EfficientDetD0(DetectionModel):
         return open_cv_image
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         Based on this (very few postprocess needed):
         https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
         """
-        logger.info(output_names)
-        detections = [results.as_numpy(output_name) for output_name in output_names]
+        logger.info(cls.OUTPUT_NAMES)
+        detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         # only one output, so
         detections = detections[0]
         logger.info(list(map(lambda detection: detection.shape, detections)))
@@ -104,7 +101,6 @@ class EfficientDetD2(EfficientDetD0):
         "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 1
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d2.onnx"
 
 
@@ -118,5 +114,4 @@ class EfficientDetD7(EfficientDetD0):
         "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 1
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d7.onnx"

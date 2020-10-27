@@ -4,20 +4,20 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from torchvision import transforms
 from tritonclient.utils import triton_to_np_dtype
 
 from .helpers import decode, generate_anchors, nms, read_class_names
 
-# TODO add details on module/def in logger?
-logger = logging.getLogger("gunicorn.error")
+logger = logging.getLogger(__name__)
+
 
 folder_path = Path(__file__).parent
 
 
-class RetinaNet(DetectionModel):
+class RetinaNet(BaseModel):
 
     DESCRIPTION = (
         "RetinaNet is a single-stage object detection model.  "
@@ -25,14 +25,12 @@ class RetinaNet(DetectionModel):
         "Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    NUM_OUTPUTS = 10
     SHAPE = (3, 480, 640)
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = "input"
-    output_names = [
+    INPUT_NAME = "input"
+    OUTPUT_NAMES = [
         "output1",
-        "output10",
         "output2",
         "output3",
         "output4",
@@ -41,8 +39,9 @@ class RetinaNet(DetectionModel):
         "output7",
         "output8",
         "output9",
+        "output10",
     ]
-    dtype = "FP32"
+    DTYPE = "FP32"
 
     @classmethod
     def _image_resize(cls, image, target_size):
@@ -75,7 +74,7 @@ class RetinaNet(DetectionModel):
         return input_tensor.numpy()
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -96,7 +95,7 @@ class RetinaNet(DetectionModel):
         img = cls._image_resize(img, cls.SHAPE[1:])
         img = cls._image_preprocess(img)
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         img = img.astype(npdtype)
 
         return img
@@ -135,25 +134,20 @@ class RetinaNet(DetectionModel):
         return scores, boxes, labels
 
     @classmethod
-    def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
-    ):
+    def postprocess(cls, results, original_image_size, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
         """
 
-        # sort output names
-        output_names = [f"output{i}" for i in range(1, 11)]
-
         cls_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in output_names[:5]
+            for output_name in cls.OUTPUT_NAMES[:5]
         ]
         logger.info(list(map(lambda detection: detection.shape, cls_heads)))
         box_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in output_names[5:]
+            for output_name in cls.OUTPUT_NAMES[5:]
         ]
         logger.info(list(map(lambda detection: detection.shape, box_heads)))
 
