@@ -142,12 +142,12 @@ class RetinaNet(DetectionModel):
 
         cls_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in OUTPUT_NAMES[:5]
+            for output_name in cls.OUTPUT_NAMES[:5]
         ]
         logger.info(list(map(lambda detection: detection.shape, cls_heads)))
         box_heads = [
             torch.from_numpy(results.as_numpy(output_name))
-            for output_name in OUTPUT_NAMES[5:]
+            for output_name in cls.OUTPUT_NAMES[5:]
         ]
         logger.info(list(map(lambda detection: detection.shape, box_heads)))
 
