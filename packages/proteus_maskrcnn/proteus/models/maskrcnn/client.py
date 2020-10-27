@@ -6,7 +6,7 @@ import torch
 import math
 import cv2
 from PIL import Image
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox, Segmentation
 from tritonclient.utils import InferenceServerException, triton_to_np_dtype
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 folder_path = Path(__file__).parent
 
-class MaskRCNN(DetectionModel):
+class MaskRCNN(BaseModel):
 
     DESCRIPTION = (
         "This model is a real-time neural network for object "
@@ -29,9 +29,9 @@ class MaskRCNN(DetectionModel):
     MAX_BATCH_SIZE = 0
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/mask-rcnn/model/MaskRCNN-10.onnx"
     CONFIG_PATH = f"{folder_path}/config.pbtxt"
-    input_name = "image"
-    output_names = ["6568", "6570", "6572", "6887"]
-    dtype = "FP32"
+    INPUT_NAME = "image"
+    OUTPUT_NAMES = ["6568", "6570", "6572", "6887"]
+    DTYPE = "FP32"
 
     @classmethod
     def _image_preprocess(cls, image):
@@ -61,23 +61,20 @@ class MaskRCNN(DetectionModel):
         return image
 
     @classmethod
-    def preprocess(cls, img, dtype):
+    def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
 
         :param img: image as array in HWC format
         """
-        if cls.SHAPE[2] == 1:
-            img = img.convert("L")
-        else:
-            img = img.convert("RGB")
+        img = img.convert("RGB")
 
         logger.info(f"Original image size: {img.size}")
 
         img = cls._image_preprocess(img)
 
-        npdtype = triton_to_np_dtype(dtype)
+        npdtype = triton_to_np_dtype(cls.DTYPE)
         img = img.astype(npdtype)
 
         return img
@@ -85,7 +82,7 @@ class MaskRCNN(DetectionModel):
     @classmethod
     def _detection_postprocess(cls, original_image_size, boxes, labels, scores, masks, score_threshold=0.7):
         # Resize boxes
-        logger.info(original_image_size)
+        logger.info(f'original_image_size {original_image_size}')
         ratio = 800.0 / min(original_image_size[0], original_image_size[1])
         boxes /= ratio
 
@@ -98,7 +95,7 @@ class MaskRCNN(DetectionModel):
             # Finding contour based on mask
             mask = mask[0, :, :, None]
             int_box = [int(i) for i in box]
-            logger.info(int_box)
+            logger.info(f'int_box {int_box}')
             mask = cv2.resize(mask, (int_box[2]-int_box[0]+1, int_box[3]-int_box[1]+1))
             mask = mask > 0.5
             im_mask = np.zeros((original_image_size[0], original_image_size[1]), dtype=np.uint8)
@@ -121,7 +118,7 @@ class MaskRCNN(DetectionModel):
 
     @classmethod
     def postprocess(
-        cls, results, original_image_size, output_names, batch_size, batching
+        cls, results, original_image_size, batch_size, batching
     ):
         """
         Post-process results to show bounding boxes.
@@ -129,13 +126,13 @@ class MaskRCNN(DetectionModel):
         """
 
         # get outputs
-        boxes = results.as_numpy(output_names[0])
-        labels = results.as_numpy(output_names[1])
-        scores = results.as_numpy(output_names[2])
-        masks = results.as_numpy(output_names[3])
+        boxes = results.as_numpy(cls.OUTPUT_NAMES[0])
+        labels = results.as_numpy(cls.OUTPUT_NAMES[1])
+        scores = results.as_numpy(cls.OUTPUT_NAMES[2])
+        masks = results.as_numpy(cls.OUTPUT_NAMES[3])
 
         postprocess_results = cls._detection_postprocess(
-            cls.SHAPE[1:], boxes, labels, scores, masks
+            original_image_size, boxes, labels, scores, masks
         )
 
         results = []
@@ -154,10 +151,12 @@ class MaskRCNN(DetectionModel):
             
             ret, thresh = cv2.threshold(mask, 0.5, 1, cv2.THRESH_BINARY)
             contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            logger.info(contours)
+
+            polygon = contours[0].reshape((-1, 2)).tolist()
+            logger.info(f'polygon {polygon}')
 
             segmentation = Segmentation(
-                segmentation=contours,
+                segmentation=polygon,
                 class_name=cls.CLASSES[int(cat)],
                 score=float(score),
             )
@@ -174,16 +173,12 @@ class MaskRCNN(DetectionModel):
 
         :return: results
         """
-        # do if not instantiated
-        if cls.input_name is None:
-            cls.load_model_info(triton_client)
-
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
 
         # Preprocess the images into input data according to model
         # requirements
-        image_data = [cls.preprocess(img, cls.dtype)]
+        image_data = [cls.preprocess(img)]
 
         # Send requests of batch_size=1 images. If the number of
         # images isn't an exact multiple of batch_size then just
@@ -200,8 +195,8 @@ class MaskRCNN(DetectionModel):
 
         # Send request
         try:
-            for inputs, outputs in cls.requestGenerator(
-                batched_image_data, cls.input_name, cls.output_names, cls.dtype
+            for inputs, outputs in cls._request_generator(
+                batched_image_data
             ):
                 sent_count += 1
                 responses.append(
@@ -221,7 +216,7 @@ class MaskRCNN(DetectionModel):
             this_id = response.get_response()["id"]
             logger.info("Request {}, batch size {}".format(this_id, 1))
             final_response = cls.postprocess(
-                response, (h, w), cls.output_names, 1, cls.MAX_BATCH_SIZE > 0
+                response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
         return final_responses
