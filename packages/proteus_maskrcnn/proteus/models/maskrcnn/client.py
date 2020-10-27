@@ -151,7 +151,7 @@ class MaskRCNN(BaseModel):
             ret, thresh = cv2.threshold(mask, 0.5, 1, cv2.THRESH_BINARY)
             contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-            polygon = contours[0].reshape((-1, 2)).tolist()
+            polygon = contours[0].reshape(-1).tolist()
 
             segmentation = Segmentation(
                 segmentation=polygon,
