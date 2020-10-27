@@ -95,7 +95,6 @@ class MaskRCNN(BaseModel):
             # Finding contour based on mask
             mask = mask[0, :, :, None]
             int_box = [int(i) for i in box]
-            logger.info(f'int_box {int_box}')
             mask = cv2.resize(mask, (int_box[2]-int_box[0]+1, int_box[3]-int_box[1]+1))
             mask = mask > 0.5
             im_mask = np.zeros((original_image_size[0], original_image_size[1]), dtype=np.uint8)
@@ -153,7 +152,6 @@ class MaskRCNN(BaseModel):
             contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
             polygon = contours[0].reshape((-1, 2)).tolist()
-            logger.info(f'polygon {polygon}')
 
             segmentation = Segmentation(
                 segmentation=polygon,
