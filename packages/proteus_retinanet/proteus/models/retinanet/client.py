@@ -4,7 +4,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from torchvision import transforms
 from tritonclient.utils import triton_to_np_dtype
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 folder_path = Path(__file__).parent
 
 
-class RetinaNet(DetectionModel):
+class RetinaNet(BaseModel):
 
     DESCRIPTION = (
         "RetinaNet is a single-stage object detection model.  "

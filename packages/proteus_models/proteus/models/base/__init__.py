@@ -4,8 +4,7 @@ __version__ = "0.0.1"
 
 from .base import BaseModel
 from .classification import ClassificationModel
-from .detection import DetectionModel
 
-__all__ = ["BaseModel", "DetectionModel", "ClassificationModel"]
+__all__ = ["BaseModel", "ClassificationModel"]
 
 model_dict = {}

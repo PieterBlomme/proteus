@@ -3,7 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
@@ -20,7 +20,7 @@ folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
 
-class YoloV4(DetectionModel):
+class YoloV4(BaseModel):
 
     CHANNEL_FIRST = False
     DESCRIPTION = (
