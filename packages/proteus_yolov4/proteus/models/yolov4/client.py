@@ -37,6 +37,7 @@ class YoloV4(BaseModel):
     INPUT_NAME = "input_1:0"
     OUTPUT_NAMES = ["Identity:0", "Identity_1:0", "Identity_2:0"]
     DTYPE = "FP32"
+    SHAPE = (416, 416, 3)
 
     @classmethod
     def _image_preprocess(cls, image, target_size):

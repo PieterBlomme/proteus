@@ -28,6 +28,7 @@ class EfficientDetD0(BaseModel):
     INPUT_NAME = "image_arrays:0"
     OUTPUT_NAMES = ["detections:0"]
     DTYPE = "UINT8"
+    SHAPE = (416, 416, 3)
 
     @classmethod
     def preprocess(cls, img):
