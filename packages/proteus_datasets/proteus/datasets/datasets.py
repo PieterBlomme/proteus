@@ -10,7 +10,7 @@ import requests
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
-tmpfolder = tempfile.TemporaryDirectory().name
+tmpfolder = tempfile.gettempdir()
 
 class ImageNette:
 
