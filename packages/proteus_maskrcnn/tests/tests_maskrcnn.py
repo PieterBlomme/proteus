@@ -8,7 +8,7 @@ from proteus.datasets import CocoVal
 
 @pytest.fixture
 def model():
-    model = "RetinaNet"
+    model = "MaskRCNN"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -92,7 +92,9 @@ def test_score(dataset, model):
                 files=jsonfiles,
                 data=payload,
             )
-            for box in response.json()[0]:
+            for ann in response.json()[0]:
+                segm = ann["segmentation"]
+                box = ann["bounding_box"]
                 try:
                     result = {
                         "image_id": img["id"],
@@ -104,10 +106,10 @@ def test_score(dataset, model):
                             box["x2"] - box["x1"],
                             box["y2"] - box["y1"],
                         ],
+                        "segmentation": [segm["segmentation"]],
                     }
-                    if box["score"] > 0.2:
-                        preds.append(result)
+                    preds.append(result)
                 except Exception as e:
                     print(e)
-    mAP = dataset.eval(preds)
+    mAP = dataset.eval(preds, type="segm")
     assert mAP > 0.25
