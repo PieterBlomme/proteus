@@ -18,6 +18,7 @@ class BaseModel:
     - implement postprocess classmethod to parse results
     - define DESCRIPTION, MODEL_URL and some other parameters
     """
+
     # Defaults
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1

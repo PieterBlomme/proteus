@@ -12,6 +12,7 @@ from pycocotools.cocoeval import COCOeval
 
 tmpfolder = tempfile.gettempdir()
 
+
 class ImageNette:
 
     lbl_dict = dict(
