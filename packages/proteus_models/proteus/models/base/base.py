@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class BaseModel:
-"""
-Abstract base for models.
-Submodels should:
-- implement preprocess classmethod to prepare an image
-- implement postprocess classmethod to parse results
-- define DESCRIPTION, MODEL_URL and some other parameters
-"""
+    """
+    Abstract base for models.
+    Submodels should:
+    - implement preprocess classmethod to prepare an image
+    - implement postprocess classmethod to parse results
+    - define DESCRIPTION, MODEL_URL and some other parameters
+    """
     # Defaults
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1
