@@ -28,7 +28,7 @@ class ImageNette:
     )
 
     def maybe_download(self):
-        if not os.path.isdir("./datasets/imagenette2-320"):
+        if not os.path.isdir(f"{tmpfolder}/datasets/imagenette2-320"):
             print("Downloading ImageNette 320 px")
             thetarfile = (
                 "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz"
