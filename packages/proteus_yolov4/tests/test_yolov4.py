@@ -110,4 +110,4 @@ def test_score(dataset, model):
                 except Exception as e:
                     print(e)
     mAP = dataset.eval(preds)
-    assert mAP > 0.4
+    assert mAP > 0.3
