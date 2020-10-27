@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
-from proteus.models.base import DetectionModel
+from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 folder_path = Path(__file__).parent
 
 
-class EfficientDetD0(DetectionModel):
+class EfficientDetD0(BaseModel):
 
     CHANNEL_FIRST = False
     DESCRIPTION = (
