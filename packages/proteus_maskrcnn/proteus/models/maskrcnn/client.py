@@ -159,6 +159,9 @@ class MaskRCNN(BaseModel):
             )
 
             polygon = contours[0].reshape(-1).tolist()
+            if len(polygon) <= 4:
+                # not valid, create a dummy
+                polygon = [0, 0, 1, 0, 1, 1]
 
             segmentation = Segmentation(
                 segmentation=polygon,
