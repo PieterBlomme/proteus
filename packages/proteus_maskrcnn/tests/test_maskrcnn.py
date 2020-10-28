@@ -8,7 +8,7 @@ from proteus.datasets import CocoVal
 
 @pytest.fixture
 def model():
-    model = "YoloV4"
+    model = "MaskRCNN"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
@@ -19,7 +19,7 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return CocoVal(k=50)
+    return CocoVal(k=100)
 
 
 def test_speed(dataset, model):
@@ -32,7 +32,7 @@ def test_speed(dataset, model):
             files=jsonfiles,
             data=payload,
         )
-    assert response.elapsed.total_seconds() < 2.0
+    assert response.elapsed.total_seconds() < 25.0
 
 
 def test_jpg(model):
@@ -92,7 +92,9 @@ def test_score(dataset, model):
                 files=jsonfiles,
                 data=payload,
             )
-            for box in response.json()[0]:
+            for ann in response.json()[0]:
+                segm = ann["segmentation"]
+                box = ann["bounding_box"]
                 try:
                     result = {
                         "image_id": img["id"],
@@ -104,10 +106,10 @@ def test_score(dataset, model):
                             box["x2"] - box["x1"],
                             box["y2"] - box["y1"],
                         ],
+                        "segmentation": [segm["segmentation"]],
                     }
-                    if box["score"] > 0.2:
-                        preds.append(result)
+                    preds.append(result)
                 except Exception as e:
                     print(e)
-    mAP = dataset.eval(preds)
-    assert mAP > 0.3
+    mAP = dataset.eval(preds, type="segm")
+    assert mAP > 0.30

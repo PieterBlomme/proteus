@@ -99,14 +99,14 @@ class CocoVal:
     def __len__(self):
         return len(self.imgs)
 
-    def eval(self, preds):
+    def eval(self, preds, type="bbox"):
         with open("results_coco.json", "w") as f:
             json.dump(preds, f)
         cocoDT = self.coco.loadRes("results_coco.json")
-        cocoEval = COCOeval(self.coco, cocoDT, "bbox")
+        cocoEval = COCOeval(self.coco, cocoDT, type)
         cocoEval.params.imgIds = [s["id"] for s in self.imgs]
         cocoEval.evaluate()
         cocoEval.accumulate()
         cocoEval.summarize()
         print(cocoEval.stats)
-        return cocoEval.stats[1]
+        return cocoEval.stats[0]
