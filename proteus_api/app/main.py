@@ -11,7 +11,7 @@ from PIL import Image
 from pydantic import BaseModel
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-PIL.Image.MAX_IMAGE_PIXELS = 838860800
+Image.MAX_IMAGE_PIXELS = 838860800
 
 # global logging level
 logging.basicConfig(level=logging.INFO)
