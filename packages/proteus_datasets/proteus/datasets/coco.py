@@ -8,14 +8,16 @@ import urllib.request
 from pathlib import Path
 
 import requests
-from .datasets import Dataset
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
+
+from .datasets import Dataset
 
 tmpfolder = tempfile.gettempdir()
 # We want a good random sample from CocoVal
 # But we want pseudorandom to get consistent test results
 random.seed(42)
+
 
 class CocoValBBox(Dataset):
     def __init__(self, k=50):
@@ -48,7 +50,7 @@ class CocoValBBox(Dataset):
     def _prepare_preds(self, preds_in):
         preds_out = []
         for index, pred in enumerate(preds_in):
-            img_id = self.imgs[index]['id']
+            img_id = self.imgs[index]["id"]
             for box in pred:
                 try:
                     result = {
@@ -77,7 +79,7 @@ class CocoValBBox(Dataset):
 
     def eval(self, preds):
         preds = self._prepare_preds(preds)
-        with tempfile.NamedTemporaryFile(suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(suffix=".json") as f:
             json.dump(preds, f)
             cocoDT = self.coco.loadRes("results_coco.json")
         cocoEval = COCOeval(self.coco, cocoDT, "bbox")

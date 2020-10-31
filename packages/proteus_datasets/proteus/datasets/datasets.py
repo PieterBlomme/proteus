@@ -12,6 +12,7 @@ from pycocotools.cocoeval import COCOeval
 
 tmpfolder = tempfile.gettempdir()
 
+
 class Dataset:
     """
     Dataset interface:
@@ -24,9 +25,10 @@ class Dataset:
 
     def __len__(self):
         return 1
-    
+
     def eval(self, preds):
         return 1.0
+
 
 class ImageNette:
 

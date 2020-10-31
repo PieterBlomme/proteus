@@ -1,10 +1,12 @@
 import json
 import tempfile
+
 import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
+
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -16,6 +18,7 @@ def get_prediction(fpath, model):
             data=payload,
         )
     return response
+
 
 @pytest.fixture
 def model():
@@ -45,21 +48,21 @@ def test_speed(dataset, model):
 
 
 def test_jpg(model):
-    with tempfile.NamedTemporaryFile(suffix='.jpg') as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
 
 def test_png(model):
-    with tempfile.NamedTemporaryFile(suffix='.png') as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".png") as tmp:
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
 
 def test_bmp(model):
-    with tempfile.NamedTemporaryFile(suffix='.bmp') as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".bmp") as tmp:
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
@@ -70,7 +73,7 @@ def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box['score'] > 0.2]
+        result = [box for box in response.json()[0] if box["score"] > 0.2]
         preds.append(result)
     mAP = dataset.eval(preds)
     print(mAP)
@@ -83,14 +86,14 @@ def test_resize(small_dataset, model):
     preds_resize = []
     for (fpath, img) in small_dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box['score'] > 0.2]
+        result = [box for box in response.json()[0] if box["score"] > 0.2]
         preds_normal.append(result)
 
         tmp_img = Image.open(fpath)
         w, h = tmp_img.size
         tmp_img.resize((w * 2, h * 2)).save(fpath)
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box['score'] > 0.2]
+        result = [box for box in response.json()[0] if box["score"] > 0.2]
         # half every box:
         for box in result:
             box["x1"] /= 2
@@ -109,7 +112,7 @@ def test_padding(small_dataset, model):
     preds_padded = []
     for (fpath, img) in small_dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box['score'] > 0.2]
+        result = [box for box in response.json()[0] if box["score"] > 0.2]
         preds_normal.append(result)
 
         tmp_img = Image.open(fpath)
@@ -120,7 +123,7 @@ def test_padding(small_dataset, model):
         tmp_img = pad(tmp_img, (target, target))
         tmp_img.save(fpath)
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box['score'] > 0.2]
+        result = [box for box in response.json()[0] if box["score"] > 0.2]
         # half every box:
         for box in result:
             box["x1"] -= dw
