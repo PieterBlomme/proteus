@@ -1,12 +1,13 @@
 import json
 import random
+import tempfile
 
 import pytest
-import tempfile
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import ImageNette
+
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -18,6 +19,7 @@ def get_prediction(fpath, model):
             data=payload,
         )
     return response
+
 
 @pytest.fixture
 def model():
@@ -33,7 +35,6 @@ def model():
 @pytest.fixture
 def dataset():
     return ImageNette(k=100)
-
 
 
 def test_jpg(model):
@@ -63,9 +64,9 @@ def test_score(dataset, model):
     for fpath, target in dataset:
         response = get_prediction(fpath, model)
         preds.append(response.json()[0])
-    
+
     score = dataset.eval(preds)
-    print(f'Accuracy: {score}')
+    print(f"Accuracy: {score}")
     assert score >= 0.79
 
 
