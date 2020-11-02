@@ -1,14 +1,6 @@
-import glob
-import json
-import os
-import random
-import tarfile
 import tempfile
-import urllib.request
 
 import requests
-from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval
 
 tmpfolder = tempfile.gettempdir()
 
