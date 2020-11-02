@@ -67,7 +67,7 @@ def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box["score"] > 0.2]
+        result = [box for box in response.json()[0]]
         preds.append(result)
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
@@ -80,7 +80,7 @@ def test_resize(small_dataset, model):
     preds_resize = []
     for (fpath, img) in small_dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box["score"] > 0.2]
+        result = [box for box in response.json()[0]]
         preds_normal.append(result)
 
         tmp_img = Image.open(fpath)
@@ -90,7 +90,7 @@ def test_resize(small_dataset, model):
         tmp_img.resize((w * 2, h * 2)).save(resize_path)
         response = get_prediction(resize_path, model)
 
-        result = [box for box in response.json()[0] if box["score"] > 0.2]
+        result = [box for box in response.json()[0]]
         # half every box:
         for box in result:
             box["x1"] /= 2
@@ -111,7 +111,7 @@ def test_padding(small_dataset, model):
     preds_padded = []
     for (fpath, img) in small_dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0] if box["score"] > 0.2]
+        result = [box for box in response.json()[0]]
         preds_normal.append(result)
 
         tmp_img = Image.open(fpath)
@@ -124,7 +124,7 @@ def test_padding(small_dataset, model):
             padded_path = tmp.name
         tmp_img.save(padded_path)
         response = get_prediction(padded_path, model)
-        result = [box for box in response.json()[0] if box["score"] > 0.2]
+        result = [box for box in response.json()[0]]
         # half every box:
         for box in result:
             box["x1"] -= dw
