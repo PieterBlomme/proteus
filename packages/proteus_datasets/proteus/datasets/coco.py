@@ -92,3 +92,42 @@ class CocoValBBox(Dataset):
         cocoEval.accumulate()
         cocoEval.summarize()
         return cocoEval.stats[0]
+
+class CocoValMask(CocoValBBox):
+
+    def _prepare_preds(self, preds_in):
+        preds_out = []
+        for index, pred in enumerate(preds_in):
+            img_id = self.imgs[index]["id"]
+            for ann in pred:
+                segm = ann["segmentation"]
+                box = ann["bounding_box"]
+                try:
+                    result = {
+                        "image_id": img_id,
+                        "category_id": self.cats[box["class_name"]],
+                        "score": segm["score"],
+                        "bbox": [
+                            box["x1"],
+                            box["y1"],
+                            box["x2"] - box["x1"],
+                            box["y2"] - box["y1"],
+                        ],
+                        "segmentation": [segm["segmentation"]],
+                    }
+                    preds_out.append(result)
+                except Exception as e:
+                    print(e)
+        return preds_out
+
+    def eval(self, preds):
+        preds = self._prepare_preds(preds)
+        with open(f"{tmpfolder}/results_coco.json", "w") as f:
+            json.dump(preds, f)
+        cocoDT = self.coco.loadRes(f"{tmpfolder}/results_coco.json")
+        cocoEval = COCOeval(self.coco, cocoDT, "segm")
+        cocoEval.params.imgIds = [s["id"] for s in self.imgs]
+        cocoEval.evaluate()
+        cocoEval.accumulate()
+        cocoEval.summarize()
+        return cocoEval.stats[0]
