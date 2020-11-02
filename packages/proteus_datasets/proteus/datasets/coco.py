@@ -93,8 +93,8 @@ class CocoValBBox(Dataset):
         cocoEval.summarize()
         return cocoEval.stats[0]
 
-class CocoValMask(CocoValBBox):
 
+class CocoValMask(CocoValBBox):
     def _prepare_preds(self, preds_in):
         preds_out = []
         for index, pred in enumerate(preds_in):

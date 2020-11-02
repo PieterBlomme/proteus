@@ -93,7 +93,9 @@ def test_resize(small_dataset, model):
         result = [ann for ann in response.json()[0]]
         # half every coord:
         for ann in result:
-            ann['segmentation']["segmentation"] = [p / 2 for p in ann['segmentation']["segmentation"]]
+            ann["segmentation"]["segmentation"] = [
+                p / 2 for p in ann["segmentation"]["segmentation"]
+            ]
         preds_resize.append(result)
 
     mAP_normal = small_dataset.eval(preds_normal)
@@ -124,7 +126,10 @@ def test_padding(small_dataset, model):
         result = [ann for ann in response.json()[0]]
         # unpad every coord:
         for ann in result:
-            ann['segmentation']["segmentation"] = [p -dw if i % 2 == 0 else p - dh for i, p in enumerate(ann['segmentation']["segmentation"])]
+            ann["segmentation"]["segmentation"] = [
+                p - dw if i % 2 == 0 else p - dh
+                for i, p in enumerate(ann["segmentation"]["segmentation"])
+            ]
 
         preds_padded.append(result)
     mAP_normal = small_dataset.eval(preds_normal)
