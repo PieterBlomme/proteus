@@ -11,17 +11,6 @@ from PIL import Image
 from pydantic import BaseModel
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-# global logging level
-logging.basicConfig(level=logging.INFO)
-loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-for logger in loggers:
-    if os.environ.get("DEBUG") == "1":
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.ERROR)
-
-logger = logging.getLogger(__name__)
-
 
 # discover models
 def iter_namespace(ns_pkg):
@@ -36,6 +25,17 @@ model_dict = {}
 for finder, name, ispkg in iter_namespace(proteus.models):
     module = importlib.import_module(name)
     model_dict.update(module.model_dict)
+
+# global logging level
+logging.basicConfig(level=logging.INFO)
+loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+for logger in loggers:
+    if os.environ.get("DEBUG") == "1":
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.ERROR)
+
+logger = logging.getLogger(__name__)
 logger.info(model_dict)
 
 
