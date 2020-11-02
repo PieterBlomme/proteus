@@ -71,7 +71,7 @@ def test_score(dataset, model):
         preds.append(result)
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
-    assert mAP > 0.35
+    assert mAP > 0.31
 
 
 def test_resize(small_dataset, model):
