@@ -45,7 +45,7 @@ class CocoValBBox(Dataset):
     def _getfile(self, url):
         filename = f"{tmpfolder}/coco_imgs/" + url.split("/")[-1]
         if not os.path.isfile(filename):
-            print(f'Downloading {url}')
+            print(f"Downloading {url}")
             response = requests.get(url, allow_redirects=True)
             open(filename, "wb").write(response.content)
         return filename

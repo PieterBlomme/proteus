@@ -87,7 +87,7 @@ def test_resize(small_dataset, model):
         w, h = tmp_img.size
         with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
             resize_path = tmp.name
-        tmp_img.resize((w*2, h*2)).save(resize_path)
+        tmp_img.resize((w * 2, h * 2)).save(resize_path)
         response = get_prediction(resize_path, model)
 
         result = [box for box in response.json()[0] if box["score"] > 0.2]
