@@ -7,7 +7,6 @@ from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
 
-
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -41,12 +40,6 @@ def small_dataset():
     return CocoValBBox(k=10)
 
 
-def test_speed(dataset, model):
-    fpath, _ = dataset[0]
-    response = get_prediction(fpath, model)
-    assert response.elapsed.total_seconds() < 25.0
-
-
 def test_jpg(model):
     with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
         Image.new("RGB", (800, 1280)).save(tmp.name)
@@ -76,12 +69,12 @@ def test_score(dataset, model):
         result = [box for box in response.json()[0] if box["score"] > 0.2]
         preds.append(result)
     mAP = dataset.eval(preds)
-    print(mAP)
+    print(f'mAP score: {mAP}')
     assert mAP > 0.33
 
 
 def test_resize(small_dataset, model):
-    # mAP should be similar after doubling image size
+    # mAP should be similar after increasing image size
     preds_normal = []
     preds_resize = []
     for (fpath, img) in small_dataset:
@@ -102,7 +95,7 @@ def test_resize(small_dataset, model):
 
     mAP_normal = small_dataset.eval(preds_normal)
     mAP_resize = small_dataset.eval(preds_resize)
-    print(abs(mAP_normal - mAP_resize))
+    print(f'Resize diff: {abs(mAP_normal - mAP_resize)}')
     assert abs(mAP_normal - mAP_resize) < 0.02  # 2% diff seems acceptable
 
 
@@ -131,5 +124,5 @@ def test_padding(small_dataset, model):
         preds_padded.append(result)
     mAP_normal = small_dataset.eval(preds_normal)
     mAP_padded = small_dataset.eval(preds_padded)
-    print(abs(mAP_normal - mAP_padded))
+    print(f'Padding diff: {abs(mAP_normal - mAP_padded)}')
     assert abs(mAP_normal - mAP_padded) < 0.05  # 5% diff seems acceptable

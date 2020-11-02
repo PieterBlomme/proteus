@@ -14,6 +14,7 @@ from pycocotools.cocoeval import COCOeval
 from .datasets import Dataset
 
 tmpfolder = tempfile.gettempdir()
+print(tmpfolder)
 # We want a good random sample from CocoVal
 # But we want pseudorandom to get consistent test results
 random.seed(42)
@@ -38,11 +39,13 @@ class CocoValBBox(Dataset):
             url = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/coco/instances_val2017.json"
             response = requests.get(url, allow_redirects=True)
             open(target, "wb").write(response.content)
-            Path(f"{tmpfolder}/coco_imgs").mkdir(parents=True, exist_ok=True)
+
+        Path(f"{tmpfolder}/coco_imgs").mkdir(parents=True, exist_ok=True)
 
     def _getfile(self, url):
         filename = f"{tmpfolder}/coco_imgs/" + url.split("/")[-1]
         if not os.path.isfile(filename):
+            print(f'Downloading {url}')
             response = requests.get(url, allow_redirects=True)
             open(filename, "wb").write(response.content)
         return filename
@@ -79,9 +82,9 @@ class CocoValBBox(Dataset):
 
     def eval(self, preds):
         preds = self._prepare_preds(preds)
-        with tempfile.NamedTemporaryFile(suffix=".json") as f:
+        with open(f"{tmpfolder}/results_coco.json", "w") as f:
             json.dump(preds, f)
-            cocoDT = self.coco.loadRes("results_coco.json")
+        cocoDT = self.coco.loadRes(f"{tmpfolder}/results_coco.json")
         cocoEval = COCOeval(self.coco, cocoDT, "bbox")
         cocoEval.params.imgIds = [s["id"] for s in self.imgs]
         cocoEval.evaluate()
