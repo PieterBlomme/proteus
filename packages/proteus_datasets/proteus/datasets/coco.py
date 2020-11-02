@@ -1,11 +1,7 @@
-import glob
 import json
 import os
 import random
-import tarfile
 import tempfile
-import urllib.request
-from pathlib import Path
 
 import requests
 from pycocotools.coco import COCO
