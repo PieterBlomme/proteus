@@ -32,7 +32,7 @@ jobs:
         run: |
           autoflake --check --recursive .
           black --check .
-          isort --check-only --multi-line=3 --trailing-comma --force-grid-wrap=0 --use-parentheses --line-width=88 .
+          isort --check-only --multi-line=3 --trailing-comma --force-grid-wrap=0 --use-parentheses --line-width=88 --diff .
 
       - name: Build the docker-compose stack
         run: docker-compose up -d
