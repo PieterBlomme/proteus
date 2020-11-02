@@ -2,11 +2,11 @@ import json
 import os
 import random
 import tempfile
+from pathlib import Path
 
 import requests
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
-from pathlib import Path
 
 from .datasets import Dataset
 
