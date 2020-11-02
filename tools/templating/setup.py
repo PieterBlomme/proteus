@@ -20,7 +20,9 @@ setup(
     classifiers=[],
     keywords="",
     entry_points={
-                'console_scripts': ['proteus.template=proteus.tools.templating.command_line:main'],
+        "console_scripts": [
+            "proteus.template=proteus.tools.templating.command_line:main"
+        ],
     },
     install_requires=requirements,
     long_description=readme,
