@@ -29,7 +29,8 @@ class CocoValBBox(Dataset):
         }
 
         imgs = self.coco.loadImgs(self.coco.getImgIds())
-        self.imgs = random.sample(imgs, k)
+        random.shuffle(imgs)
+        self.imgs = imgs[:k]
 
     def maybe_download(self):
         target = f"{tmpfolder}/datasets/coco/instances_val2017.json"
