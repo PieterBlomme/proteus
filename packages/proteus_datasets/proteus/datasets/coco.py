@@ -6,6 +6,7 @@ import tempfile
 import requests
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
+from pathlib import Path
 
 from .datasets import Dataset
 

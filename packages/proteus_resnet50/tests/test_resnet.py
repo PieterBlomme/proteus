@@ -33,7 +33,7 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return ImageNette(k=100)
+    return ImageNette(k=500)
 
 
 def test_jpg(model):
