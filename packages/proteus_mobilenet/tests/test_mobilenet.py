@@ -1,5 +1,4 @@
 import json
-import random
 import tempfile
 
 import pytest
