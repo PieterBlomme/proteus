@@ -7,9 +7,10 @@ import tempfile
 import urllib.request
 
 import requests
-from .datasets import Dataset
-tmpfolder = tempfile.gettempdir()
 
+from .datasets import Dataset
+
+tmpfolder = tempfile.gettempdir()
 
 
 class ImageNette(Dataset):
@@ -53,11 +54,10 @@ class ImageNette(Dataset):
         return len(self.files)
 
     def eval(self, preds):
-        preds =[pred[0][0]['class_name'].lower() for pred in preds]
+        preds = [pred[0][0]["class_name"].lower() for pred in preds]
         targets = [self.__getitem__(i)[1] for i in range(self.__len__())]
         correct = 0
         for p, t in zip(preds, targets):
             if p == t:
                 correct += 1
         return correct / self.__len__()
-
