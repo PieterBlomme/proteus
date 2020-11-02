@@ -7,6 +7,7 @@ from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
 
+
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -69,7 +70,7 @@ def test_score(dataset, model):
         result = [box for box in response.json()[0] if box["score"] > 0.2]
         preds.append(result)
     mAP = dataset.eval(preds)
-    print(f'mAP score: {mAP}')
+    print(f"mAP score: {mAP}")
     assert mAP > 0.33
 
 
@@ -84,18 +85,23 @@ def test_resize(small_dataset, model):
 
         tmp_img = Image.open(fpath)
         w, h = tmp_img.size
-        tmp_img.resize((w * 2, h * 2)).save(fpath)
-        response = get_prediction(fpath, model)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            resize_path = tmp.name
+        tmp_img.resize((w*2, h*2)).save(resize_path)
+        response = get_prediction(resize_path, model)
+
         result = [box for box in response.json()[0] if box["score"] > 0.2]
         # half every box:
         for box in result:
             box["x1"] /= 2
             box["y1"] /= 2
+            box["x2"] /= 2
+            box["y2"] /= 2
         preds_resize.append(result)
 
     mAP_normal = small_dataset.eval(preds_normal)
     mAP_resize = small_dataset.eval(preds_resize)
-    print(f'Resize diff: {abs(mAP_normal - mAP_resize)}')
+    print(f"Resize diff: {abs(mAP_normal - mAP_resize)}")
     assert abs(mAP_normal - mAP_resize) < 0.02  # 2% diff seems acceptable
 
 
@@ -114,15 +120,20 @@ def test_padding(small_dataset, model):
         dw = (target - w) / 2
         dh = (target - h) / 2
         tmp_img = pad(tmp_img, (target, target))
-        tmp_img.save(fpath)
-        response = get_prediction(fpath, model)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            padded_path = tmp.name
+        tmp_img.save(padded_path)
+        response = get_prediction(padded_path, model)
         result = [box for box in response.json()[0] if box["score"] > 0.2]
         # half every box:
         for box in result:
             box["x1"] -= dw
             box["y1"] -= dh
+            box["x2"] -= dw
+            box["y2"] -= dh
+
         preds_padded.append(result)
     mAP_normal = small_dataset.eval(preds_normal)
     mAP_padded = small_dataset.eval(preds_padded)
-    print(f'Padding diff: {abs(mAP_normal - mAP_padded)}')
+    print(f"Padding diff: {abs(mAP_normal - mAP_padded)}")
     assert abs(mAP_normal - mAP_padded) < 0.05  # 5% diff seems acceptable
