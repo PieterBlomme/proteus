@@ -21,6 +21,7 @@ services:
       - triton
     volumes:
       - model-repository:/models
+      - ./packages:/packages
     environment:
       - DEBUG=0
 

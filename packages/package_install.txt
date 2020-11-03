@@ -1,9 +1,9 @@
-/packages/proteus_types/.
-/packages/proteus_models/.
-/packages/proteus_yolov4/.
-/packages/proteus_mobilenet/.
-/packages/proteus_resnet50/.
-/packages/proteus_efficientnetlite4/.
-/packages/proteus_efficientdet/.
-/packages/proteus_retinanet/.
-/packages/proteus_maskrcnn/.
+-e /packages/proteus_types/.
+-e /packages/proteus_models/.
+-e /packages/proteus_yolov4/.
+-e /packages/proteus_mobilenet/.
+-e /packages/proteus_resnet50/.
+-e /packages/proteus_efficientnetlite4/.
+-e /packages/proteus_efficientdet/.
+-e /packages/proteus_retinanet/.
+-e /packages/proteus_maskrcnn/.
