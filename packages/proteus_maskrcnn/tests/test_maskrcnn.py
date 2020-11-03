@@ -19,9 +19,18 @@ def get_prediction(fpath, model):
         )
     return response
 
+def test_health():
+    for i in range(10):
+        try:
+            response = requests.get('http://localhost/health')
+            if response.status_code == requests.codes.ok:
+                return
+        except:
+            time.sleep(25)
 
 @pytest.fixture
 def model():
+    test_health()
     model = "MaskRCNN"
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
