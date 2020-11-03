@@ -23,11 +23,12 @@ def get_prediction(fpath, model):
 def test_health():
     for i in range(10):
         try:
-            response = requests.get('http://localhost/health')
+            response = requests.get("http://localhost/health")
             if response.status_code == requests.codes.ok:
                 return
         except:
             time.sleep(25)
+
 
 @pytest.fixture
 def model():
