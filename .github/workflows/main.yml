@@ -31,7 +31,7 @@ jobs:
       - name: Lint
         run: |
           autoflake --check --recursive .
-          black --check .
+          black --check --exclude=/tools/templating/proteus/tools/templating/templates .
           isort --check-only --multi-line=3 --trailing-comma --force-grid-wrap=0 --use-parentheses --line-width=88 --diff .
 
       - name: Build the docker-compose stack
@@ -39,4 +39,4 @@ jobs:
 
       - name: Test with pytest
         run: |         
-          pytest -s
+          pytest -s --ignore=tools/templating/proteus/tools/templating/templates
