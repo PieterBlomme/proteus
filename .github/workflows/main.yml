@@ -39,4 +39,4 @@ jobs:
 
       - name: Test with pytest
         run: |         
-          pytest -s --ignore=/tools/templating/proteus/tools/templating/templates
+          pytest -s --ignore=tools/templating/proteus/tools/templating/templates
