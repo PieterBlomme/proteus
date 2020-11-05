@@ -45,7 +45,7 @@ def main():
 
     start = time.time()
     preds = []
-    dataset = [s for s in dataset] #pre-download
+    dataset = [s for s in dataset]  # pre-download
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Start the load operations and mark each future with its URL
         futures = [
