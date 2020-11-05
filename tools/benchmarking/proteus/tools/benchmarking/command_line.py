@@ -45,11 +45,11 @@ def main():
 
     start = time.time()
     preds = []
-    dataset = [s for s in dataset]  # pre-download
+    ds = [s for s in dataset]  # pre-download
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Start the load operations and mark each future with its URL
         futures = [
-            executor.submit(get_prediction, fpath, model) for (fpath, img) in dataset
+            executor.submit(get_prediction, fpath, model) for (fpath, img) in ds
         ]
         for fut in as_completed(futures):
             response = fut.result()
