@@ -11,7 +11,6 @@ from pycocotools.cocoeval import COCOeval
 from .datasets import Dataset
 
 tmpfolder = tempfile.gettempdir()
-print(tmpfolder)
 # We want a good random sample from CocoVal
 # But we want pseudorandom to get consistent test results
 random.seed(42)
