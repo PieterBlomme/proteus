@@ -45,6 +45,7 @@ def main():
 
     start = time.time()
     preds = []
+    dataset = [s for s in dataset] #pre-download
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Start the load operations and mark each future with its URL
         futures = [
@@ -55,8 +56,7 @@ def main():
             preds.append(response.json()[0])
     score = dataset.eval(preds)
     end = time.time()
-    throughput = (end - start) * 1000 / num_samples
-
+    throughput = num_samples / (end - start) * 1000
     # latency
     fpath, img = dataset[0]
     latency = get_prediction(fpath, model).elapsed.total_seconds() * 1000
