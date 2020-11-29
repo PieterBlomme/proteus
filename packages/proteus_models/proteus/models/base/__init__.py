@@ -8,3 +8,6 @@ from .classification import ClassificationModel
 __all__ = ["BaseModel", "ClassificationModel"]
 
 model_dict = {}
+
+from fastapi import APIRouter, HTTPException
+router = APIRouter()

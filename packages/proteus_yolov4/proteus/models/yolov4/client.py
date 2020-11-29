@@ -6,6 +6,8 @@ import numpy as np
 from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
+from fastapi import APIRouter, HTTPException
+from fastapi_utils.cbv import cbv
 
 # isort: skip
 from .helpers import (
@@ -19,7 +21,9 @@ from .helpers import (
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
+router = APIRouter()  # Step 1: Create a router
 
+@cbv(router)  # Step 2: Create and decorate a class to hold the endpoints
 class YoloV4(BaseModel):
 
     CHANNEL_FIRST = False
@@ -38,6 +42,11 @@ class YoloV4(BaseModel):
     OUTPUT_NAMES = ["Identity:0", "Identity_1:0", "Identity_2:0"]
     DTYPE = "FP32"
     SHAPE = (416, 416, 3)
+
+    @router.get(f"/somewhere")
+    def bar(self) -> int:
+        # Step 4: Use `self.<dependency_name>` to access shared dependencies
+        return self.x
 
     @classmethod
     def _image_preprocess(cls, image, target_size):
