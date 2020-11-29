@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
-logger.info(model_dict)
 
 
 @app.get("/health")
