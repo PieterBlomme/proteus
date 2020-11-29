@@ -3,7 +3,9 @@ import pkgutil
 
 import proteus.models
 import tritonclient.http as httpclient
+import logging
 
+logger = logging.getLogger(__name__)
 
 def get_triton_client():
     # set up Triton connection
@@ -35,4 +37,5 @@ def get_model_dict():
     for finder, name, ispkg in iter_namespace(proteus.models):
         module = importlib.import_module(name)
         model_dict.update(module.model_dict)
+    logger.info(model_dict)
     return model_dict
