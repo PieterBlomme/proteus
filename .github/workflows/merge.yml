@@ -1,8 +1,9 @@
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push
+# Controls when the action will run. Triggers the workflow on push to master
 on:
-  push:
+  push: 
+    branches: [ master ]
 
 jobs:
   test:
@@ -39,4 +40,4 @@ jobs:
 
       - name: Test with pytest
         run: |         
-          pytest -s --ignore=tools/templating/proteus/tools/templating/templates -m "not slow"
+          pytest -s --ignore=tools/templating/proteus/tools/templating/templates

@@ -73,7 +73,7 @@ def test_bmp(model):
     assert response.status_code == requests.codes.ok
 
 
-@pytest.mark.long_running
+@pytest.mark.slow
 def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
