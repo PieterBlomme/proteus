@@ -77,7 +77,7 @@ def test_score(dataset, model):
 
     score = dataset.eval(preds)
     print(f"Accuracy: {score}")
-    assert score >= 0.7
+    assert score >= 0.67
 
 
 def test_resize(dataset, model):
