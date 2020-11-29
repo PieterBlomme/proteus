@@ -6,11 +6,11 @@ from io import BytesIO
 
 import proteus.models
 import tritonclient.http as httpclient
-from fastapi import FastAPI, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, APIRouter
 from PIL import Image
-from pydantic import BaseModel
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
+app = FastAPI()
 
 # discover models
 def iter_namespace(ns_pkg):
@@ -38,16 +38,6 @@ for logger in loggers:
 logger = logging.getLogger(__name__)
 logger.info(model_dict)
 
-
-class Model(BaseModel):
-    name: str
-
-
-app = FastAPI()
-from .routers import users
-app.include_router(users.router)
-
-"""
 # set up Triton connection
 TRITONURL = "triton:8000"
 # TODO check that always available ...
@@ -82,53 +72,61 @@ async def get_models():
 async def get_model_repository():
     return triton_client.get_model_repository_index()
 
+#build model-specific routers
+for name, model in model_dict.items():
+    router = APIRouter()
 
-@app.post("/load/")
-async def load_model(model: Model):
+    @router.post("/load")
+    async def load_model():
 
-    try:
-        MODEL = model_dict[model.name]
-        logger.info(f"Loading model {model.name}")
-        MODEL.load_model(triton_client)
+        try:
+            logger.info(f"Loading model {name}")
+            model.load_model(triton_client)
 
-        if not triton_client.is_model_ready(model.name):
-            return {
-                "success": False,
-                "message": f"model {model.name} not ready - check logs",
-            }
+            if not triton_client.is_model_ready(name):
+                return {
+                    "success": False,
+                    "message": f"model {name} not ready - check logs",
+                }
+            else:
+                return {"success": True, "message": f"model {name} loaded"}
+        except ImportError as e:
+            logger.info(e)
+            return {"success": False, "message": f"unknown model {name}"}
+
+    @router.post("/unload")
+    async def unload_model():
+        if not triton_client.is_model_ready(name):
+            logger.info(f"No model with name {name} loaded")
+            return {"success": False, "message": "model not loaded"}
         else:
-            return {"success": True, "message": f"model {model.name} loaded"}
-    except ImportError as e:
-        logger.info(e)
-        return {"success": False, "message": f"unknown model {model.name}"}
+            logger.info(f"Unloading model {name}")
+            triton_client.unload_model(name)
+            return {"success": True, "message": f"model {name} unloaded"}
 
+    @router.post("/predict")
+    async def predict(file: bytes = File(...)):
+        if not triton_client.is_model_ready(name):
+            raise HTTPException(status_code=404, detail="model not available")
 
-@app.post("/unload/")
-async def unload_model(model: Model):
-    if not triton_client.is_model_ready(model.name):
-        logger.info(f"No model with name {model.name} loaded")
-        return {"success": False, "message": "model not loaded"}
-    else:
-        logger.info(f"Unloading model {model.name}")
-        triton_client.unload_model(model.name)
-        return {"success": True, "message": f"model {model.name} unloaded"}
+        # TODO validation of the file
+        try:
+            img = Image.open(BytesIO(file))
+        except Exception as e:
+            logger.error(e)
+            raise HTTPException(
+                status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Unable to process file",
+            )
+        response = model.inference_http(triton_client, img)
+        return response
 
-
-@app.post("/{model}/predict")
-async def predict(model: str, file: bytes = File(...)):
-    if not triton_client.is_model_ready(model):
-        raise HTTPException(status_code=404, detail="model not available")
-
-    # TODO validation of the file
-    try:
-        img = Image.open(BytesIO(file))
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Unable to process file",
+    app.include_router(
+            router,
+            prefix=f"/{name}",
+            tags=[f"{name}"],
         )
-    MODEL = model_dict[model]
-    response = MODEL.inference_http(triton_client, img)
-    return response
-"""
+
+
+
+
