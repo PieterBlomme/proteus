@@ -12,9 +12,11 @@ def load_model(model):
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
+
 def unload_model(model):
     response = requests.post("http://localhost/unload", json.dumps({"name": model}))
     assert response.json()["success"]
+
 
 def load_dataset(dataset, num_samples):
     dataset = getattr(mod, dataset)
