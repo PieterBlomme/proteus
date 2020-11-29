@@ -6,7 +6,7 @@ from fastapi import APIRouter, FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from .helper import get_triton_client, get_model_dict
+from .helper import get_model_dict, get_triton_client
 
 app = FastAPI()
 
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 triton_client = get_triton_client()
 model_dict = get_model_dict()
 logger.info(model_dict)
+
 
 @app.get("/health")
 async def get_server_health():

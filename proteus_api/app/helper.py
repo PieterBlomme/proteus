@@ -1,7 +1,9 @@
-import tritonclient.http as httpclient
-import pkgutil
-import proteus.models
 import importlib
+import pkgutil
+
+import proteus.models
+import tritonclient.http as httpclient
+
 
 def get_triton_client():
     # set up Triton connection
@@ -19,6 +21,7 @@ def get_triton_client():
         logger.error("client creation failed: " + str(e))
     return triton_client
 
+
 def get_model_dict():
     # discover models
     def iter_namespace(ns_pkg):
@@ -27,7 +30,6 @@ def get_model_dict():
         # import_module to work without having to do additional modification to
         # the name.
         return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
-
 
     model_dict = {}
     for finder, name, ispkg in iter_namespace(proteus.models):
