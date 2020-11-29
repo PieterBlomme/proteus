@@ -19,6 +19,7 @@ from .helpers import (
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
+
 class YoloV4(BaseModel):
 
     CHANNEL_FIRST = False

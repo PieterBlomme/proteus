@@ -6,7 +6,7 @@ from io import BytesIO
 
 import proteus.models
 import tritonclient.http as httpclient
-from fastapi import FastAPI, File, HTTPException, APIRouter
+from fastapi import APIRouter, FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -72,7 +72,8 @@ async def get_models():
 async def get_model_repository():
     return triton_client.get_model_repository_index()
 
-#build model-specific routers
+
+# build model-specific routers
 for name, model in model_dict.items():
     router = APIRouter()
 
@@ -122,11 +123,7 @@ for name, model in model_dict.items():
         return response
 
     app.include_router(
-            router,
-            prefix=f"/{name}",
-            tags=[f"{name}"],
-        )
-
-
-
-
+        router,
+        prefix=f"/{name}",
+        tags=[f"{name}"],
+    )
