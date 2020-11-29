@@ -1,11 +1,12 @@
 import importlib
+import logging
 import pkgutil
 
 import proteus.models
 import tritonclient.http as httpclient
-import logging
 
 logger = logging.getLogger(__name__)
+
 
 def get_triton_client():
     # set up Triton connection
