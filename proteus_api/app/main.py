@@ -44,7 +44,10 @@ class Model(BaseModel):
 
 
 app = FastAPI()
+from .routers import users
+app.include_router(users.router)
 
+"""
 # set up Triton connection
 TRITONURL = "triton:8000"
 # TODO check that always available ...
@@ -128,3 +131,4 @@ async def predict(model: str, file: bytes = File(...)):
     MODEL = model_dict[model]
     response = MODEL.inference_http(triton_client, img)
     return response
+"""
