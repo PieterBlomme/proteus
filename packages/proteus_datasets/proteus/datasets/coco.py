@@ -49,9 +49,12 @@ class CocoValBBox(Dataset):
 
     def _prepare_preds(self, preds_in):
         preds_out = []
+        
         for index, pred in enumerate(preds_in):
             img_id = self.imgs[index]["id"]
-            for box in pred:
+            for ann in pred:
+                segm = ann["segmentation"]
+                box = ann["bounding_box"]
                 try:
                     result = {
                         "image_id": img_id,

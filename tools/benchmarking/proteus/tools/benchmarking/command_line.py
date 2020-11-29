@@ -9,12 +9,12 @@ mod = importlib.import_module("proteus.datasets")
 
 
 def load_model(model):
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/load")
     assert response.json()["success"]
 
 
 def unload_model(model):
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/unload")
     assert response.json()["success"]
 
 
