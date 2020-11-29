@@ -34,11 +34,11 @@ def test_health():
 def model():
     test_health()
     model = "MobileNetV2"
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/load")
     assert response.json()["success"]
 
     yield model
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/unload")
     assert response.json()["success"]
 
 
