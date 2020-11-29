@@ -1,30 +1,14 @@
-import importlib
 import logging
 import os
-import pkgutil
 from io import BytesIO
 
-import proteus.models
-import tritonclient.http as httpclient
 from fastapi import APIRouter, FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
+from .helper import get_triton_client, get_model_dict
+
 app = FastAPI()
-
-# discover models
-def iter_namespace(ns_pkg):
-    # Specifying the second argument (prefix) to iter_modules makes the
-    # returned name an absolute name instead of a relative one. This allows
-    # import_module to work without having to do additional modification to
-    # the name.
-    return pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
-
-
-model_dict = {}
-for finder, name, ispkg in iter_namespace(proteus.models):
-    module = importlib.import_module(name)
-    model_dict.update(module.model_dict)
 
 # global logging level
 logging.basicConfig(level=logging.INFO)
@@ -36,22 +20,10 @@ for logger in loggers:
         logger.setLevel(logging.ERROR)
 
 logger = logging.getLogger(__name__)
+
+triton_client = get_triton_client()
+model_dict = get_model_dict()
 logger.info(model_dict)
-
-# set up Triton connection
-TRITONURL = "triton:8000"
-# TODO check that always available ...
-try:
-    # Specify large enough concurrency to handle the
-    # the number of requests.
-    concurrency = 1
-    triton_client = httpclient.InferenceServerClient(
-        url=TRITONURL, concurrency=concurrency
-    )
-    logger.info(f"Server ready? {triton_client.is_server_ready()}")
-except Exception as e:
-    logger.error("client creation failed: " + str(e))
-
 
 @app.get("/health")
 async def get_server_health():
