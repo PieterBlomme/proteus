@@ -12,6 +12,9 @@ def load_model(model):
     response = requests.post("http://localhost/load", json.dumps({"name": model}))
     assert response.json()["success"]
 
+def unload_model(model):
+    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    assert response.json()["success"]
 
 def load_dataset(dataset, num_samples):
     dataset = getattr(mod, dataset)
@@ -48,7 +51,10 @@ def main():
     ds = [s for s in dataset]  # pre-download
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         # Start the load operations and mark each future with its index
-        futures = [executor.submit(get_prediction, fpath, model, i) for i, (fpath, img) in enumerate(ds)]
+        futures = [
+            executor.submit(get_prediction, fpath, model, i)
+            for i, (fpath, img) in enumerate(ds)
+        ]
 
         for fut in as_completed(futures):
             response, i = fut.result()
@@ -60,6 +66,8 @@ def main():
     fpath, img = dataset[0]
     latency, _ = get_prediction(fpath, model, 0)
     latency = latency.elapsed.total_seconds() * 1000
+
+    unload_model(model)
 
     print("Results")
     print(f"Throughput: {throughput} FPS")
