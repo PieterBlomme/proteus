@@ -13,12 +13,17 @@ def load_model(model):
     assert response.json()["success"]
 
 
+def unload_model(model):
+    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    assert response.json()["success"]
+
+
 def load_dataset(dataset, num_samples):
     dataset = getattr(mod, dataset)
     return dataset(k=num_samples)
 
 
-def get_prediction(fpath, model):
+def get_prediction(fpath, model, i):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
         payload = {"file_id": fpath}
@@ -27,7 +32,7 @@ def get_prediction(fpath, model):
             files=jsonfiles,
             data=payload,
         )
-    return response
+    return response, i
 
 
 def main():
@@ -44,20 +49,27 @@ def main():
     num_workers = int(num_workers)
 
     start = time.time()
-    preds = []
+    preds = [None for i in range(num_samples)]
     ds = [s for s in dataset]  # pre-download
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        # Start the load operations and mark each future with its URL
-        futures = [executor.submit(get_prediction, fpath, model) for (fpath, img) in ds]
+        # Start the load operations and mark each future with its index
+        futures = [
+            executor.submit(get_prediction, fpath, model, i)
+            for i, (fpath, img) in enumerate(ds)
+        ]
+
         for fut in as_completed(futures):
-            response = fut.result()
-            preds.append(response.json()[0])
+            response, i = fut.result()
+            preds[i] = response.json()[0]
     score = dataset.eval(preds)
     end = time.time()
     throughput = num_samples / (end - start)
     # latency
     fpath, img = dataset[0]
-    latency = get_prediction(fpath, model).elapsed.total_seconds() * 1000
+    latency, _ = get_prediction(fpath, model, 0)
+    latency = latency.elapsed.total_seconds() * 1000
+
+    unload_model(model)
 
     print("Results")
     print(f"Throughput: {throughput} FPS")
