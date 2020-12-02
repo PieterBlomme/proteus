@@ -1,20 +1,19 @@
 import importlib
 import logging
-import pkgutil
 import os
-
-import proteus.models
-from fastapi import APIRouter
-from fastapi import APIRouter, FastAPI, File, HTTPException, Depends
-from PIL import Image
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
-import tritonclient.http as httpclient
+import pkgutil
 from io import BytesIO
 
+import proteus.models
+import tritonclient.http as httpclient
+from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
+from PIL import Image
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 def get_model_dict():
     # discover models
@@ -32,6 +31,7 @@ def get_model_dict():
     logger.info(model_dict)
     return model_dict
 
+
 def get_triton_client():
     # set up Triton connection
     TRITONURL = "triton:8000"
@@ -48,11 +48,13 @@ def get_triton_client():
         logger.error("client creation failed: " + str(e))
     return triton_client
 
+
 triton_client = get_triton_client()
+
 
 @router.post(f"/load")
 async def load_model():
-    name = '{{name}}'
+    name = "{{name}}"
     model_dict = get_model_dict()
     model = model_dict[name]
     try:
@@ -60,7 +62,7 @@ async def load_model():
         model.load_model(triton_client)
 
         if not triton_client.is_model_ready(name):
-            return {    
+            return {
                 "success": False,
                 "message": f"model {{name}} not ready - check logs",
             }
@@ -70,9 +72,10 @@ async def load_model():
         logger.info(e)
         return {"success": False, "message": f"unknown model {{name}}"}
 
+
 @router.post(f"/unload")
 async def unload_model():
-    name = '{{name}}'
+    name = "{{name}}"
     if not triton_client.is_model_ready(name):
         logger.info(f"No model with name {{name}} loaded")
         return {"success": False, "message": "model not loaded"}
@@ -81,9 +84,10 @@ async def unload_model():
         triton_client.unload_model(name)
         return {"success": True, "message": f"model {{name}} unloaded"}
 
+
 @router.post(f"/predict")
 async def predict(file: bytes = File(...)):
-    name = '{{name}}'
+    name = "{{name}}"
     model_dict = get_model_dict()
     model = model_dict[name]
 

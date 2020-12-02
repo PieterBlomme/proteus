@@ -1,13 +1,13 @@
+import copy
 import logging
 import os
-import copy
 from io import BytesIO
 
-from fastapi import APIRouter, FastAPI, File, HTTPException, Depends
+from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
 from PIL import Image
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
-from .helper import get_model_dict, generate_endpoints, get_triton_client
+from .helper import generate_endpoints, get_model_dict, get_triton_client
 
 app = FastAPI()
 
@@ -50,8 +50,11 @@ async def get_model_repository():
 for name, model in model_dict.items():
     generate_endpoints(name)
     import importlib.util
+
     currdir = os.path.dirname(os.path.abspath(__file__))
-    spec = importlib.util.spec_from_file_location(f'routers.{name}', f'{currdir}/routers/{name}.py')
+    spec = importlib.util.spec_from_file_location(
+        f"routers.{name}", f"{currdir}/routers/{name}.py"
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     router = module.router
