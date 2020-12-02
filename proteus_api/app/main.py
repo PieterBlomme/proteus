@@ -1,6 +1,6 @@
-import copy
 import logging
 import os
+import importlib.util
 
 from fastapi import FastAPI
 
@@ -46,8 +46,6 @@ async def get_model_repository():
 # build model-specific routers
 for name, model in model_dict.items():
     generate_endpoints(name)
-    import importlib.util
-
     currdir = os.path.dirname(os.path.abspath(__file__))
     spec = importlib.util.spec_from_file_location(
         f"routers.{name}", f"{currdir}/routers/{name}.py"
