@@ -28,9 +28,7 @@ def get_model_dict():
     for finder, name, ispkg in iter_namespace(proteus.models):
         module = importlib.import_module(name)
         model_dict.update(module.model_dict)
-    logger.info(model_dict)
     return model_dict
-
 
 def get_triton_client():
     # set up Triton connection
@@ -50,12 +48,11 @@ def get_triton_client():
 
 
 triton_client = get_triton_client()
-
+model_dict = get_model_dict()
 
 @router.post(f"/load")
 async def load_model():
     name = "{{name}}"
-    model_dict = get_model_dict()
     model = model_dict[name]
     try:
         logger.info(f"Loading model {{name}}")
@@ -88,7 +85,6 @@ async def unload_model():
 @router.post(f"/predict")
 async def predict(file: bytes = File(...)):
     name = "{{name}}"
-    model_dict = get_model_dict()
     model = model_dict[name]
 
     if not triton_client.is_model_ready(name):
