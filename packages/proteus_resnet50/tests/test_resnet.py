@@ -1,4 +1,3 @@
-import json
 import tempfile
 
 import pytest
@@ -34,11 +33,11 @@ def test_health():
 def model():
     test_health()
     model = "Resnet50V2"
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/load")
     assert response.json()["success"]
 
     yield model
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/unload")
     assert response.json()["success"]
 
 
@@ -68,7 +67,7 @@ def test_bmp(model):
     assert response.status_code == requests.codes.ok
 
 
-@pytest.mark.long_running
+@pytest.mark.slow
 def test_score(dataset, model):
     preds = []
     for fpath, target in dataset:
@@ -77,7 +76,7 @@ def test_score(dataset, model):
 
     score = dataset.eval(preds)
     print(f"Accuracy: {score}")
-    assert score >= 0.7
+    assert score >= 0.67
 
 
 def test_resize(dataset, model):

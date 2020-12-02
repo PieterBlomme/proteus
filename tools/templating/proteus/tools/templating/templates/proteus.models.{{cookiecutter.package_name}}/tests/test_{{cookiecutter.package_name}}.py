@@ -23,11 +23,11 @@ def get_prediction(fpath, model):
 @pytest.fixture
 def model():
     model = "{{cookiecutter.model_name}}"
-    response = requests.post("http://localhost/load", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/load")
     assert response.json()["success"]
 
     yield model
-    response = requests.post("http://localhost/unload", json.dumps({"name": model}))
+    response = requests.post(f"http://localhost/{model}/unload")
     assert response.json()["success"]
 
 
@@ -62,7 +62,7 @@ def test_bmp(model):
     assert response.status_code == requests.codes.ok
 
 
-@pytest.mark.long_running
+@pytest.mark.slow
 def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:

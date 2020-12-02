@@ -49,6 +49,7 @@ class CocoValBBox(Dataset):
 
     def _prepare_preds(self, preds_in):
         preds_out = []
+
         for index, pred in enumerate(preds_in):
             img_id = self.imgs[index]["id"]
             for box in pred:
