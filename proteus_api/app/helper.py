@@ -53,7 +53,7 @@ def get_model_dict():
 
 
 def generate_endpoints(model):
-    targetfile = f"{currdir}/routers/{model}.py"
+    targetfile = Path(f"{currdir}/routers/{model}.py")
     if not targetfile.is_file():
         # file does not exist yet
         with open(targetfile, "w") as fh:
