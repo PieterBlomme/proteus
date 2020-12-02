@@ -1,6 +1,68 @@
 import numpy as np
 import torch
+import cv2
+import torch
+from torchvision import transforms
 
+def image_resize(image, target_size):
+
+    ih, iw = target_size
+    h, w, _ = image.shape
+
+    scale = min(iw / w, ih / h)
+    nw, nh = int(scale * w), int(scale * h)
+    image_resized = cv2.resize(image, (nw, nh))
+
+    image_padded = np.full(shape=[ih, iw, 3], fill_value=128.0)
+    dw, dh = (iw - nw) // 2, (ih - nh) // 2
+    image_padded[dh : nh + dh, dw : nw + dw, :] = image_resized
+    image_padded = image_padded / 255.0
+    return image_padded
+
+def image_preprocess(input_image):
+    preprocess = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            ),
+        ]
+    )
+    input_tensor = preprocess(input_image)
+    # Create a mini-batch as expected by the model.
+    return input_tensor.numpy()
+
+def detection_postprocess(original_image_size, cls_heads, box_heads):
+    # Inference post-processing
+    anchors = {}
+    decoded = []
+
+    for cls_head, box_head in zip(cls_heads, box_heads):
+        # Generate level's anchors
+        stride = original_image_size[-1] // cls_head.shape[-1]
+        if stride not in anchors:
+            anchors[stride] = generate_anchors(
+                stride,
+                ratio_vals=[1.0, 2.0, 0.5],
+                scales_vals=[4 * 2 ** (i / 3) for i in range(3)],
+            )
+        # Decode and filter boxes
+        decoded.append(
+            decode(
+                cls_head,
+                box_head,
+                stride,
+                threshold=0.05,
+                top_n=1000,
+                anchors=anchors[stride],
+            )
+        )
+
+    # Perform non-maximum suppression
+    decoded = [torch.cat(tensors, 1) for tensors in zip(*decoded)]
+    # NMS threshold = 0.5
+    scores, boxes, labels = nms(*decoded, nms=0.5, ndetections=100)
+    return scores, boxes, labels
 
 def generate_anchors(stride, ratio_vals, scales_vals, angles_vals=None):
     "Generate anchors coordinates from scales/ratios"
