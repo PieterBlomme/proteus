@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 from scipy import special
 
@@ -17,6 +18,22 @@ def read_class_names(class_file_name):
         for ID, name in enumerate(data):
             names[ID] = name.strip("\n")
     return names
+
+
+def image_preprocess(image, target_size):
+
+    ih, iw = target_size
+    h, w, _ = image.shape
+
+    scale = min(iw / w, ih / h)
+    nw, nh = int(scale * w), int(scale * h)
+    image_resized = cv2.resize(image, (nw, nh))
+
+    image_padded = np.full(shape=[ih, iw, 3], fill_value=128.0)
+    dw, dh = (iw - nw) // 2, (ih - nh) // 2
+    image_padded[dh : nh + dh, dw : nw + dw, :] = image_resized
+    image_padded = image_padded / 255.0
+    return image_padded
 
 
 def postprocess_bbbox(pred_bbox, ANCHORS, STRIDES, XYSCALE=[1, 1, 1]):
