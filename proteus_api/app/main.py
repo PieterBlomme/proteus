@@ -1,11 +1,8 @@
 import copy
 import logging
 import os
-from io import BytesIO
 
-from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
-from PIL import Image
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from fastapi import FastAPI
 
 from .helper import generate_endpoints, get_model_dict, get_triton_client
 
