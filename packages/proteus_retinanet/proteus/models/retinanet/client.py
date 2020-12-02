@@ -8,7 +8,14 @@ from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
-from .helpers import decode, generate_anchors, nms, read_class_names, image_resize, detection_postprocess
+from .helpers import (
+    decode,
+    detection_postprocess,
+    generate_anchors,
+    image_resize,
+    nms,
+    read_class_names,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +75,6 @@ class RetinaNet(BaseModel):
         img = img.astype(npdtype)
 
         return img
-
-
 
     @classmethod
     def postprocess(cls, results, original_image_size, batch_size, batching):

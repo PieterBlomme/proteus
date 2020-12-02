@@ -1,8 +1,8 @@
+import cv2
 import numpy as np
 import torch
-import cv2
-import torch
 from torchvision import transforms
+
 
 def image_resize(image, target_size):
 
@@ -19,18 +19,18 @@ def image_resize(image, target_size):
     image_padded = image_padded / 255.0
     return image_padded
 
+
 def image_preprocess(input_image):
     preprocess = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-            ),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
     input_tensor = preprocess(input_image)
     # Create a mini-batch as expected by the model.
     return input_tensor.numpy()
+
 
 def detection_postprocess(original_image_size, cls_heads, box_heads):
     # Inference post-processing
@@ -63,6 +63,7 @@ def detection_postprocess(original_image_size, cls_heads, box_heads):
     # NMS threshold = 0.5
     scores, boxes, labels = nms(*decoded, nms=0.5, ndetections=100)
     return scores, boxes, labels
+
 
 def generate_anchors(stride, ratio_vals, scales_vals, angles_vals=None):
     "Generate anchors coordinates from scales/ratios"
