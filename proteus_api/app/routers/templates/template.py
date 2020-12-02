@@ -1,6 +1,5 @@
 import importlib
 import logging
-import os
 import pkgutil
 from io import BytesIO
 

@@ -1,6 +1,6 @@
+import importlib.util
 import logging
 import os
-import importlib.util
 
 from fastapi import FastAPI
 
