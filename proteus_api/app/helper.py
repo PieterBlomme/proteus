@@ -1,9 +1,18 @@
 import importlib
 import logging
+import os
 import pkgutil
 
 import proteus.models
 import tritonclient.http as httpclient
+from jinja2 import Environment, FileSystemLoader
+
+currdir = os.path.dirname(os.path.abspath(__file__))
+
+env = Environment(
+    loader=FileSystemLoader([f"{currdir}/routers/templates"]),
+)
+template = env.get_template("template.py")
 
 logger = logging.getLogger(__name__)
 
@@ -40,3 +49,9 @@ def get_model_dict():
         model_dict.update(module.model_dict)
     logger.info(model_dict)
     return model_dict
+
+
+def generate_endpoints(model):
+    targetfile = f"{currdir}/routers/{model}.py"
+    with open(targetfile, "w") as fh:
+        fh.write(template.render(name=model))
