@@ -30,6 +30,7 @@ def get_model_dict():
         model_dict.update(module.model_dict)
     return model_dict
 
+
 def get_triton_client():
     # set up Triton connection
     TRITONURL = "triton:8000"
@@ -49,6 +50,7 @@ def get_triton_client():
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
+
 
 @router.post(f"/load")
 async def load_model():
