@@ -1,12 +1,20 @@
 import importlib
 import logging
 import pkgutil
+import os
 
 import proteus.models
+from jinja2 import Environment, FileSystemLoader
 import tritonclient.http as httpclient
 
-logger = logging.getLogger(__name__)
+currdir = os.path.dirname(os.path.abspath(__file__))
 
+env = Environment(
+    loader=FileSystemLoader([f'{currdir}/routers/templates']),
+)
+template = env.get_template('template.py')
+
+logger = logging.getLogger(__name__)
 
 def get_triton_client():
     # set up Triton connection
@@ -24,7 +32,6 @@ def get_triton_client():
         logger.error("client creation failed: " + str(e))
     return triton_client
 
-
 def get_model_dict():
     # discover models
     def iter_namespace(ns_pkg):
@@ -40,3 +47,8 @@ def get_model_dict():
         model_dict.update(module.model_dict)
     logger.info(model_dict)
     return model_dict
+
+def generate_endpoints(model):
+    targetfile = f'{currdir}/routers/{model}.py'
+    with open(targetfile, "w") as fh:
+        fh.write(template.render(name=model))
