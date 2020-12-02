@@ -14,6 +14,7 @@ from .helpers import (
     postprocess_bbbox,
     postprocess_boxes,
     read_class_names,
+    image_preprocess,
 )
 
 folder_path = Path(__file__).parent
@@ -40,22 +41,6 @@ class YoloV4(BaseModel):
     SHAPE = (416, 416, 3)
 
     @classmethod
-    def _image_preprocess(cls, image, target_size):
-
-        ih, iw = target_size
-        h, w, _ = image.shape
-
-        scale = min(iw / w, ih / h)
-        nw, nh = int(scale * w), int(scale * h)
-        image_resized = cv2.resize(image, (nw, nh))
-
-        image_padded = np.full(shape=[ih, iw, 3], fill_value=128.0)
-        dw, dh = (iw - nw) // 2, (ih - nh) // 2
-        image_padded[dh : nh + dh, dw : nw + dw, :] = image_resized
-        image_padded = image_padded / 255.0
-        return image_padded
-
-    @classmethod
     def preprocess(cls, img):
         """
         Pre-process an image to meet the size, type and format
@@ -75,7 +60,7 @@ class YoloV4(BaseModel):
         open_cv_image = np.array(sample_img)
         open_cv_image = open_cv_image[:, :, ::-1].copy()
 
-        image = cls._image_preprocess(open_cv_image, (cls.SHAPE[0], cls.SHAPE[1]))
+        image = image_preprocess(open_cv_image, (cls.SHAPE[0], cls.SHAPE[1]))
 
         npdtype = triton_to_np_dtype(cls.DTYPE)
         image = image.astype(npdtype)
