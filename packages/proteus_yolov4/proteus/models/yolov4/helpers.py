@@ -1,5 +1,5 @@
-import numpy as np
 import cv2
+import numpy as np
 from scipy import special
 
 
@@ -34,6 +34,7 @@ def image_preprocess(image, target_size):
     image_padded[dh : nh + dh, dw : nw + dw, :] = image_resized
     image_padded = image_padded / 255.0
     return image_padded
+
 
 def postprocess_bbbox(pred_bbox, ANCHORS, STRIDES, XYSCALE=[1, 1, 1]):
     """define anchor boxes"""

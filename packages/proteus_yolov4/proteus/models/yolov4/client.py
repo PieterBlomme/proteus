@@ -10,11 +10,11 @@ from tritonclient.utils import triton_to_np_dtype
 # isort: skip
 from .helpers import (
     get_anchors,
+    image_preprocess,
     nms,
     postprocess_bbbox,
     postprocess_boxes,
     read_class_names,
-    image_preprocess,
 )
 
 folder_path = Path(__file__).parent
