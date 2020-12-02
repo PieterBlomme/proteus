@@ -6,6 +6,7 @@ import pkgutil
 import proteus.models
 import tritonclient.http as httpclient
 from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
 
 currdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -53,5 +54,7 @@ def get_model_dict():
 
 def generate_endpoints(model):
     targetfile = f"{currdir}/routers/{model}.py"
-    with open(targetfile, "w") as fh:
-        fh.write(template.render(name=model))
+    if not targetfile.is_file():
+        # file does not exist yet
+        with open(targetfile, "w") as fh:
+            fh.write(template.render(name=model))
