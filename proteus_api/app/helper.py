@@ -2,11 +2,11 @@ import importlib
 import logging
 import os
 import pkgutil
+from pathlib import Path
 
 import proteus.models
 import tritonclient.http as httpclient
 from jinja2 import Environment, FileSystemLoader
-from pathlib import Path
 
 currdir = os.path.dirname(os.path.abspath(__file__))
 
