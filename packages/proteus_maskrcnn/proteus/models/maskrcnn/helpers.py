@@ -1,9 +1,11 @@
-import numpy as np
-import math
 import logging
+import math
+
 import cv2
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
 
 def read_class_names(class_file_name):
     """loads class name from a file"""
@@ -12,6 +14,7 @@ def read_class_names(class_file_name):
         for ID, name in enumerate(data):
             names[ID] = name.strip("\n")
     return names
+
 
 def image_preprocess(image):
     # Resize
@@ -40,6 +43,7 @@ def image_preprocess(image):
     image = padded_image
 
     return image
+
 
 def detection_postprocess(
     original_image_size, boxes, labels, scores, masks, score_threshold=0.7

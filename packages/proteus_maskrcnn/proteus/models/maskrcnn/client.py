@@ -9,7 +9,7 @@ from proteus.models.base import BaseModel
 from proteus.types import BoundingBox, Segmentation
 from tritonclient.utils import triton_to_np_dtype
 
-from .helpers import read_class_names, image_preprocess, detection_postprocess
+from .helpers import detection_postprocess, image_preprocess, read_class_names
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,6 @@ class MaskRCNN(BaseModel):
         img = img.astype(npdtype)
 
         return img
-
-
 
     @classmethod
     def postprocess(cls, results, original_image_size, batch_size, batching):
