@@ -12,8 +12,8 @@ from .helpers import (
     decode,
     detection_postprocess,
     generate_anchors,
-    image_resize,
     image_preprocess,
+    image_resize,
     nms,
     read_class_names,
 )
