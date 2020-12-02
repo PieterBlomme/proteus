@@ -52,9 +52,7 @@ class CocoValBBox(Dataset):
 
         for index, pred in enumerate(preds_in):
             img_id = self.imgs[index]["id"]
-            for ann in pred:
-                segm = ann["segmentation"]
-                box = ann["bounding_box"]
+            for box in pred:
                 try:
                     result = {
                         "image_id": img_id,
