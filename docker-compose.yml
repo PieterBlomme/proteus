@@ -24,6 +24,7 @@ services:
       - ./packages:/packages
     environment:
       - DEBUG=0
+      - MAX_ACTIVE_MODELS=3
 
 volumes:
   model-repository: 
