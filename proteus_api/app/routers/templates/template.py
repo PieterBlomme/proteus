@@ -99,8 +99,8 @@ async def unload_model():
 
 @router.post(f"/predict")
 async def predict(file: bytes = File(...)):
-    #log prediction call to file
-    logging.getLogger('predictions').info('{{name}}')
+    # log prediction call to file
+    logging.getLogger("predictions").info("{{name}}")
 
     name = "{{name}}"
     model = model_dict[name]

@@ -2,9 +2,10 @@ import importlib.util
 import logging
 import os
 
-LOGLEVEL = os.environ.get('LOGLEVEL', 'DEBUG')
-logging.config.fileConfig("/app/logging.conf", disable_existing_loggers=False,
-    defaults={'level': LOGLEVEL})
+LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG")
+logging.config.fileConfig(
+    "/app/logging.conf", disable_existing_loggers=False, defaults={"level": LOGLEVEL}
+)
 
 from fastapi import FastAPI
 
