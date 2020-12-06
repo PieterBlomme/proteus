@@ -1,7 +1,10 @@
 import importlib.util
 import logging
 import os
-logging.config.fileConfig('/app/logging.conf', disable_existing_loggers=False)
+
+LOGLEVEL = os.environ.get('LOGLEVEL', 'DEBUG')
+logging.config.fileConfig("/app/logging.conf", disable_existing_loggers=False,
+    defaults={'level': LOGLEVEL})
 
 from fastapi import FastAPI
 
@@ -9,19 +12,11 @@ from .helper import generate_endpoints, get_model_dict, get_triton_client
 
 app = FastAPI()
 
-# global logging level
-logging.basicConfig(level=logging.INFO)
-loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-for logger in loggers:
-    if os.environ.get("DEBUG") == "1":
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.ERROR)
-
 logger = logging.getLogger(__name__)
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
+
 
 @app.get("/health")
 async def get_server_health():
