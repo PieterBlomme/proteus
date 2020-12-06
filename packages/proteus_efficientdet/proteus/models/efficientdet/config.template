@@ -15,6 +15,4 @@ output [
     dims: [1, -1, 7]
   }
 ]
-optimization { execution_accelerators {
-  gpu_execution_accelerator : [ { name : "tensorrt" } ]
-}}
+{{triton_optimization}}

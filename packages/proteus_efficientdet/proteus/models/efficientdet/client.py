@@ -24,7 +24,7 @@ class EfficientDetD0(BaseModel):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d0.onnx"
-    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "image_arrays:0"
     OUTPUT_NAMES = ["detections:0"]
     DTYPE = "UINT8"
