@@ -2,7 +2,6 @@ import importlib.util
 import logging
 import os
 
-
 from fastapi import FastAPI
 from fastapi_utils.timing import add_timing_middleware
 
