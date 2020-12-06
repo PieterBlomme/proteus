@@ -4,8 +4,13 @@ import os
 
 from fastapi import FastAPI
 from fastapi_utils.timing import add_timing_middleware
+from fastapi_utils.tasks import repeat_every
 
-from .helper import generate_endpoints, get_model_dict, get_triton_client
+from .helper import generate_endpoints, get_model_dict, get_triton_client, check_last_active
+
+# Env vars
+LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG")
+MODEL_INACTIVITY = int(os.environ.get("MODEL_INACTIVITY", "10"))
 
 # Setup logging
 LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG")
@@ -20,6 +25,22 @@ add_timing_middleware(app, record=logger.info)
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
+
+@app.on_event("startup")
+@repeat_every(seconds=10)
+async def remove_expired_models():
+    logger.warning('Triggered remove expired')
+    # Get loaded models
+    loaded_models = [
+        m.get("name")
+        for m in triton_client.get_model_repository_index()
+        if m.get("state", "UNAVAILABLE") == "READY"
+    ]
+    for model in loaded_models:
+        last_active = check_last_active(model)
+        if last_active > MODEL_INACTIVITY:
+            logger.warning(f'Model was last active {last_active} minutes ago.  Automatic shutdown because larger than {MODEL_INACTIVITY} MODEL_INACTIVITY')
+            triton_client.unload_model(model)
 
 
 @app.get("/health")

@@ -1,4 +1,5 @@
 import importlib
+import datetime
 import logging
 import os
 import pkgutil
@@ -7,6 +8,7 @@ from pathlib import Path
 import proteus.models
 import tritonclient.http as httpclient
 from jinja2 import Environment, FileSystemLoader
+from file_read_backwards import FileReadBackwards
 
 currdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -58,3 +60,15 @@ def generate_endpoints(model):
         # file does not exist yet
         with open(targetfile, "w") as fh:
             fh.write(template.render(name=model))
+
+def check_last_active(model):
+    with FileReadBackwards("/logs/predictions.log") as frb:
+
+        # getting lines by lines starting from the last line up
+        for l in frb:
+            ts, name = l.split('|')[0], l.split('|')[1]
+            if model == name:
+                last_call = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S,%f')
+                elapsed = datetime.datetime.now() - last_call
+                return elapsed.total_seconds() / 60
+    return 60 *60 *24 # some very large number, eg. 1 day
