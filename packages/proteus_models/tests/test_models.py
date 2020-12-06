@@ -79,9 +79,9 @@ def test_inactivity_with_request():
                 assert response.status_code == requests.codes.ok
 
         # Model should be expire after a while
-        time.sleep(MODEL_INACTIVITY * 60 + 60)
+        time.sleep(MODEL_INACTIVITY * 60 + 30)
         response = requests.get(f"http://localhost/models/status")
-        model_status = [m for m in response.json() if m.get("name") == model]
+        model_status = [m for m in response.json() if m.get("name") == model][0]
         assert model_status.get("state", "UNAVAILABLE") != "READY"
 
         # cleanup
