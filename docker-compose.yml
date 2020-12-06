@@ -21,10 +21,13 @@ services:
       - triton
     volumes:
       - model-repository:/models
+      - logs:/logs
       - ./packages:/packages
     environment:
-      - DEBUG=0
+      - LOGLEVEL=INFO
       - MAX_ACTIVE_MODELS=3
+      - MODEL_INACTIVITY=1
 
 volumes:
   model-repository: 
+  logs:

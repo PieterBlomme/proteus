@@ -66,6 +66,8 @@ async def load_model():
             status_code=403,
             detail=f"Max active models ({max_active_models}) reached.  A model needs to be unloaded before adding another.",
         )
+    # log prediction call to file
+    logging.getLogger("predictions").info("{{name}}|LOAD")
 
     name = "{{name}}"
     model = model_dict[name]
@@ -87,6 +89,8 @@ async def load_model():
 
 @router.post(f"/unload")
 async def unload_model():
+    # log prediction call to file
+    logging.getLogger("predictions").info("{{name}}|UNLOAD")
     name = "{{name}}"
     if not triton_client.is_model_ready(name):
         logger.info(f"No model with name {{name}} loaded")
@@ -99,6 +103,9 @@ async def unload_model():
 
 @router.post(f"/predict")
 async def predict(file: bytes = File(...)):
+    # log prediction call to file
+    logging.getLogger("predictions").info("{{name}}|PREDICT")
+
     name = "{{name}}"
     model = model_dict[name]
 
