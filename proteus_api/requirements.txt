@@ -1,6 +1,7 @@
 click==7.1.1
 fastapi==0.55.1
 fastapi-utils==0.2.1
+file-read-backwards==2.0.0
 gevent==20.9.0
 geventhttpclient==1.4.4
 greenlet==0.4.17
