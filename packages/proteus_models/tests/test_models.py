@@ -1,5 +1,6 @@
-import time
 import tempfile
+import time
+
 import pytest
 import requests
 from PIL import Image
