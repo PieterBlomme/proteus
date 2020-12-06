@@ -9,11 +9,9 @@ input [
 ]
 output [
   {
-    name: "resnetv24_dense0_fwd"
+    name: "mobilenetv20_output_flatten0_reshape0"
     data_type: TYPE_FP32
     dims: [1, 1000]
   }
 ]
-optimization { execution_accelerators {
-  gpu_execution_accelerator : [ { name : "tensorrt" } ]
-}}
+{{triton_optimization}}

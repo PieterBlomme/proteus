@@ -96,9 +96,7 @@ class BaseModel:
             triton_optimization = ""
 
         with open(targetfile, "w") as fh:
-            rendered_template = template.render(
-                triton_optimization=triton_optimization
-            )
+            rendered_template = template.render(triton_optimization=triton_optimization)
             logger.error(rendered_template)
             fh.write(rendered_template)
 

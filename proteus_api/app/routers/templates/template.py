@@ -50,10 +50,11 @@ def get_triton_client():
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
+config_class = model_dict["{{name}}"].MODEL_CONFIG
 
 
 @router.post(f"/load")
-async def load_model():
+async def load_model(model_config: config_class):
     # Check if there's room for more models
     max_active_models = int(os.environ.get("MAX_ACTIVE_MODELS", "1"))
     loaded_models = [
@@ -73,7 +74,7 @@ async def load_model():
     model = model_dict[name]
     try:
         logger.info(f"Loading model {{name}}")
-        model.load_model(triton_client)
+        model.load_model(model_config, triton_client)
 
         if not triton_client.is_model_ready(name):
             return {
