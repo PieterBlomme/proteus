@@ -1,6 +1,7 @@
 import importlib.util
 import logging
 import os
+logging.config.fileConfig('/app/logging.conf', disable_existing_loggers=False)
 
 from fastapi import FastAPI
 
@@ -21,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
-
 
 @app.get("/health")
 async def get_server_health():
