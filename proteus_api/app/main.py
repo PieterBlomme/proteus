@@ -2,18 +2,22 @@ import importlib.util
 import logging
 import os
 
+
+from fastapi import FastAPI
+from fastapi_utils.timing import add_timing_middleware
+
+from .helper import generate_endpoints, get_model_dict, get_triton_client
+
+# Setup logging
 LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG")
 logging.config.fileConfig(
     "/app/logging.conf", disable_existing_loggers=False, defaults={"level": LOGLEVEL}
 )
-
-from fastapi import FastAPI
-
-from .helper import generate_endpoints, get_model_dict, get_triton_client
-
-app = FastAPI()
-
 logger = logging.getLogger(__name__)
+
+# Setup FastAPI
+app = FastAPI()
+add_timing_middleware(app, record=logger.info)
 
 triton_client = get_triton_client()
 model_dict = get_model_dict()
