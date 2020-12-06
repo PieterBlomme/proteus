@@ -1,5 +1,6 @@
 import importlib
 import logging
+import os
 import pkgutil
 from io import BytesIO
 
@@ -53,6 +54,19 @@ model_dict = get_model_dict()
 
 @router.post(f"/load")
 async def load_model():
+    # Check if there's room for more models
+    max_active_models = int(os.environ.get("MAX_ACTIVE_MODELS", "1"))
+    loaded_models = [
+        m.get("name")
+        for m in triton_client.get_model_repository_index()
+        if m.get("state", "UNAVAILABLE") == "READY"
+    ]
+    if len(loaded_models) >= max_active_models:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Max active models ({max_active_models}) reached.  A model needs to be unloaded before adding another.",
+        )
+
     name = "{{name}}"
     model = model_dict[name]
     try:
