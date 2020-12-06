@@ -1,6 +1,3 @@
-import tempfile
-
-
 import pytest
 import requests
 
