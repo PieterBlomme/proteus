@@ -36,9 +36,9 @@ def model():
     response = requests.post(f"http://localhost/{model}/load")
     payload = {"triton_optimization": True}
     response = requests.post(
-            f"http://localhost/{model}/load",
-            json=payload,
-        )
+        f"http://localhost/{model}/load",
+        json=payload,
+    )
     assert response.json()["success"]
 
     yield model
