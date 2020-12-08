@@ -34,12 +34,16 @@ def model():
     test_health()
     model = "MobileNetV2"
     response = requests.post(f"http://localhost/{model}/load")
+    payload = {"triton_optimization": True}
+    response = requests.post(
+            f"http://localhost/{model}/load",
+            json=payload,
+        )
     assert response.json()["success"]
 
     yield model
     response = requests.post(f"http://localhost/{model}/unload")
     assert response.json()["success"]
-
 
 @pytest.fixture
 def dataset():

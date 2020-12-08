@@ -34,6 +34,11 @@ def model():
     test_health()
     model = "Resnet50V2"
     response = requests.post(f"http://localhost/{model}/load")
+    payload = {"triton_optimization": True}
+    response = requests.post(
+            f"http://localhost/{model}/load",
+            json=payload,
+        )
     assert response.json()["success"]
 
     yield model
