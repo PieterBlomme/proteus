@@ -7,8 +7,11 @@ import requests
 mod = importlib.import_module("proteus.datasets")
 
 
-def load_model(model):
-    response = requests.post(f"http://localhost/{model}/load")
+def load_model(model, model_config):
+    response = requests.post(
+        f"http://localhost/{model}/load",
+        json=model_config,
+    )
     assert response.json()["success"]
 
 
@@ -37,7 +40,14 @@ def get_prediction(fpath, model, i):
 def main():
     print("Welcome to the benchmark tool")
     model = input("Model? ")
-    load_model(model)
+    
+    model_config = {}
+    triton_optimization = input("Triton optimization? (y/n)")
+    if triton_optimization == 'y':
+        model_config['triton_optimization'] = True
+    else:
+        model_config['triton_optimization'] = False
+    load_model(model, model_config)
 
     dataset = input("Dataset? ")
     num_samples = input("Number of samples? ")
