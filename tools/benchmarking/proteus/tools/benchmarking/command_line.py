@@ -40,13 +40,13 @@ def get_prediction(fpath, model, i):
 def main():
     print("Welcome to the benchmark tool")
     model = input("Model? ")
-    
+
     model_config = {}
     triton_optimization = input("Triton optimization? (y/n)")
-    if triton_optimization == 'y':
-        model_config['triton_optimization'] = True
+    if triton_optimization == "y":
+        model_config["triton_optimization"] = True
     else:
-        model_config['triton_optimization'] = False
+        model_config["triton_optimization"] = False
     load_model(model, model_config)
 
     dataset = input("Dataset? ")
