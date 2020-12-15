@@ -50,7 +50,7 @@ def get_model_dict():
     for finder, name, ispkg in iter_namespace(proteus.models):
         module = importlib.import_module(name)
         model_dict.update(module.model_dict)
-    logger.info(model_dict)
+    logger.debug(model_dict)
     return model_dict
 
 
