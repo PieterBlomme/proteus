@@ -5,6 +5,7 @@ import os
 from fastapi import FastAPI
 from fastapi_utils.tasks import repeat_every
 from fastapi_utils.timing import add_timing_middleware
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY, HTTP_503_SERVICE_UNAVAILABLE, HTTP_500_INTERNAL_SERVER_ERROR 
 
 from .helper import (
     check_last_active,
@@ -56,8 +57,7 @@ async def get_server_health():
         logger.info("Server is alive")
         return {"success": True}
     else:
-        logger.info(f"Server is dead")
-        return {"success": False}
+        raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE , detail="Triton server not available")
 
 
 @app.get("/models")
@@ -67,8 +67,10 @@ async def get_models():
 
 @app.get("/models/status")
 async def get_model_repository():
-    return triton_client.get_model_repository_index()
-
+    try:
+        return triton_client.get_model_repository_index()
+    except:
+        raise HTTPException(status_code=HTTP_503_SERVICE_UNAVAILABLE , detail="Triton server not available")
 
 # build model-specific routers
 for name, model in model_dict.items():
