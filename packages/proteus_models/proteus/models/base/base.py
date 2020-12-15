@@ -1,13 +1,18 @@
 import logging
 import os
-from shutil import copyfile
 
 import numpy as np
+import pydantic
 import requests
 import tritonclient.http as httpclient
+from jinja2 import Template
 from tritonclient.utils import InferenceServerException
 
 logger = logging.getLogger(__name__)
+
+
+class ModelConfig(pydantic.BaseModel):
+    triton_optimization: bool = True
 
 
 class BaseModel:
@@ -31,6 +36,8 @@ class BaseModel:
     OUTPUT_NAMES = None
     DTYPE = None
 
+    MODEL_CONFIG = ModelConfig
+
     @classmethod
     def _maybe_download(cls):
         # Download model
@@ -48,10 +55,6 @@ class BaseModel:
                 print(e)
             with open(target_path, "wb") as f:
                 f.write(r.content)
-        # Download config
-        target_path = f"/models/{cls.__name__}/config.pbtxt"
-        if cls.CONFIG_PATH and not os.path.isfile(target_path):
-            copyfile(cls.CONFIG_PATH, target_path)
 
     @classmethod
     def _request_generator(cls, batched_image_data):
@@ -68,13 +71,35 @@ class BaseModel:
         yield inputs, outputs
 
     @classmethod
-    def load_model(cls, triton_client):
+    def load_model(cls, model_config, triton_client):
         """
         Download (if needed) model files and load model in Triton
 
         :param triton_client : the client to use
         """
+        logger.warning(model_config)
+        logger.warning(type(model_config))
         cls._maybe_download()
+
+        # Generate config
+        targetfile = f"/models/{cls.__name__}/config.pbtxt"
+        with open(cls.CONFIG_PATH) as f:
+            template = Template(f.read())
+
+        if model_config.triton_optimization:
+            triton_optimization = (
+                "optimization { execution_accelerators {\n"
+                '  gpu_execution_accelerator : [ { name : "tensorrt" } ]\n'
+                "}}"
+            )
+        else:
+            triton_optimization = ""
+
+        with open(targetfile, "w") as fh:
+            rendered_template = template.render(triton_optimization=triton_optimization)
+            logger.error(rendered_template)
+            fh.write(rendered_template)
+
         triton_client.load_model(cls.__name__)
 
     @classmethod

@@ -13,7 +13,7 @@ class {{cookiecutter.model_name}}(BaseModel):
         "Description for model goes here"
     )
     MODEL_URL = None
-    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = None
     OUTPUT_NAMES = None
     DTYPE = None

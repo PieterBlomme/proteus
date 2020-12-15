@@ -24,7 +24,7 @@ class EfficientDetD0(BaseModel):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d0.onnx"
-    CONFIG_PATH = f"{folder_path}/config.pbtxt"
+    CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "image_arrays:0"
     OUTPUT_NAMES = ["detections:0"]
     DTYPE = "UINT8"
@@ -102,16 +102,3 @@ class EfficientDetD2(EfficientDetD0):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d2.onnx"
-
-
-class EfficientDetD7(EfficientDetD0):
-
-    CHANNEL_FIRST = False
-    DESCRIPTION = (
-        "EfficientDets are a family of object detection models, which achieve state-of-the-art "
-        "55.1mAP on COCO test-dev, yet being 4x - 9x smaller and using 13x - 42x fewer FLOPs than previous"
-        " detectors. Our models also run 2x - 4x faster on GPU, and 5x - 11x faster on CPU than other detectors."
-        "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
-    )
-    CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d7.onnx"
