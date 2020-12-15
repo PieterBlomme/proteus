@@ -8,7 +8,11 @@ import proteus.models
 import tritonclient.http as httpclient
 from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
 from PIL import Image
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import (
+    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_503_SERVICE_UNAVAILABLE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,15 +81,17 @@ async def load_model(model_config: config_class):
         model.load_model(model_config, triton_client)
 
         if not triton_client.is_model_ready(name):
-            return {
-                "success": False,
-                "message": f"model {{name}} not ready - check logs",
-            }
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Triton could not load model",
+            )
         else:
             return {"success": True, "message": f"model {{name}} loaded"}
     except ImportError as e:
         logger.info(e)
-        return {"success": False, "message": f"unknown model {{name}}"}
+        raise HTTPException(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Unkwown model"
+        )
 
 
 @router.post(f"/unload")
@@ -95,7 +101,9 @@ async def unload_model():
     name = "{{name}}"
     if not triton_client.is_model_ready(name):
         logger.info(f"No model with name {{name}} loaded")
-        return {"success": False, "message": "model not loaded"}
+        raise HTTPException(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Model not loaded"
+        )
     else:
         logger.info(f"Unloading model {{name}}")
         triton_client.unload_model(name)
@@ -111,7 +119,9 @@ async def predict(file: bytes = File(...)):
     model = model_dict[name]
 
     if not triton_client.is_model_ready(name):
-        raise HTTPException(status_code=404, detail="model not available")
+        raise HTTPException(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE, detail="Model not available"
+        )
 
     # TODO validation of the file
     try:
