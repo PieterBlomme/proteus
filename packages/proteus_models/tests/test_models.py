@@ -14,10 +14,13 @@ def test_max_active_models():
     If max_active_models is reached, api should return a clean error message instead of 200 on model load
     """
     model_dict = requests.get(f"http://localhost/models").json()
-
     loaded_models = []
     for model, desc in model_dict.items():
-        response = requests.post(f"http://localhost/{model}/load")
+        payload = {"triton_optimization": True}
+        response = requests.post(
+            f"http://localhost/{model}/load",
+            json=payload,
+        )
         if len(loaded_models) < MAX_ACTIVE_MODELS:
             assert response.status_code == requests.codes.ok
             assert response.json()["success"]
@@ -34,7 +37,11 @@ def test_inactivity_no_requests():
     model_dict = requests.get(f"http://localhost/models").json()
 
     for model, desc in model_dict.items():
-        response = requests.post(f"http://localhost/{model}/load")
+        payload = {"triton_optimization": True}
+        response = requests.post(
+            f"http://localhost/{model}/load",
+            json=payload,
+        )
 
         # Model should be available for at least a grace period
         # Even though no predictions are done
@@ -61,7 +68,11 @@ def test_inactivity_with_request():
     model_dict = requests.get(f"http://localhost/models").json()
 
     for model, desc in model_dict.items():
-        response = requests.post(f"http://localhost/{model}/load").json()
+        payload = {"triton_optimization": True}
+        response = requests.post(
+            f"http://localhost/{model}/load",
+            json=payload,
+        )
 
         # Dummy prediction
         fpath = None
