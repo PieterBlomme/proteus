@@ -35,6 +35,11 @@ services:
       - ./prometheus:/etc/prometheus
       - prometheus-data:/prometheus
     command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+  grafana:
+    build: './grafana'
+    container_name: 'grafana'
+    ports:
+      - '3000:3000'
 
 volumes:
   model-repository: 
