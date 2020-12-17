@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__requires": [
     {
       "type": "grafana",
@@ -59,12 +49,12 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "prom1",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 10,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -146,165 +136,18 @@
       }
     },
     {
-      "cards": {
-        "cardPadding": null,
-        "cardRound": null
-      },
-      "color": {
-        "cardColor": "#b4ff00",
-        "colorScale": "sqrt",
-        "colorScheme": "interpolateReds",
-        "exponent": 0.5,
-        "mode": "spectrum"
-      },
-      "dataFormat": "timeseries",
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "heatmap": {},
-      "hideZeroBuckets": false,
-      "highlightCards": true,
-      "id": 7,
-      "legend": {
-        "show": false
-      },
-      "options": {},
-      "reverseYBuckets": false,
-      "targets": [
-        {
-          "expr": "sum(increase(nv_inference_load_ratio_bucket[1m])) by (le)",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Load Ratio  (Total Time / Compute Time)",
-      "tooltip": {
-        "show": true,
-        "showHistogram": false
-      },
-      "type": "heatmap",
-      "xAxis": {
-        "show": true
-      },
-      "xBucketNumber": null,
-      "xBucketSize": null,
-      "yAxis": {
-        "decimals": null,
-        "format": "short",
-        "logBase": 1,
-        "max": null,
-        "min": null,
-        "show": true,
-        "splitFactor": null
-      },
-      "yBucketBound": "auto",
-      "yBucketNumber": null,
-      "yBucketSize": null
-    },
-    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": "prom1",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 10,
+        "w": 24,
         "x": 0,
-        "y": 9
-      },
-      "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "dataLinks": []
-      },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(nv_inference_queue_duration_us[30s]) / 1000",
-          "legendFormat": "{{model}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Queue Time (milliseconds)",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": "Queue Time (ms)",
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 9
+        "y": 12
       },
       "id": 5,
       "legend": {
@@ -332,7 +175,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(nv_inference_compute_duration_us[30s]) / 1000",
+          "expr": "rate(nv_inference_compute_infer_duration_us[1m]) / 1000",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
