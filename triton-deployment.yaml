@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: triton
+  name: triton
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: triton
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: triton
+    spec:
+      containers:
+        - args:
+            - tritonserver
+            - --model-repository=/models
+            - --strict-model-config=False
+            - --model-control-mode=explicit
+          image: nvcr.io/nvidia/tritonserver:20.09-py3
+          name: triton
+          ports:
+            - containerPort: 8000
+            - containerPort: 8001
+            - containerPort: 8002
+          resources:
+            limits:
+              nvidia.com/gpu: 1 # requesting 1 GPU
+          volumeMounts:
+            - mountPath: /models
+              name: model-repository
+      restartPolicy: Always
+      volumes:
+        - name: model-repository
+          persistentVolumeClaim:
+            claimName: model-repository
+status: {}

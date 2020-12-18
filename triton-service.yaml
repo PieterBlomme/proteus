@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: triton
+  name: triton
+spec:
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 8000
+    - name: "8001"
+      port: 8001
+      targetPort: 8001
+    - name: "8002"
+      port: 8002
+      targetPort: 8002
+  selector:
+    io.kompose.service: triton
+status:
+  loadBalancer: {}
