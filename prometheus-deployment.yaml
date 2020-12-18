@@ -34,15 +34,10 @@ spec:
             - containerPort: 9090
           resources: {}
           volumeMounts:
-            - mountPath: /etc/prometheus
-              name: prometheus-claim0
             - mountPath: /prometheus
               name: prometheus-data
       restartPolicy: Always
       volumes:
-        - name: prometheus-claim0
-          persistentVolumeClaim:
-            claimName: prometheus-claim0
         - name: prometheus-data
           persistentVolumeClaim:
             claimName: prometheus-data

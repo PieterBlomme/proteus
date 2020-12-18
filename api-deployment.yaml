@@ -42,8 +42,6 @@ spec:
               name: model-repository
             - mountPath: /logs
               name: logs
-            - mountPath: /packages
-              name: api-claim2
       restartPolicy: Always
       volumes:
         - name: model-repository
@@ -52,7 +50,4 @@ spec:
         - name: logs
           persistentVolumeClaim:
             claimName: logs
-        - name: api-claim2
-          persistentVolumeClaim:
-            claimName: api-claim2
 status: {}
