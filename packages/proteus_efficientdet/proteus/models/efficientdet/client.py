@@ -13,9 +13,11 @@ logger = logging.getLogger(__name__)
 
 folder_path = Path(__file__).parent
 
+
 class ModelConfig(pydantic.BaseModel):
     pass
-    
+
+
 class EfficientDetD0(BaseModel):
 
     CHANNEL_FIRST = False

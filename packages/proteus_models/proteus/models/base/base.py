@@ -85,7 +85,7 @@ class BaseModel:
         with open(cls.CONFIG_PATH) as f:
             template = Template(f.read())
 
-        if getattr(model_config, 'triton_optimization', False):
+        if getattr(model_config, "triton_optimization", False):
             triton_optimization = (
                 "optimization { execution_accelerators {\n"
                 '  gpu_execution_accelerator : [ { name : "tensorrt" } ]\n'
