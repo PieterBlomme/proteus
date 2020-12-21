@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: api
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: api
+    spec:
+      containers:
+        - env:
+            - name: LOGLEVEL
+              value: INFO
+            - name: MAX_ACTIVE_MODELS
+              value: "3"
+            - name: MODEL_INACTIVITY
+              value: "1"
+          image: pieterblomme/api:0.1
+          name: api
+          ports:
+            - containerPort: 80
+          resources: {}
+          volumeMounts:
+            - mountPath: /models
+              name: model-repository
+            - mountPath: /logs
+              name: logs
+      restartPolicy: Always
+      volumes:
+        - name: model-repository
+          persistentVolumeClaim:
+            claimName: model-repository
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logs
+status: {}
