@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import numpy as np
+import pydantic
 from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
@@ -12,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 folder_path = Path(__file__).parent
 
-
+class ModelConfig(pydantic.BaseModel):
+    pass
+    
 class EfficientDetD0(BaseModel):
 
     CHANNEL_FIRST = False
@@ -29,6 +32,7 @@ class EfficientDetD0(BaseModel):
     OUTPUT_NAMES = ["detections:0"]
     DTYPE = "UINT8"
     SHAPE = (416, 416, 3)
+    MODEL_CONFIG = ModelConfig
 
     @classmethod
     def preprocess(cls, img):
