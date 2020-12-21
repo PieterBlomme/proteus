@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
+    num_instances: int = 1
 
 
 class BaseModel:
@@ -85,7 +86,7 @@ class BaseModel:
         with open(cls.CONFIG_PATH) as f:
             template = Template(f.read())
 
-        if model_config.triton_optimization:
+        if getattr(model_config, "triton_optimization", False):
             triton_optimization = (
                 "optimization { execution_accelerators {\n"
                 '  gpu_execution_accelerator : [ { name : "tensorrt" } ]\n'
@@ -94,9 +95,21 @@ class BaseModel:
         else:
             triton_optimization = ""
 
+        if getattr(model_config, "dynamic_batching", False):
+            dynamic_batching = "dynamic_batching { }"
+        else:
+            dynamic_batching = ""
+
+        num_instances = getattr(model_config, "num_instances", 1)
+        num_instances = "instance_group [ { count: " + str(num_instances) + " }]"
+
         with open(targetfile, "w") as fh:
-            rendered_template = template.render(triton_optimization=triton_optimization)
-            logger.debug(rendered_template)
+            rendered_template = template.render(
+                triton_optimization=triton_optimization,
+                dynamic_batching=dynamic_batching,
+                num_instances=num_instances,
+            )
+            logger.info(rendered_template)
             fh.write(rendered_template)
 
         triton_client.load_model(cls.__name__)

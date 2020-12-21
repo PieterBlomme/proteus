@@ -42,10 +42,11 @@ def get_triton_client():
     try:
         # Specify large enough concurrency to handle the
         # the number of requests.
-        concurrency = 1
+        CONCURRENCY = int(os.environ.get("TRITON_CONCURRENCY", "1"))
         triton_client = httpclient.InferenceServerClient(
-            url=TRITONURL, concurrency=concurrency
+            url=TRITONURL, concurrency=CONCURRENCY
         )
+        logger.info(f"Concurrency set to {CONCURRENCY}")
         logger.info(f"Server ready? {triton_client.is_server_ready()}")
     except Exception as e:
         logger.error("client creation failed: " + str(e))

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pydantic
 from PIL import Image
 from proteus.models.base import BaseModel
 from proteus.types import BoundingBox, Segmentation
@@ -13,6 +14,10 @@ from .helpers import detection_postprocess, image_preprocess, read_class_names
 logger = logging.getLogger(__name__)
 
 folder_path = Path(__file__).parent
+
+
+class ModelConfig(pydantic.BaseModel):
+    num_instances: int = 1
 
 
 class MaskRCNN(BaseModel):
@@ -31,6 +36,7 @@ class MaskRCNN(BaseModel):
     INPUT_NAME = "image"
     OUTPUT_NAMES = ["6568", "6570", "6572", "6887"]
     DTYPE = "FP32"
+    MODEL_CONFIG = ModelConfig
 
     @classmethod
     def preprocess(cls, img):

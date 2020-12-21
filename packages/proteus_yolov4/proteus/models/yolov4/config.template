@@ -26,4 +26,5 @@ output [
   }
 ]
 {{triton_optimization}}
-dynamic_batching {}
+{{dynamic_batching}}
+{{num_instances}}
