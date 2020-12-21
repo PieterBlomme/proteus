@@ -21,9 +21,11 @@ from .helpers import (
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
+
 class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
     dynamic_batching: bool = True
+    num_instances: int = 1
 
 class YoloV4(BaseModel):
 
@@ -43,6 +45,7 @@ class YoloV4(BaseModel):
     OUTPUT_NAMES = ["Identity:0", "Identity_1:0", "Identity_2:0"]
     DTYPE = "FP32"
     SHAPE = (416, 416, 3)
+    MODEL_CONFIG = ModelConfig
 
     @classmethod
     def preprocess(cls, img):

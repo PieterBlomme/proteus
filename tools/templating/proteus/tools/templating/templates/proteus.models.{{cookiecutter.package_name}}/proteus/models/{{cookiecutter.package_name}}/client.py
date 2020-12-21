@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 import pydantic
 from proteus.models.base import BaseModel
 
@@ -9,6 +10,7 @@ logger = logging.getLogger(__name__)
 class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
     dynamic_batching: bool = True
+    num_instances: int = 1
     
 class {{cookiecutter.model_name}}(BaseModel):
 
