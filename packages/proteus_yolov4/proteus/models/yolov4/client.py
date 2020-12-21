@@ -27,6 +27,7 @@ class ModelConfig(pydantic.BaseModel):
     dynamic_batching: bool = True
     num_instances: int = 1
 
+
 class YoloV4(BaseModel):
 
     CHANNEL_FIRST = False

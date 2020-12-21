@@ -96,9 +96,7 @@ class BaseModel:
             triton_optimization = ""
 
         if getattr(model_config, "dynamic_batching", False):
-            dynamic_batching = (
-                "dynamic_batching { }"
-            )
+            dynamic_batching = "dynamic_batching { }"
         else:
             dynamic_batching = ""
 
@@ -106,7 +104,11 @@ class BaseModel:
         num_instances = "instance_group [ { count: " + str(num_instances) + " }]"
 
         with open(targetfile, "w") as fh:
-            rendered_template = template.render(triton_optimization=triton_optimization, dynamic_batching=dynamic_batching, num_instances=num_instances)
+            rendered_template = template.render(
+                triton_optimization=triton_optimization,
+                dynamic_batching=dynamic_batching,
+                num_instances=num_instances,
+            )
             logger.info(rendered_template)
             fh.write(rendered_template)
 
