@@ -32,6 +32,9 @@ spec:
               value: "3"
             - name: MODEL_INACTIVITY
               value: "1"
+            - name: TRITON_CONCURRENCY
+              value: "1"
+
           image: pieterblomme/api:0.1
           name: api
           ports:
