@@ -88,12 +88,12 @@ class RetinaNet(BaseModel):
             torch.from_numpy(results.as_numpy(output_name))
             for output_name in cls.OUTPUT_NAMES[:5]
         ]
-        logger.info(list(map(lambda detection: detection.shape, cls_heads)))
+        logger.debug(list(map(lambda detection: detection.shape, cls_heads)))
         box_heads = [
             torch.from_numpy(results.as_numpy(output_name))
             for output_name in cls.OUTPUT_NAMES[5:]
         ]
-        logger.info(list(map(lambda detection: detection.shape, box_heads)))
+        logger.debug(list(map(lambda detection: detection.shape, box_heads)))
 
         # Size here is input size of the model !!
         # Still postprocessing needed to invert padding and scaling.

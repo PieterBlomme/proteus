@@ -67,16 +67,16 @@ class EfficientDetD0(BaseModel):
         Based on this (very few postprocess needed):
         https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
         """
-        logger.info(cls.OUTPUT_NAMES)
+        logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         # only one output, so
         detections = detections[0]
-        logger.info(list(map(lambda detection: detection.shape, detections)))
+        logger.debug(list(map(lambda detection: detection.shape, detections)))
 
         results = []
         # first dimension is the batch TODO
         for bbox in detections[0]:
-            logger.info(bbox)
+            logger.debug(bbox)
             # bbox[0] is the image id
             # ymin, xmin, ymax, xmax = bbox[1=5]
             bbox = BoundingBox(

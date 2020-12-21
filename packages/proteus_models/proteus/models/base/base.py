@@ -77,8 +77,7 @@ class BaseModel:
 
         :param triton_client : the client to use
         """
-        logger.warning(model_config)
-        logger.warning(type(model_config))
+        logger.debug(model_config)
         cls._maybe_download()
 
         # Generate config
@@ -97,7 +96,7 @@ class BaseModel:
 
         with open(targetfile, "w") as fh:
             rendered_template = template.render(triton_optimization=triton_optimization)
-            logger.error(rendered_template)
+            logger.debug(rendered_template)
             fh.write(rendered_template)
 
         triton_client.load_model(cls.__name__)
@@ -166,12 +165,13 @@ class BaseModel:
                     )
                 )
         except InferenceServerException as e:
-            logger.info("inference failed: " + str(e))
+            logger.error("inference failed: " + str(e))
+            raise e
 
         final_responses = []
         for response in responses:
             this_id = response.get_response()["id"]
-            logger.info("Request {}, batch size {}".format(this_id, 1))
+            logger.debug("Request {}, batch size {}".format(this_id, 1))
             final_response = cls.postprocess(
                 response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
             )

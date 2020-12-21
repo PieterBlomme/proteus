@@ -76,9 +76,9 @@ class YoloV4(BaseModel):
         """
         Post-process results to show bounding boxes.
         """
-        logger.info(cls.OUTPUT_NAMES)
+        logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
-        logger.info(list(map(lambda detection: detection.shape, detections)))
+        logger.debug(list(map(lambda detection: detection.shape, detections)))
 
         STRIDES = np.array([8, 16, 32])
         XYSCALE = [1.2, 1.1, 1.05]
