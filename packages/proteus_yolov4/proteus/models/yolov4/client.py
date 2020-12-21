@@ -3,6 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pydantic
 from proteus.models.base import BaseModel
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
@@ -20,6 +21,9 @@ from .helpers import (
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
+class ModelConfig(pydantic.BaseModel):
+    triton_optimization: bool = True
+    dynamic_batching: bool = True
 
 class YoloV4(BaseModel):
 

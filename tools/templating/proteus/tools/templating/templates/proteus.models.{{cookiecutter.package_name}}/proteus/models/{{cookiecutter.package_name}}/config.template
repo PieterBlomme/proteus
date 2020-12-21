@@ -1,0 +1,8 @@
+platform: "onnxruntime_onnx"
+max_batch_size : 0
+input [
+]
+output [
+]
+{{triton_optimization}}
+{{dynamic_batching}}
