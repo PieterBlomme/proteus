@@ -7,12 +7,15 @@ import requests
 import tritonclient.http as httpclient
 from jinja2 import Template
 from tritonclient.utils import InferenceServerException
+import onnx
+from onnxruntime.quantization import quantize_dynamic, QuantType
 
 logger = logging.getLogger(__name__)
 
 
 class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
+    quantize: bool = True
     num_instances: int = 1
 
 
@@ -58,6 +61,29 @@ class BaseModel:
                 f.write(r.content)
 
     @classmethod
+    def _maybe_quantize(cls):
+        # Download model
+        model_fp32 = f"/models/{cls.__name__}/1/model.onnx"
+        model_quant = f"/models/{cls.__name__}/2/model.onnx"
+        if not os.path.isfile(model_quant):
+            url = cls.MODEL_URL
+            r = requests.get(url)
+            try:
+                os.mkdir(f"/models/{cls.__name__}")
+            except Exception as e:
+                print(e)
+            try:
+                os.mkdir(f"/models/{cls.__name__}/2")
+            except Exception as e:
+                print(e)
+            quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
+            logger.info(f"Quantized model saved to:{model_quant}")
+            full_size = os.path.getsize(model_fp32)/(1024*1024)
+            quant_size = os.path.getsize(model_quant)/(1024*1024)
+            logger.info(f'ONNX full precision model size (MB): {full_size}')
+            logger.info(f'ONNX quantized model size (MB): {quant_size}')
+
+    @classmethod
     def _request_generator(cls, batched_image_data):
         """ Set the input data """
         inputs = [
@@ -99,6 +125,9 @@ class BaseModel:
             dynamic_batching = "dynamic_batching { }"
         else:
             dynamic_batching = ""
+
+        if getattr(model_config, "quantize", False):
+            cls._maybe_quantize()
 
         num_instances = getattr(model_config, "num_instances", 1)
         num_instances = "instance_group [ { count: " + str(num_instances) + " }]"
