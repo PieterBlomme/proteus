@@ -2,13 +2,13 @@ import logging
 import os
 
 import numpy as np
+import onnx
 import pydantic
 import requests
 import tritonclient.http as httpclient
 from jinja2 import Template
+from onnxruntime.quantization import QuantType, quantize_dynamic
 from tritonclient.utils import InferenceServerException
-import onnx
-from onnxruntime.quantization import quantize_dynamic, QuantType
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +78,10 @@ class BaseModel:
                 print(e)
             quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
             logger.info(f"Quantized model saved to:{model_quant}")
-            full_size = os.path.getsize(model_fp32)/(1024*1024)
-            quant_size = os.path.getsize(model_quant)/(1024*1024)
-            logger.info(f'ONNX full precision model size (MB): {full_size}')
-            logger.info(f'ONNX quantized model size (MB): {quant_size}')
+            full_size = os.path.getsize(model_fp32) / (1024 * 1024)
+            quant_size = os.path.getsize(model_quant) / (1024 * 1024)
+            logger.info(f"ONNX full precision model size (MB): {full_size}")
+            logger.info(f"ONNX quantized model size (MB): {quant_size}")
 
     @classmethod
     def _request_generator(cls, batched_image_data):
