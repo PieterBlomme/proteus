@@ -1,6 +1,8 @@
-import pydantic
 from pathlib import Path
+
+import pydantic
 from proteus.models.base import ClassificationModel
+
 from .helpers import read_class_names
 
 folder_path = Path(__file__).parent
