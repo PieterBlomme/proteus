@@ -71,8 +71,9 @@ def calculate_throughput(model, dataset, parms):
     print(throughput)
     unload_model(model)
 
+
 def calculate_latency(model, dataset, parms):
-    num_samples = min(len(dataset), 10)
+    num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
     ds = [s for s in dataset][:num_samples]  # pre-download
 
@@ -93,6 +94,35 @@ def calculate_latency(model, dataset, parms):
     print(latency)
     unload_model(model)
 
+def calculate_score(model, dataset, parms):
+    num_samples = len(dataset)
+    preds = [None for i in range(num_samples)]
+    ds = [s for s in dataset]  # pre-download
+
+    model_config = {
+        k: v
+        for k, v in parms.items()
+        if k in ["quantize", "triton_optimization", "num_instances"]
+    }
+    load_model(model, model_config)
+
+    start = time.time()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        # Start the load operations and mark each future with its index
+        futures = [
+            executor.submit(get_prediction, fpath, model, i)
+            for i, (fpath, img) in enumerate(ds)
+        ]
+
+        for fut in as_completed(futures):
+            response, i = fut.result()
+            preds[i] = response.json()[0]
+    score = dataset.eval(preds)
+    end = time.time()
+    print(parms)
+    print(score)
+    unload_model(model)
+
 def main():
     args = sys.argv[1:]
     if len(args) < 1:
@@ -103,11 +133,14 @@ def main():
     with open(f"{folder_path}/configs/{args[0]}.json", "rb") as f:
         data = json.load(f)
 
-    dataset = load_dataset(data["Dataset"], 50)
-
+    dataset = load_dataset(data["Dataset"], 10)
     for parms in data["Latency"]:
         calculate_latency(model, dataset, parms)
 
+    dataset = load_dataset(data["Dataset"], 5)
     for parms in data["Throughput"]:
         calculate_throughput(model, dataset, parms)
 
+    dataset = load_dataset(data["Dataset"], 20)
+    for parms in data["Score"]:
+        calculate_score(model, dataset, parms)
