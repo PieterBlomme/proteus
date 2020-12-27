@@ -21,8 +21,7 @@ setup(
     keywords="",
     entry_points={
         "console_scripts": [
-            "proteus.benchmark=proteus.tools.benchmarking.command_line:main",
-            "proteus.full_benchmark=proteus.tools.benchmarking.suite:main",
+            "proteus.benchmark=proteus.tools.benchmarking.suite:main",
         ],
     },
     install_requires=requirements,
