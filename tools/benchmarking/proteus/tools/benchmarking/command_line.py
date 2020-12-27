@@ -47,6 +47,19 @@ def main():
         model_config["triton_optimization"] = True
     else:
         model_config["triton_optimization"] = False
+
+    quantization = input("Quantiziation? (y/n)")
+    if quantization == "y":
+        model_config["quantize"] = True
+    else:
+        model_config["quantize"] = False
+
+    num_instances = input("Num instances? (Default 1)")
+    if num_instances == "":
+        model_config["num_instances"] = 1
+    else:
+        model_config["num_instances"] = int(num_instances)
+
     load_model(model, model_config)
 
     dataset = input("Dataset? ")

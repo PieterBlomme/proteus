@@ -26,6 +26,7 @@ class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
     dynamic_batching: bool = True
     num_instances: int = 1
+    quantize: bool = False
 
 
 class YoloV4(BaseModel):

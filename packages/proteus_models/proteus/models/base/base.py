@@ -1,11 +1,14 @@
 import logging
 import os
+import shutil
 
 import numpy as np
+import onnx
 import pydantic
 import requests
 import tritonclient.http as httpclient
 from jinja2 import Template
+from onnxruntime.quantization import QuantType, quantize_dynamic
 from tritonclient.utils import InferenceServerException
 
 logger = logging.getLogger(__name__)
@@ -42,20 +45,40 @@ class BaseModel:
     @classmethod
     def _maybe_download(cls):
         # Download model
-        target_path = f"/models/{cls.__name__}/1/model.onnx"
+        target_path = f"/tmp_models/{cls.__name__}/model.onnx"
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+
         if not os.path.isfile(target_path):
             url = cls.MODEL_URL
             r = requests.get(url)
-            try:
-                os.mkdir(f"/models/{cls.__name__}")
-            except Exception as e:
-                print(e)
-            try:
-                os.mkdir(f"/models/{cls.__name__}/1")
-            except Exception as e:
-                print(e)
             with open(target_path, "wb") as f:
                 f.write(r.content)
+
+    @classmethod
+    def _maybe_quantize(cls):
+        logger.info("Saving quantized model")
+        # Download model
+        model_fp32 = f"/tmp_models/{cls.__name__}/model.onnx"
+        model_quant = f"/models/{cls.__name__}/1/model.onnx"
+        os.makedirs(os.path.dirname(model_quant), exist_ok=True)
+
+        url = cls.MODEL_URL
+        r = requests.get(url)
+        quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
+        logger.info(f"Quantized model saved to:{model_quant}")
+        full_size = os.path.getsize(model_fp32) / (1024 * 1024)
+        quant_size = os.path.getsize(model_quant) / (1024 * 1024)
+        logger.info(f"ONNX full precision model size (MB): {full_size}")
+        logger.info(f"ONNX quantized model size (MB): {quant_size}")
+
+    @classmethod
+    def _write_model(cls):
+        # Download model
+        model_source = f"/tmp_models/{cls.__name__}/model.onnx"
+        model_target = f"/models/{cls.__name__}/1/model.onnx"
+        os.makedirs(os.path.dirname(model_target), exist_ok=True)
+
+        shutil.copy(model_source, model_target)
 
     @classmethod
     def _request_generator(cls, batched_image_data):
@@ -83,6 +106,7 @@ class BaseModel:
 
         # Generate config
         targetfile = f"/models/{cls.__name__}/config.pbtxt"
+        os.makedirs(os.path.dirname(targetfile), exist_ok=True)
         with open(cls.CONFIG_PATH) as f:
             template = Template(f.read())
 
@@ -111,6 +135,12 @@ class BaseModel:
             )
             logger.info(rendered_template)
             fh.write(rendered_template)
+
+        if getattr(model_config, "quantize", False):
+            # quantize model and write
+            cls._maybe_quantize()
+        else:
+            cls._write_model()
 
         triton_client.load_model(cls.__name__)
 

@@ -11,7 +11,8 @@ class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
     dynamic_batching: bool = True
     num_instances: int = 1
-    
+    quantize: bool = False # this will require ONNX opset 11
+
 class {{cookiecutter.model_name}}(BaseModel):
 
     DESCRIPTION = (

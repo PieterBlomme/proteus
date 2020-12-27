@@ -1,10 +1,17 @@
 from pathlib import Path
 
+import pydantic
 from proteus.models.base import ClassificationModel
 
 from .helpers import read_class_names
 
 folder_path = Path(__file__).parent
+
+
+class ModelConfig(pydantic.BaseModel):
+    triton_optimization: bool = True
+    num_instances: int = 1
+    quantize: bool = False
 
 
 class EfficientNetLite4(ClassificationModel):
@@ -23,3 +30,4 @@ class EfficientNetLite4(ClassificationModel):
     INPUT_NAME = "images:0"
     OUTPUT_NAMES = ["Softmax:0"]
     DTYPE = "FP32"
+    MODEL_CONFIG = ModelConfig
