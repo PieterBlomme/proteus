@@ -4,10 +4,12 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
+from jinja2 import Template
+import pandas as pd
 import requests
 
 folder_path = Path(__file__).parent
+TEMPLATE_PATH = f'{folder_path}/templates/Benchmark.md'
 
 mod = importlib.import_module("proteus.datasets")
 
@@ -67,10 +69,9 @@ def calculate_throughput(model, dataset, parms):
             preds[i] = response.json()[0]
     end = time.time()
     throughput = num_samples / (end - start)
-    print(parms)
-    print(throughput)
     unload_model(model)
-
+    parms['throughput'] = throughput
+    return parms
 
 def calculate_latency(model, dataset, parms):
     num_samples = len(dataset)
@@ -90,10 +91,9 @@ def calculate_latency(model, dataset, parms):
         latency = latency.elapsed.total_seconds() * 1000
         latencies.append(latency)
     latency = sum(latencies) / (num_samples)
-    print(parms)
-    print(latency)
     unload_model(model)
-
+    parms['latency'] = latency
+    return parms
 
 def calculate_score(model, dataset, parms):
     num_samples = len(dataset)
@@ -120,9 +120,9 @@ def calculate_score(model, dataset, parms):
             preds[i] = response.json()[0]
     score = dataset.eval(preds)
     end = time.time()
-    print(parms)
-    print(score)
     unload_model(model)
+    parms['score'] = score
+    return parms
 
 
 def main():
@@ -135,14 +135,46 @@ def main():
         data = json.load(f)
 
     model = data["Model"]
-    dataset = load_dataset(data["Dataset"], 10)
+
+    num_samples_latency = 10
+    dataset = load_dataset(data["Dataset"], num_samples_latency)
+    results = []
     for parms in data["Latency"]:
-        calculate_latency(model, dataset, parms)
+        result = calculate_latency(model, dataset, parms)
+        results.append(result)
+    score_df = pd.DataFrame(results).sort_values(by='latency', ascending=False)
+    print(score_df.to_markdown())
 
-    dataset = load_dataset(data["Dataset"], 5)
+    num_samples_throughput = 5
+    dataset = load_dataset(data["Dataset"], num_samples_throughput)
+    results = []
     for parms in data["Throughput"]:
-        calculate_throughput(model, dataset, parms)
+        result = calculate_throughput(model, dataset, parms)
+        results.append(result)
+    throughput_df = pd.DataFrame(results).sort_values(by='throughput', ascending=False)
+    print(throughput_df.to_markdown())
 
-    dataset = load_dataset(data["Dataset"], 20)
+    num_samples_score = 20
+    dataset = load_dataset(data["Dataset"], num_samples_score)
+    results = []
     for parms in data["Score"]:
-        calculate_score(model, dataset, parms)
+        result = calculate_score(model, dataset, parms)
+        results.append(result)
+    latency_df = pd.DataFrame(results).sort_values(by='score', ascending=False)
+    print(latency_df.to_markdown())
+
+    with open(TEMPLATE_PATH) as f:
+        template = Template(f.read())
+    
+    targetfile = 'Benchmark.md'
+    with open(targetfile, "w") as fh:
+        rendered_template = template.render(
+            score_table=score_df.to_markdown(),
+            latency_table=latency_df.to_markdown(),
+            throughput_table=throughput_df.to_markdown(),
+            dataset=data["Dataset"],
+            num_samples_score=num_samples_score,
+            num_samples_latency=num_samples_latency,
+            num_samples_throughput=num_samples_throughput            
+        )
+        fh.write(rendered_template)

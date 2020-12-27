@@ -2,17 +2,14 @@
 
 ## Score
 
-Scoring was evaluated with {{num_samples}} samples from {{dataset}} dataset
-Score: {{Score}}
+Score on {{num_samples_score}} samples from {{dataset}} dataset
+{{score_table}}
 
 ## Throughput
-
-| Parameter 1 | Parameter 2 |Parameter 3 | FPS |
-| ----------- | ----------- | ----------- | ----------- |
-| Test | Title | Title | Title |
+Average throughput in FPS on {{num_samples_throughput}} samples from {{dataset}} dataset
+{{throughput_table}}
 
 ## Latency
 
-| Parameter 1 | Parameter 2 |Parameter 3 | FPS |
-| ----------- | ----------- | ----------- | ----------- |
-| Test | Title | Title | Title |
+Average latency in ms on {{num_samples_latency}} samples from {{dataset}} dataset
+{{latency_table}}
