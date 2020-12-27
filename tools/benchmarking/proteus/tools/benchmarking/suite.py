@@ -148,7 +148,7 @@ def main():
     score_df = pd.DataFrame(results).sort_values(by="latency", ascending=False)
     print(score_df.to_markdown())
 
-    num_samples_throughput = 5
+    num_samples_throughput = 50
     dataset = load_dataset(data["Dataset"], num_samples_throughput)
     results = []
     for parms in data["Throughput"]:
@@ -157,7 +157,7 @@ def main():
     throughput_df = pd.DataFrame(results).sort_values(by="throughput", ascending=False)
     print(throughput_df.to_markdown())
 
-    num_samples_score = 20
+    num_samples_score = 100
     dataset = load_dataset(data["Dataset"], num_samples_score)
     results = []
     for parms in data["Score"]:
