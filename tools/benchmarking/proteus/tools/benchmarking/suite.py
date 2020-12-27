@@ -4,12 +4,13 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from jinja2 import Template
+
 import pandas as pd
 import requests
+from jinja2 import Template
 
 folder_path = Path(__file__).parent
-TEMPLATE_PATH = f'{folder_path}/templates/Benchmark.md'
+TEMPLATE_PATH = f"{folder_path}/templates/Benchmark.md"
 
 mod = importlib.import_module("proteus.datasets")
 
@@ -70,8 +71,9 @@ def calculate_throughput(model, dataset, parms):
     end = time.time()
     throughput = num_samples / (end - start)
     unload_model(model)
-    parms['throughput'] = throughput
+    parms["throughput"] = throughput
     return parms
+
 
 def calculate_latency(model, dataset, parms):
     num_samples = len(dataset)
@@ -92,8 +94,9 @@ def calculate_latency(model, dataset, parms):
         latencies.append(latency)
     latency = sum(latencies) / (num_samples)
     unload_model(model)
-    parms['latency'] = latency
+    parms["latency"] = latency
     return parms
+
 
 def calculate_score(model, dataset, parms):
     num_samples = len(dataset)
@@ -121,7 +124,7 @@ def calculate_score(model, dataset, parms):
     score = dataset.eval(preds)
     end = time.time()
     unload_model(model)
-    parms['score'] = score
+    parms["score"] = score
     return parms
 
 
@@ -142,7 +145,7 @@ def main():
     for parms in data["Latency"]:
         result = calculate_latency(model, dataset, parms)
         results.append(result)
-    score_df = pd.DataFrame(results).sort_values(by='latency', ascending=False)
+    score_df = pd.DataFrame(results).sort_values(by="latency", ascending=False)
     print(score_df.to_markdown())
 
     num_samples_throughput = 5
@@ -151,7 +154,7 @@ def main():
     for parms in data["Throughput"]:
         result = calculate_throughput(model, dataset, parms)
         results.append(result)
-    throughput_df = pd.DataFrame(results).sort_values(by='throughput', ascending=False)
+    throughput_df = pd.DataFrame(results).sort_values(by="throughput", ascending=False)
     print(throughput_df.to_markdown())
 
     num_samples_score = 20
@@ -160,13 +163,13 @@ def main():
     for parms in data["Score"]:
         result = calculate_score(model, dataset, parms)
         results.append(result)
-    latency_df = pd.DataFrame(results).sort_values(by='score', ascending=False)
+    latency_df = pd.DataFrame(results).sort_values(by="score", ascending=False)
     print(latency_df.to_markdown())
 
     with open(TEMPLATE_PATH) as f:
         template = Template(f.read())
-    
-    targetfile = 'Benchmark.md'
+
+    targetfile = "Benchmark.md"
     with open(targetfile, "w") as fh:
         rendered_template = template.render(
             score_table=score_df.to_markdown(),
@@ -175,6 +178,6 @@ def main():
             dataset=data["Dataset"],
             num_samples_score=num_samples_score,
             num_samples_latency=num_samples_latency,
-            num_samples_throughput=num_samples_throughput            
+            num_samples_throughput=num_samples_throughput,
         )
         fh.write(rendered_template)
