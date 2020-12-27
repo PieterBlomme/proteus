@@ -56,7 +56,7 @@ class BaseModel:
 
     @classmethod
     def _maybe_quantize(cls):
-        logger.info('Saving quantized model')
+        logger.info("Saving quantized model")
         # Download model
         model_fp32 = f"/tmp_models/{cls.__name__}/model.onnx"
         model_quant = f"/models/{cls.__name__}/1/model.onnx"
