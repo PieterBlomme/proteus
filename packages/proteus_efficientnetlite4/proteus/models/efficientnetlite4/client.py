@@ -6,6 +6,10 @@ from .helpers import read_class_names
 
 folder_path = Path(__file__).parent
 
+class ModelConfig(pydantic.BaseModel):
+    triton_optimization: bool = True
+    num_instances: int = 1
+    quantize: bool = False
 
 class EfficientNetLite4(ClassificationModel):
 

@@ -17,7 +17,6 @@ folder_path = Path(__file__).parent
 class ModelConfig(pydantic.BaseModel):
     num_instances: int = 1
 
-
 class EfficientDetD0(BaseModel):
 
     CHANNEL_FIRST = False

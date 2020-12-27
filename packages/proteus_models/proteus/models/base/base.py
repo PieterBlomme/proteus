@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 class ModelConfig(pydantic.BaseModel):
     triton_optimization: bool = True
-    quantize: bool = True
     num_instances: int = 1
 
 
