@@ -1,11 +1,11 @@
 import logging
 import os
+import shutil
 
 import numpy as np
 import onnx
 import pydantic
 import requests
-import shutil
 import tritonclient.http as httpclient
 from jinja2 import Template
 from onnxruntime.quantization import QuantType, quantize_dynamic
@@ -104,7 +104,6 @@ class BaseModel:
         """
         logger.debug(model_config)
         cls._maybe_download()
-
 
         # Generate config
         targetfile = f"/models/{cls.__name__}/config.pbtxt"
