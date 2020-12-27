@@ -94,6 +94,7 @@ def calculate_latency(model, dataset, parms):
     print(latency)
     unload_model(model)
 
+
 def calculate_score(model, dataset, parms):
     num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
@@ -123,16 +124,17 @@ def calculate_score(model, dataset, parms):
     print(score)
     unload_model(model)
 
+
 def main():
     args = sys.argv[1:]
     if len(args) < 1:
-        print("Missing model argument")
+        print("Missing path to config json")
         return
 
-    model = args[0]
-    with open(f"{folder_path}/configs/{args[0]}.json", "rb") as f:
+    with open(args[0], "rb") as f:
         data = json.load(f)
 
+    model = data["Model"]
     dataset = load_dataset(data["Dataset"], 10)
     for parms in data["Latency"]:
         calculate_latency(model, dataset, parms)
