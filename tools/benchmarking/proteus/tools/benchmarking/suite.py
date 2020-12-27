@@ -145,8 +145,8 @@ def main():
     for parms in data["Latency"]:
         result = calculate_latency(model, dataset, parms)
         results.append(result)
-    score_df = pd.DataFrame(results).sort_values(by="latency", ascending=True)
-    print(score_df.to_markdown())
+    latency_df = pd.DataFrame(results).sort_values(by="latency", ascending=True)
+    print(latency_df.to_markdown())
 
     num_samples_throughput = 50
     dataset = load_dataset(data["Dataset"], num_samples_throughput)
