@@ -1,5 +1,6 @@
-{"Dataset": "CocoValBBox",
-    "Throughput" : [
+{
+"Dataset": "CocoValBBox",
+"Throughput" : [
     {"triton_optimization": true, "quantize": false, "num_workers": 1, "num_instances": 1 },
     {"triton_optimization": false, "quantize": false, "num_workers": 1, "num_instances": 1 },
     {"triton_optimization": true, "quantize": true, "num_workers": 1, "num_instances": 1 },
@@ -9,4 +10,15 @@
     {"triton_optimization": true, "quantize": false, "num_workers": 4, "num_instances": 1 },
     {"triton_optimization": true, "quantize": false, "num_workers": 4, "num_instances": 2 },
     {"triton_optimization": true, "quantize": true, "num_workers": 4, "num_instances": 2 }
-]}
+],
+"Latency" : [
+    {"triton_optimization": true, "quantize": true},
+    {"triton_optimization": true, "quantize": false},
+    {"triton_optimization": false, "quantize": true},
+    {"triton_optimization": false, "quantize": false}
+],
+"Score" : [
+    {"quantize": true},
+    {"quantize": false}
+]
+}

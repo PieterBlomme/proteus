@@ -43,18 +43,18 @@ def get_prediction(fpath, model, i):
 
 
 def calculate_throughput(model, dataset, parms):
-    start = time.time()
+    num_samples = len(dataset)
+    preds = [None for i in range(num_samples)]
+    ds = [s for s in dataset]  # pre-download
 
     model_config = {
         k: v
         for k, v in parms.items()
         if k in ["quantize", "triton_optimization", "num_instances"]
     }
-    print(model_config)
     load_model(model, model_config)
 
-    preds = [None for i in range(num_samples)]
-    ds = [s for s in dataset]  # pre-download
+    start = time.time()
     with ThreadPoolExecutor(max_workers=parms["num_workers"]) as executor:
         # Start the load operations and mark each future with its index
         futures = [
@@ -65,12 +65,33 @@ def calculate_throughput(model, dataset, parms):
         for fut in as_completed(futures):
             response, i = fut.result()
             preds[i] = response.json()[0]
-    score = dataset.eval(preds)
     end = time.time()
     throughput = num_samples / (end - start)
     print(parms)
     print(throughput)
+    unload_model(model)
 
+def calculate_latency(model, dataset, parms):
+    num_samples = min(len(dataset), 10)
+    preds = [None for i in range(num_samples)]
+    ds = [s for s in dataset][:num_samples]  # pre-download
+
+    model_config = {
+        k: v
+        for k, v in parms.items()
+        if k in ["quantize", "triton_optimization", "num_instances"]
+    }
+    load_model(model, model_config)
+
+    latencies = []
+    for i, (fpath, img) in enumerate(ds):
+        latency, _ = get_prediction(fpath, model, i)
+        latency = latency.elapsed.total_seconds() * 1000
+        latencies.append(latency)
+    latency = sum(latencies) / (num_samples)
+    print(parms)
+    print(latency)
+    unload_model(model)
 
 def main():
     args = sys.argv[1:]
@@ -84,5 +105,9 @@ def main():
 
     dataset = load_dataset(data["Dataset"], 50)
 
+    for parms in data["Latency"]:
+        calculate_latency(model, dataset, parms)
+
     for parms in data["Throughput"]:
         calculate_throughput(model, dataset, parms)
+
