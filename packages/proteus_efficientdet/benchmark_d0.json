@@ -1,0 +1,16 @@
+{
+"Model": "EfficientDetD0",
+"Dataset": "CocoValBBox",
+"Throughput" : [
+    {"num_workers": 1, "num_instances": 1 },
+    {"num_workers": 2, "num_instances": 1 },
+    {"num_workers": 2, "num_instances": 2},
+    {"num_workers": 1, "num_instances": 2}
+],
+"Latency" : [
+    {"triton_optimization": true}
+],
+"Score" : [
+    {}
+]
+}
