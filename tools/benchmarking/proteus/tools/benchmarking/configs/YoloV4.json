@@ -1,0 +1,12 @@
+{"Dataset": "CocoValBBox",
+    "Throughput" : [
+    {"triton_optimization": true, "quantize": false, "num_workers": 1, "num_instances": 1 },
+    {"triton_optimization": false, "quantize": false, "num_workers": 1, "num_instances": 1 },
+    {"triton_optimization": true, "quantize": true, "num_workers": 1, "num_instances": 1 },
+    {"triton_optimization": true, "quantize": false, "num_workers": 1, "num_instances": 2 },
+    {"triton_optimization": true, "quantize": false, "num_workers": 2, "num_instances": 1 },
+    {"triton_optimization": true, "quantize": false, "num_workers": 4, "num_instances": 1 },
+    {"triton_optimization": true, "quantize": false, "num_workers": 4, "num_instances": 1 },
+    {"triton_optimization": true, "quantize": false, "num_workers": 4, "num_instances": 2 },
+    {"triton_optimization": true, "quantize": true, "num_workers": 4, "num_instances": 2 }
+]}
