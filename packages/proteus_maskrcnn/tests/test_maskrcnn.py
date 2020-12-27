@@ -53,7 +53,7 @@ def dataset():
 
 @pytest.fixture
 def small_dataset():
-    return CocoValMask(k=10)
+    return CocoValMask(k=25)
 
 
 def test_jpg(model):
