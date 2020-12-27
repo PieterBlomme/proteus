@@ -56,20 +56,20 @@ class BaseModel:
 
     @classmethod
     def _maybe_quantize(cls):
+        logger.info('Saving quantized model')
         # Download model
         model_fp32 = f"/tmp_models/{cls.__name__}/model.onnx"
         model_quant = f"/models/{cls.__name__}/1/model.onnx"
         os.makedirs(os.path.dirname(model_quant), exist_ok=True)
 
-        if not os.path.isfile(model_quant):
-            url = cls.MODEL_URL
-            r = requests.get(url)
-            quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
-            logger.info(f"Quantized model saved to:{model_quant}")
-            full_size = os.path.getsize(model_fp32) / (1024 * 1024)
-            quant_size = os.path.getsize(model_quant) / (1024 * 1024)
-            logger.info(f"ONNX full precision model size (MB): {full_size}")
-            logger.info(f"ONNX quantized model size (MB): {quant_size}")
+        url = cls.MODEL_URL
+        r = requests.get(url)
+        quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
+        logger.info(f"Quantized model saved to:{model_quant}")
+        full_size = os.path.getsize(model_fp32) / (1024 * 1024)
+        quant_size = os.path.getsize(model_quant) / (1024 * 1024)
+        logger.info(f"ONNX full precision model size (MB): {full_size}")
+        logger.info(f"ONNX quantized model size (MB): {quant_size}")
 
     @classmethod
     def _write_model(cls):
@@ -78,8 +78,7 @@ class BaseModel:
         model_target = f"/models/{cls.__name__}/1/model.onnx"
         os.makedirs(os.path.dirname(model_target), exist_ok=True)
 
-        if not os.path.isfile(model_target):
-            shutil.copy(model_source, model_target)
+        shutil.copy(model_source, model_target)
 
     @classmethod
     def _request_generator(cls, batched_image_data):
