@@ -50,9 +50,11 @@ def model():
 def dataset():
     return ImageNette(k=1000)
 
+
 @pytest.fixture
 def small_dataset():
     return ImageNette(k=250)
+
 
 def test_jpg(model):
     with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
