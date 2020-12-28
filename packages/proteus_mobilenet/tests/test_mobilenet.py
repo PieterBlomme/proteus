@@ -48,7 +48,12 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return ImageNette(k=500)
+    return ImageNette(k=1000)
+
+
+@pytest.fixture
+def small_dataset():
+    return ImageNette(k=250)
 
 
 def test_jpg(model):
@@ -84,11 +89,11 @@ def test_score(dataset, model):
     assert score >= 0.50
 
 
-def test_resize(dataset, model):
+def test_resize(small_dataset, model):
     # mAP should be similar after increasing image size
     preds_normal = []
     preds_resize = []
-    for fpath, img in dataset:
+    for fpath, img in small_dataset:
         response = get_prediction(fpath, model)
         preds_normal.append(response.json()[0])
 
@@ -100,17 +105,17 @@ def test_resize(dataset, model):
         response = get_prediction(resize_path, model)
         preds_resize.append(response.json()[0])
 
-    score_normal = dataset.eval(preds_normal)
-    score_resize = dataset.eval(preds_resize)
+    score_normal = small_dataset.eval(preds_normal)
+    score_resize = small_dataset.eval(preds_resize)
     print(f"Resize diff: {abs(score_normal - score_resize)}")
     assert abs(score_normal - score_resize) < 0.025  # 2% diff seems acceptable
 
 
-def test_padding(dataset, model):
+def test_padding(small_dataset, model):
     # mAP should be similar after padding to a square
     preds_normal = []
     preds_padded = []
-    for fpath, img in dataset:
+    for fpath, img in small_dataset:
         response = get_prediction(fpath, model)
         preds_normal.append(response.json()[0])
 
@@ -126,7 +131,7 @@ def test_padding(dataset, model):
         response = get_prediction(padded_path, model)
         preds_padded.append(response.json()[0])
 
-    score_normal = dataset.eval(preds_normal)
-    score_padded = dataset.eval(preds_padded)
+    score_normal = small_dataset.eval(preds_normal)
+    score_padded = small_dataset.eval(preds_padded)
     print(f"Padding diff: {abs(score_normal - score_padded)}")
     assert abs(score_normal - score_padded) < 0.15  # 15% diff seems acceptable

@@ -7,7 +7,7 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = ["proteus.datasets", "requests"]
+requirements = ["proteus.datasets", "requests", "jinja2", "pandas", "tabulate"]
 test_requirements = []
 
 setup(
@@ -21,7 +21,7 @@ setup(
     keywords="",
     entry_points={
         "console_scripts": [
-            "proteus.benchmark=proteus.tools.benchmarking.command_line:main"
+            "proteus.benchmark=proteus.tools.benchmarking.suite:main",
         ],
     },
     install_requires=requirements,
