@@ -1,5 +1,5 @@
 {
-"Model": "RetinaNet",
+"Model": "YoloV4",
 "Dataset": "CocoValBBox",
 "Throughput" : [
     {"triton_optimization": true, "quantize": true, "dynamic_batching": true, "num_workers": 1, "num_instances": 1 },
