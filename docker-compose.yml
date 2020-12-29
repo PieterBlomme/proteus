@@ -2,7 +2,7 @@ version: "3.8"
    
 services:
   triton:
-    image: nvcr.io/nvidia/tritonserver:20.09-py3
+    image: nvcr.io/nvidia/tritonserver:20.12-py3
     command: tritonserver --model-repository=/models --strict-model-config=False --model-control-mode=explicit
     shm_size: '2gb'
     ports:
