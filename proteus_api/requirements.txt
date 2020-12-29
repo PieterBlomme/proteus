@@ -21,7 +21,7 @@ scipy==1.5.2
 six==1.15.0
 starlette==0.13.2
 tritonclient==2.3.0
-uvicorn==0.11.3
+uvicorn==0.11.7
 uvloop==0.14.0
 websockets==8.1
 zope.event==4.5.0
