@@ -1,4 +1,5 @@
 {
+"BasePath": "http://localhost",
 "Model": "EfficientNetLite4",
 "Dataset": "ImageNette",
 "Throughput" : [

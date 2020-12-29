@@ -15,16 +15,16 @@ TEMPLATE_PATH = f"{folder_path}/templates/Benchmark.md"
 mod = importlib.import_module("proteus.datasets")
 
 
-def load_model(model, model_config):
+def load_model(base_path, model, model_config):
     response = requests.post(
-        f"http://api.localhost/{model}/load",
+        f"{base_path}/{model}/load",
         json=model_config,
     )
     assert response.json()["success"]
 
 
-def unload_model(model):
-    response = requests.post(f"http://api.localhost/{model}/unload")
+def unload_model(base_path, model):
+    response = requests.post(f"{base_path}/{model}/unload")
     assert response.json()["success"]
 
 
@@ -33,19 +33,19 @@ def load_dataset(dataset, num_samples):
     return dataset(k=num_samples)
 
 
-def get_prediction(fpath, model, i):
+def get_prediction(base_path, fpath, model, i):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
         payload = {"file_id": fpath}
         response = requests.post(
-            f"http://api.localhost/{model}/predict",
+            f"{base_path}/{model}/predict",
             files=jsonfiles,
             data=payload,
         )
     return response, i
 
 
-def calculate_throughput(model, dataset, parms):
+def calculate_throughput(base_path, model, dataset, parms):
     num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
     ds = [s for s in dataset]  # pre-download
@@ -55,13 +55,13 @@ def calculate_throughput(model, dataset, parms):
         for k, v in parms.items()
         if k in ["quantize", "triton_optimization", "num_instances"]
     }
-    load_model(model, model_config)
+    load_model(base_path, model, model_config)
 
     start = time.time()
     with ThreadPoolExecutor(max_workers=parms["num_workers"]) as executor:
         # Start the load operations and mark each future with its index
         futures = [
-            executor.submit(get_prediction, fpath, model, i)
+            executor.submit(get_prediction, base_path, fpath, model, i)
             for i, (fpath, img) in enumerate(ds)
         ]
 
@@ -70,12 +70,12 @@ def calculate_throughput(model, dataset, parms):
             preds[i] = response.json()[0]
     end = time.time()
     throughput = num_samples / (end - start)
-    unload_model(model)
+    unload_model(base_path, model)
     parms["throughput"] = throughput
     return parms
 
 
-def calculate_latency(model, dataset, parms):
+def calculate_latency(base_path, model, dataset, parms):
     num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
     ds = [s for s in dataset][:num_samples]  # pre-download
@@ -85,20 +85,20 @@ def calculate_latency(model, dataset, parms):
         for k, v in parms.items()
         if k in ["quantize", "triton_optimization", "num_instances"]
     }
-    load_model(model, model_config)
+    load_model(base_path, model, model_config)
 
     latencies = []
     for i, (fpath, img) in enumerate(ds):
-        latency, _ = get_prediction(fpath, model, i)
+        latency, _ = get_prediction(base_path, fpath, model, i)
         latency = latency.elapsed.total_seconds() * 1000
         latencies.append(latency)
     latency = sum(latencies) / (num_samples)
-    unload_model(model)
+    unload_model(base_path, model)
     parms["latency"] = latency
     return parms
 
 
-def calculate_score(model, dataset, parms):
+def calculate_score(base_path, model, dataset, parms):
     num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
     ds = [s for s in dataset]  # pre-download
@@ -108,13 +108,13 @@ def calculate_score(model, dataset, parms):
         for k, v in parms.items()
         if k in ["quantize", "triton_optimization", "num_instances"]
     }
-    load_model(model, model_config)
+    load_model(base_path, model, model_config)
 
     start = time.time()
     with ThreadPoolExecutor(max_workers=1) as executor:
         # Start the load operations and mark each future with its index
         futures = [
-            executor.submit(get_prediction, fpath, model, i)
+            executor.submit(get_prediction, base_path, fpath, model, i)
             for i, (fpath, img) in enumerate(ds)
         ]
 
@@ -123,7 +123,7 @@ def calculate_score(model, dataset, parms):
             preds[i] = response.json()[0]
     score = dataset.eval(preds)
     end = time.time()
-    unload_model(model)
+    unload_model(base_path, model)
     parms["score"] = score
     return parms
 
@@ -138,12 +138,13 @@ def main():
         data = json.load(f)
 
     model = data["Model"]
+    BASE_PATH = data.get('BasePath', 'http://api.localhost')
 
     num_samples_latency = 10
     dataset = load_dataset(data["Dataset"], num_samples_latency)
     results = []
     for parms in data["Latency"]:
-        result = calculate_latency(model, dataset, parms)
+        result = calculate_latency(BASE_PATH, model, dataset, parms)
         results.append(result)
     latency_df = pd.DataFrame(results).sort_values(by="latency", ascending=True)
     print(latency_df.to_markdown())
@@ -152,7 +153,7 @@ def main():
     dataset = load_dataset(data["Dataset"], num_samples_throughput)
     results = []
     for parms in data["Throughput"]:
-        result = calculate_throughput(model, dataset, parms)
+        result = calculate_throughput(BASE_PATH, model, dataset, parms)
         results.append(result)
     throughput_df = pd.DataFrame(results).sort_values(by="throughput", ascending=False)
     print(throughput_df.to_markdown())
@@ -161,7 +162,7 @@ def main():
     dataset = load_dataset(data["Dataset"], num_samples_score)
     results = []
     for parms in data["Score"]:
-        result = calculate_score(model, dataset, parms)
+        result = calculate_score(BASE_PATH, model, dataset, parms)
         results.append(result)
     score_df = pd.DataFrame(results).sort_values(by="score", ascending=False)
     print(score_df.to_markdown())
