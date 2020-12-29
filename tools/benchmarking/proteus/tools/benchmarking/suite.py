@@ -138,7 +138,7 @@ def main():
         data = json.load(f)
 
     model = data["Model"]
-    BASE_PATH = data.get('BasePath', 'http://api.localhost')
+    BASE_PATH = data.get("BasePath", "http://api.localhost")
 
     num_samples_latency = 10
     dataset = load_dataset(data["Dataset"], num_samples_latency)
