@@ -83,7 +83,7 @@ def test_score(dataset, model):
     print(f"Accuracy: {score}")
     assert score >= 0.67
 
-
+@pytest.mark.slow
 def test_resize(dataset, model):
     # mAP should be similar after increasing image size
     preds_normal = []
@@ -105,7 +105,7 @@ def test_resize(dataset, model):
     print(f"Resize diff: {abs(score_normal - score_resize)}")
     assert abs(score_normal - score_resize) < 0.025  # 2% diff seems acceptable
 
-
+@pytest.mark.slow
 def test_padding(dataset, model):
     # mAP should be similar after padding to a square
     preds_normal = []
