@@ -9,10 +9,10 @@ with open("README.rst") as readme_file:
 
 requirements = [
     "opencv-python-headless==4.4.0.40",
-    "requests",
-    "onnx",
-    "onnxruntime",
-    "jinja2",
+    "requests==2.25.1",
+    "onnx==1.8.0",
+    "onnxruntime==1.6.0",
+    "jinja2==2.11.2",
 ]
 
 test_requirements = ["pytest>=3"]
