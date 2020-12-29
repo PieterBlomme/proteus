@@ -7,7 +7,13 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = ["proteus.datasets==0.0.1", "requests==2.25.1", "jinja2==2.11.2", "pandas==1.2.0", "tabulate==0.8.7"]
+requirements = [
+    "proteus.datasets==0.0.1",
+    "requests==2.25.1",
+    "jinja2==2.11.2",
+    "pandas==1.2.0",
+    "tabulate==0.8.7",
+]
 test_requirements = []
 
 setup(
