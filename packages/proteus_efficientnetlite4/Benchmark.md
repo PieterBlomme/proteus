@@ -1,30 +1,26 @@
-# Benchmark for 
+# Benchmark for EfficientNetLite4
 
 ## Score
 
 Score on 100 samples from ImageNette dataset
-|    | triton_optimization   | quantize   |   latency |
-|---:|:----------------------|:-----------|----------:|
-|  3 | False                 | False      |   48.617  |
-|  1 | True                  | False      |   52.4732 |
-|  0 | True                  | True       |  136.358  |
-|  2 | False                 | True       |  167.926  |
+|    | quantize   |   score |
+|---:|:-----------|--------:|
+|  0 | False      |    0.85 |
 
 ## Throughput
 Average throughput in FPS on 50 samples from ImageNette dataset
 |    | triton_optimization   | quantize   |   num_workers |   num_instances |   throughput |
 |---:|:----------------------|:-----------|--------------:|----------------:|-------------:|
-|  4 | True                  | False      |             2 |               1 |     37.379   |
-|  5 | True                  | False      |             4 |               1 |     36.4435  |
-|  1 | True                  | False      |             1 |               1 |     30.7522  |
-|  3 | True                  | False      |             1 |               2 |     27.6539  |
-|  2 | False                 | False      |             1 |               1 |     24.7281  |
-|  0 | True                  | True       |             1 |               1 |      6.70238 |
+|  3 | True                  | False      |             2 |               1 |      92.3679 |
+|  4 | True                  | False      |             4 |               1 |      90.1308 |
+|  0 | True                  | False      |             1 |               1 |      76.9962 |
+|  2 | True                  | False      |             1 |               2 |      76.6523 |
+|  1 | False                 | False      |             1 |               1 |      16.3393 |
 
 ## Latency
 
 Average latency in ms on 10 samples from ImageNette dataset
-|    | quantize   |   score |
-|---:|:-----------|--------:|
-|  0 | True       |    0.82 |
-|  1 | False      |    0.82 |
+|    | triton_optimization   | quantize   |   latency |
+|---:|:----------------------|:-----------|----------:|
+|  0 | True                  | False      |   13.1624 |
+|  1 | False                 | False      |  196.281  |

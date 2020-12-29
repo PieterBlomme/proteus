@@ -17,14 +17,14 @@ mod = importlib.import_module("proteus.datasets")
 
 def load_model(model, model_config):
     response = requests.post(
-        f"http://localhost/{model}/load",
+        f"http://api.localhost/{model}/load",
         json=model_config,
     )
     assert response.json()["success"]
 
 
 def unload_model(model):
-    response = requests.post(f"http://localhost/{model}/unload")
+    response = requests.post(f"http://api.localhost/{model}/unload")
     assert response.json()["success"]
 
 
@@ -38,7 +38,7 @@ def get_prediction(fpath, model, i):
         jsonfiles = {"file": f}
         payload = {"file_id": fpath}
         response = requests.post(
-            f"http://localhost/{model}/predict",
+            f"http://api.localhost/{model}/predict",
             files=jsonfiles,
             data=payload,
         )
@@ -163,8 +163,8 @@ def main():
     for parms in data["Score"]:
         result = calculate_score(model, dataset, parms)
         results.append(result)
-    latency_df = pd.DataFrame(results).sort_values(by="score", ascending=False)
-    print(latency_df.to_markdown())
+    score_df = pd.DataFrame(results).sort_values(by="score", ascending=False)
+    print(score_df.to_markdown())
 
     with open(TEMPLATE_PATH) as f:
         template = Template(f.read())
@@ -179,5 +179,6 @@ def main():
             num_samples_score=num_samples_score,
             num_samples_latency=num_samples_latency,
             num_samples_throughput=num_samples_throughput,
+            model=model,
         )
         fh.write(rendered_template)

@@ -31,11 +31,11 @@ spec:
             - name: MAX_ACTIVE_MODELS
               value: "3"
             - name: MODEL_INACTIVITY
-              value: "1"
+              value: "5"
             - name: TRITON_CONCURRENCY
               value: "1"
 
-          image: pieterblomme/api:0.1
+          image: pieterblomme/api:0.2
           name: api
           ports:
             - containerPort: 80
