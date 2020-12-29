@@ -31,7 +31,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.21.0
     ports:
-      - 9000:9090
+      - 9090:9090
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus-data:/prometheus
