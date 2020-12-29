@@ -20,7 +20,9 @@ setup(
     classifiers=[],
     keywords="",
     entry_points={
-        "console_scripts": ["proteus.benchmark=proteus.tools.benchmarking.suite:main",],
+        "console_scripts": [
+            "proteus.benchmark=proteus.tools.benchmarking.suite:main",
+        ],
     },
     install_requires=requirements,
     long_description=readme,

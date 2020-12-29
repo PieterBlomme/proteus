@@ -16,7 +16,10 @@ mod = importlib.import_module("proteus.datasets")
 
 
 def load_model(model, model_config):
-    response = requests.post(f"http://api.localhost/{model}/load", json=model_config,)
+    response = requests.post(
+        f"http://api.localhost/{model}/load",
+        json=model_config,
+    )
     assert response.json()["success"]
 
 
@@ -35,7 +38,9 @@ def get_prediction(fpath, model, i):
         jsonfiles = {"file": f}
         payload = {"file_id": fpath}
         response = requests.post(
-            f"http://api.localhost/{model}/predict", files=jsonfiles, data=payload,
+            f"http://api.localhost/{model}/predict",
+            files=jsonfiles,
+            data=payload,
         )
     return response, i
 
