@@ -86,7 +86,7 @@ def test_score(dataset, model):
 
     score = dataset.eval(preds)
     print(f"Accuracy: {score}")
-    assert score >= 0.50
+    assert score >= 0.47
 
 
 @pytest.mark.slow
