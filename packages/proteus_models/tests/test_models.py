@@ -45,7 +45,7 @@ def test_inactivity_no_requests():
 
         # Model should be available for at least a grace period
         # Even though no predictions are done
-        time.sleep(MODEL_INACTIVITY * 60)
+        time.sleep(MODEL_INACTIVITY * 30)
         response = requests.get(f"http://localhost/models/status")
         model_status = [m for m in response.json() if m.get("name") == model][0]
         assert model_status.get("state", "UNAVAILABLE") == "READY"
