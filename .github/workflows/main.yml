@@ -28,8 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install black autoflake isort pytest requests Pillow
-          pip install ./packages/proteus_datasets/
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
 
       - name: Lint
         run: |
@@ -39,10 +38,6 @@ jobs:
 
       - name: Build the docker-compose stack
         run: docker-compose up -d
-
-      - name: Packages install
-        run: |
-          pip install -r ./packages/package_install_tmp.txt
           
       - name: Test with pytest
         run: |         
