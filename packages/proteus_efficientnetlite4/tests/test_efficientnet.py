@@ -1,11 +1,14 @@
 import tempfile
-
+import itertools
 import pytest
 import requests
+import time
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import ImageNette
+from proteus.models.efficientnetlite4.client import ModelConfig 
 
+MODEL = "EfficientNetLite4"
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -32,17 +35,15 @@ def test_health():
 @pytest.fixture
 def model():
     test_health()
-    model = "EfficientNetLite4"
-    response = requests.post(f"http://localhost/{model}/load")
     payload = {"triton_optimization": True}
     response = requests.post(
-        f"http://localhost/{model}/load",
+        f"http://localhost/{MODEL}/load",
         json=payload,
     )
     assert response.json()["success"]
 
-    yield model
-    response = requests.post(f"http://localhost/{model}/unload")
+    yield MODEL
+    response = requests.post(f"http://localhost/{MODEL}/unload")
     assert response.json()["success"]
 
 
@@ -76,6 +77,41 @@ def test_bmp(model):
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
+def test_modelconfig():
+    test_health()
+
+    # Figure out which config parameters are defined
+    schema = ModelConfig().dict()
+
+    # Find all combinations that we want to test
+    test_parameters = []
+    test_values = []
+    for k, v in schema.items():
+        test_parameters.append(k)
+        if type(v) == bool:
+            test_values.append([True, False])
+        elif type(v) == int:
+            test_values.append([1, 2])
+        else:
+            raise NotImplementedError(f'Config parameter of type {type(v)} not yet implemented')
+    test_combinations = list(itertools.product(*test_values))
+
+    # Test load + prediction for each combination
+    for test_config in test_combinations:
+        mc = {k: v for k, v in zip(test_parameters, test_config)}
+        response = requests.post(
+            f"http://localhost/{MODEL}/load",
+            json=mc,
+        )
+        assert response.status_code == requests.codes.ok
+
+        with tempfile.NamedTemporaryFile(suffix=".bmp") as tmp:
+            Image.new("RGB", (800, 1280)).save(tmp.name)
+            response = get_prediction(tmp.name, MODEL)
+            assert response.status_code == requests.codes.ok
+
+        response = requests.post(f"http://localhost/{MODEL}/unload")
+        assert response.status_code == requests.codes.ok
 
 @pytest.mark.slow
 def test_score(dataset, model):
