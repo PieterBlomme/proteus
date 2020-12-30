@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install black autoflake isort pytest requests Pillow
           pip install nvidia-pyindex==1.0.4
-          pip install tritonclient==2.3.0
+          pip install tritonclient[http]==2.3.0
           if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
 
       - name: Lint

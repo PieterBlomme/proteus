@@ -13,6 +13,8 @@ requirements = [
     "onnx==1.8.0",
     "onnxruntime==1.6.0",
     "jinja2==2.11.2",
+    "pydantic==1.5.1",
+    "tritonclient[http]==2.3.0"
 ]
 
 test_requirements = ["pytest>=3"]
