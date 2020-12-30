@@ -14,12 +14,12 @@ TEMPLATE_PATH = f"{folder_path}/templates/Benchmark.md"
 
 mod = importlib.import_module("proteus.datasets")
 
+
 def test_server(base_path):
-    response = requests.get(
-        f"{base_path}/health"
-    )
+    response = requests.get(f"{base_path}/health")
     if response.status_code == requests.codes.service_unavailable:
-        raise Exception(f'Service not available.  Is {base_path} a valid hostname?')
+        raise Exception(f"Service not available.  Is {base_path} a valid hostname?")
+
 
 def load_model(base_path, model, model_config):
     response = requests.post(
@@ -28,13 +28,17 @@ def load_model(base_path, model, model_config):
     )
 
     if response.status_code != requests.codes.ok:
-        raise Exception(f'Model could not be loaded.  Code: {response.status_code} Reason: {response.reason}')
+        raise Exception(
+            f"Model could not be loaded.  Code: {response.status_code} Reason: {response.reason}"
+        )
 
 
 def unload_model(base_path, model):
     response = requests.post(f"{base_path}/{model}/unload")
     if response.status_code != requests.codes.ok:
-        raise Exception(f'Model could not be unloaded.  Code: {response.status_code} Reason: {response.reason}')
+        raise Exception(
+            f"Model could not be unloaded.  Code: {response.status_code} Reason: {response.reason}"
+        )
 
 
 def load_dataset(dataset, num_samples):
@@ -42,8 +46,7 @@ def load_dataset(dataset, num_samples):
         dataset = getattr(mod, dataset)
         return dataset(k=num_samples)
     except Exception:
-        raise Exception(f'Dataset {dataset} could not be imported.')
-
+        raise Exception(f"Dataset {dataset} could not be imported.")
 
 
 def get_prediction(base_path, fpath, model, i):
@@ -57,7 +60,9 @@ def get_prediction(base_path, fpath, model, i):
         )
 
     if response.status_code != requests.codes.ok:
-        raise Exception(f'Inference failed.  Code: {response.status_code} Reason: {response.reason}')
+        raise Exception(
+            f"Inference failed.  Code: {response.status_code} Reason: {response.reason}"
+        )
 
     return response, i
 
@@ -90,6 +95,7 @@ def calculate_throughput(base_path, model, dataset, parms):
     unload_model(base_path, model)
     parms["throughput"] = throughput
     return parms
+
 
 def calculate_latency(base_path, model, dataset, parms):
     num_samples = len(dataset)
@@ -149,7 +155,7 @@ def main():
         args = sys.argv[1:]
         if len(args) < 1:
             raise Exception("Missing path to config json")
-        
+
         try:
             with open(args[0], "rb") as f:
                 data = json.load(f)
@@ -158,9 +164,9 @@ def main():
 
         model = data["Model"]
         BASE_PATH = data.get("BasePath", "http://api.localhost")
-        
+
         test_server(BASE_PATH)
-        
+
         num_samples_latency = 10
         dataset = load_dataset(data["Dataset"], num_samples_latency)
         results = []
@@ -176,7 +182,9 @@ def main():
         for parms in data["Throughput"]:
             result = calculate_throughput(BASE_PATH, model, dataset, parms)
             results.append(result)
-        throughput_df = pd.DataFrame(results).sort_values(by="throughput", ascending=False)
+        throughput_df = pd.DataFrame(results).sort_values(
+            by="throughput", ascending=False
+        )
         print(throughput_df.to_markdown())
 
         num_samples_score = 100
@@ -205,4 +213,4 @@ def main():
             )
             fh.write(rendered_template)
     except Exception as e:
-        print (f'Error: {e}')
+        print(f"Error: {e}")
