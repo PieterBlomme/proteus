@@ -34,6 +34,8 @@ spec:
               value: "5"
             - name: TRITON_CONCURRENCY
               value: "1"
+            - name: "TRITON_CLIENT_TIMEOUT"
+              value: "300"
 
           image: pieterblomme/api:0.2
           name: api
