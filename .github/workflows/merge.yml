@@ -40,7 +40,7 @@ jobs:
 
       - name: Packages install
         run: |
-          pip install -r packages/package_install.txt
+          pip install -r ./packages/package_install.txt
           
       - name: Test with pytest
         run: |         
