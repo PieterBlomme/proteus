@@ -36,7 +36,10 @@ spec:
               value: "1"
             - name: "TRITON_CLIENT_TIMEOUT"
               value: "300"
-
+            - name: "TIMEOUT"
+              value: "120"
+            - name: "KEEP_ALIVE"
+              value: "2"
           image: pieterblomme/api:0.2
           name: api
           ports:
