@@ -1,0 +1,9 @@
+-e ./proteus_types/.
+-e ./proteus_models/.
+-e ./proteus_yolov4/.
+-e ./proteus_mobilenet/.
+-e ./proteus_resnet50/.
+-e ./proteus_efficientnetlite4/.
+-e ./proteus_efficientdet/.
+-e ./proteus_retinanet/.
+-e ./proteus_maskrcnn/.
