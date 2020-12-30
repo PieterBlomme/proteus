@@ -38,6 +38,10 @@ jobs:
       - name: Build the docker-compose stack
         run: docker-compose up -d
 
+      - name: Packages install
+        run: |
+          pip install packages/package_install.txt
+          
       - name: Test with pytest
         run: |         
           pytest -s --ignore=tools/templating/proteus/tools/templating/templates
