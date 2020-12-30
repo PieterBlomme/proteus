@@ -1,10 +1,15 @@
 from pathlib import Path
 
 from proteus.models.base import ClassificationModel
+from proteus.models.base.modelconfigs import BaseModelConfig
 
 from .helpers import read_class_names
 
 folder_path = Path(__file__).parent
+
+
+class ModelConfig(BaseModelConfig):
+    pass
 
 
 class Resnet50V2(ClassificationModel):

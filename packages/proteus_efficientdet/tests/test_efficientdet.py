@@ -1,3 +1,4 @@
+import itertools
 import tempfile
 import time
 
@@ -6,6 +7,18 @@ import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
+from proteus.models.efficientdet.client import ModelConfig
+
+MODEL = "EfficientDetD2"
+
+# Check liveness
+for i in range(10):
+    try:
+        response = requests.get("http://localhost/health")
+        if response.status_code == requests.codes.ok:
+            break
+    except:
+        time.sleep(25)
 
 
 def get_prediction(fpath, model):
@@ -20,30 +33,17 @@ def get_prediction(fpath, model):
     return response
 
 
-def test_health():
-    for i in range(10):
-        try:
-            response = requests.get("http://localhost/health")
-            if response.status_code == requests.codes.ok:
-                return
-        except:
-            time.sleep(25)
-
-
 @pytest.fixture
 def model():
-    test_health()
-    model = "EfficientDetD2"
-    response = requests.post(f"http://localhost/{model}/load")
     payload = {"triton_optimization": True}
     response = requests.post(
-        f"http://localhost/{model}/load",
+        f"http://localhost/{MODEL}/load",
         json=payload,
     )
     assert response.json()["success"]
 
-    yield model
-    response = requests.post(f"http://localhost/{model}/unload")
+    yield MODEL
+    response = requests.post(f"http://localhost/{MODEL}/unload")
     assert response.json()["success"]
 
 
@@ -76,6 +76,43 @@ def test_bmp(model):
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
+
+
+def test_modelconfig():
+    # Figure out which config parameters are defined
+    schema = ModelConfig().dict()
+
+    # Find all combinations that we want to test
+    test_parameters = []
+    test_values = []
+    for k, v in schema.items():
+        test_parameters.append(k)
+        if type(v) == bool:
+            test_values.append([True, False])
+        elif type(v) == int:
+            test_values.append([1, 2])
+        else:
+            raise NotImplementedError(
+                f"Config parameter of type {type(v)} not yet implemented"
+            )
+    test_combinations = list(itertools.product(*test_values))
+
+    # Test load + prediction for each combination
+    for test_config in test_combinations:
+        mc = {k: v for k, v in zip(test_parameters, test_config)}
+        response = requests.post(
+            f"http://localhost/{MODEL}/load",
+            json=mc,
+        )
+        assert response.status_code == requests.codes.ok
+
+        with tempfile.NamedTemporaryFile(suffix=".bmp") as tmp:
+            Image.new("RGB", (800, 1280)).save(tmp.name)
+            response = get_prediction(tmp.name, MODEL)
+            assert response.status_code == requests.codes.ok
+
+        response = requests.post(f"http://localhost/{MODEL}/unload")
+        assert response.status_code == requests.codes.ok
 
 
 @pytest.mark.slow

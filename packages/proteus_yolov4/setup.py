@@ -7,7 +7,7 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = []
+requirements = ["scipy==1.5.2"]
 
 test_requirements = ["pytest>=3"]
 
@@ -24,7 +24,7 @@ setup(
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    namespace_packages=["proteus.models"],
+    namespace_packages=["proteus", "proteus.models"],
     packages=find_namespace_packages(exclude=["tests"]),
     test_suite="tests",
     tests_require=test_requirements,

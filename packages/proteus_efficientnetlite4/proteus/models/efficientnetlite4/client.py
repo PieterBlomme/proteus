@@ -1,17 +1,21 @@
 from pathlib import Path
 
-import pydantic
 from proteus.models.base import ClassificationModel
+from proteus.models.base.modelconfigs import (
+    BaseModelConfig,
+    QuantizationModelConfig,
+    TritonOptimizationModelConfig,
+)
 
 from .helpers import read_class_names
 
 folder_path = Path(__file__).parent
 
 
-class ModelConfig(pydantic.BaseModel):
-    triton_optimization: bool = True
-    num_instances: int = 1
-    quantize: bool = False
+class ModelConfig(
+    BaseModelConfig, QuantizationModelConfig, TritonOptimizationModelConfig
+):
+    pass
 
 
 class EfficientNetLite4(ClassificationModel):

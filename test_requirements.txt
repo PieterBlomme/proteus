@@ -1,0 +1,10 @@
+./packages/proteus_types
+./packages/proteus_datasets
+./packages/proteus_models
+./packages/proteus_yolov4
+./packages/proteus_mobilenet
+./packages/proteus_resnet50
+./packages/proteus_efficientnetlite4
+./packages/proteus_efficientdet
+./packages/proteus_retinanet
+./packages/proteus_maskrcnn
