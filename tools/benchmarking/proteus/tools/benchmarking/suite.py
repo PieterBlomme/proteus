@@ -91,7 +91,6 @@ def calculate_throughput(base_path, model, dataset, parms):
     parms["throughput"] = throughput
     return parms
 
-
 def calculate_latency(base_path, model, dataset, parms):
     num_samples = len(dataset)
     preds = [None for i in range(num_samples)]
