@@ -24,7 +24,7 @@ setup(
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    namespace_packages=["proteus.models"],
+    namespace_packages=["proteus", "proteus.models"],
     packages=find_namespace_packages(exclude=["tests"]),
     test_suite="tests",
     tests_require=test_requirements,
