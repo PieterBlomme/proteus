@@ -7,7 +7,7 @@ import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import ImageNette
-from proteus.models.base.base import ModelConfig # probably should have his own version
+from proteus.models.base.base import ModelConfig  # probably should have his own version
 
 MODEL = "MobileNetV2"
 
@@ -20,6 +20,7 @@ for i in range(10):
     except:
         time.sleep(25)
 
+
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -30,6 +31,7 @@ def get_prediction(fpath, model):
             data=payload,
         )
     return response
+
 
 @pytest.fixture
 def model():
@@ -75,6 +77,7 @@ def test_bmp(model):
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
+
 def test_modelconfig():
     # Figure out which config parameters are defined
     schema = ModelConfig().dict()
@@ -110,6 +113,7 @@ def test_modelconfig():
 
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
+
 
 @pytest.mark.slow
 def test_score(dataset, model):

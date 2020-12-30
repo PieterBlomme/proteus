@@ -1,5 +1,5 @@
-import json
 import itertools
+import json
 import tempfile
 import time
 

@@ -20,6 +20,7 @@ for i in range(10):
     except:
         time.sleep(25)
 
+
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -44,6 +45,7 @@ def model():
     yield MODEL
     response = requests.post(f"http://localhost/{MODEL}/unload")
     assert response.json()["success"]
+
 
 @pytest.fixture
 def dataset():
@@ -74,6 +76,7 @@ def test_bmp(model):
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
+
 
 def test_modelconfig():
     # Figure out which config parameters are defined
@@ -110,6 +113,7 @@ def test_modelconfig():
 
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
+
 
 @pytest.mark.slow
 def test_score(dataset, model):
