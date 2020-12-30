@@ -6,6 +6,7 @@ import pkgutil
 from pathlib import Path
 
 import proteus.models
+import tritonclient.http as httpclient
 from file_read_backwards import FileReadBackwards
 from jinja2 import Environment, FileSystemLoader
 
@@ -17,6 +18,23 @@ env = Environment(
 template = env.get_template("template.py")
 
 logger = logging.getLogger(__name__)
+
+
+def get_triton_client():
+    # set up Triton connection
+    TRITONURL = "triton:8000"
+    # TODO check that always available ...
+    try:
+        # Specify large enough concurrency to handle the
+        # the number of requests.
+        concurrency = 1
+        triton_client = httpclient.InferenceServerClient(
+            url=TRITONURL, concurrency=concurrency
+        )
+        logger.info(f"Server ready? {triton_client.is_server_ready()}")
+    except Exception as e:
+        logger.error("client creation failed: " + str(e))
+    return triton_client
 
 
 def get_model_dict():
