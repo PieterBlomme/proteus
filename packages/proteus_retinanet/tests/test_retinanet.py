@@ -7,7 +7,7 @@ import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
-from proteus.models.base.base import ModelConfig  # probably should have his own version
+from proteus.models.retinanet.client import ModelConfig
 
 MODEL = "RetinaNet"
 

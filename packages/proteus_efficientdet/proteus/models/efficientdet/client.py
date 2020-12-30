@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 
 import numpy as np
-import pydantic
 from proteus.models.base import BaseModel
+from proteus.models.base.modelconfigs import BaseModelConfig
 from proteus.types import BoundingBox
 from tritonclient.utils import triton_to_np_dtype
 
@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 folder_path = Path(__file__).parent
 
 
-class ModelConfig(pydantic.BaseModel):
-    num_instances: int = 1
+class ModelConfig(BaseModelConfig):
+    pass
 
 
 class EfficientDetD0(BaseModel):

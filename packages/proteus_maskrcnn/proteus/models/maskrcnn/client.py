@@ -3,9 +3,9 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import pydantic
 from PIL import Image
 from proteus.models.base import BaseModel
+from proteus.models.base.modelconfigs import BaseModelConfig
 from proteus.types import BoundingBox, Segmentation
 from tritonclient.utils import triton_to_np_dtype
 
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 folder_path = Path(__file__).parent
 
 
-class ModelConfig(pydantic.BaseModel):
-    num_instances: int = 1
+class ModelConfig(BaseException):
+    pass
 
 
 class MaskRCNN(BaseModel):

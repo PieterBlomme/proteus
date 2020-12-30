@@ -7,7 +7,7 @@ import requests
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import ImageNette
-from proteus.models.base.base import ModelConfig  # probably should have his own version
+from proteus.models.resnet50.client import ModelConfig
 
 MODEL = "Resnet50V2"
 

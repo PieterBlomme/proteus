@@ -4,19 +4,19 @@ import shutil
 
 import numpy as np
 import onnx
-import pydantic
 import requests
 import tritonclient.http as httpclient
 from jinja2 import Template
 from onnxruntime.quantization import QuantType, quantize_dynamic
 from tritonclient.utils import InferenceServerException
 
+from .modelconfigs import BaseModelConfig, TritonOptimizationModelConfig
+
 logger = logging.getLogger(__name__)
 
 
-class ModelConfig(pydantic.BaseModel):
-    triton_optimization: bool = True
-    num_instances: int = 1
+class ModelConfig(BaseModelConfig, TritonOptimizationModelConfig):
+    pass
 
 
 class BaseModel:
