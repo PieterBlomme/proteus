@@ -1,14 +1,24 @@
-import tempfile
 import itertools
+import tempfile
+import time
+
 import pytest
 import requests
-import time
 from PIL import Image
 from PIL.ImageOps import pad
 from proteus.datasets import ImageNette
-from proteus.models.efficientnetlite4.client import ModelConfig 
+from proteus.models.efficientnetlite4.client import ModelConfig
 
 MODEL = "EfficientNetLite4"
+
+# Check liveness
+for i in range(10):
+    try:
+        response = requests.get("http://localhost/health")
+        if response.status_code == requests.codes.ok:
+            break
+    except:
+        time.sleep(25)
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -21,20 +31,8 @@ def get_prediction(fpath, model):
         )
     return response
 
-
-def test_health():
-    for i in range(10):
-        try:
-            response = requests.get("http://localhost/health")
-            if response.status_code == requests.codes.ok:
-                return
-        except:
-            time.sleep(25)
-
-
 @pytest.fixture
 def model():
-    test_health()
     payload = {"triton_optimization": True}
     response = requests.post(
         f"http://localhost/{MODEL}/load",
@@ -77,9 +75,8 @@ def test_bmp(model):
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
-def test_modelconfig():
-    test_health()
 
+def test_modelconfig():
     # Figure out which config parameters are defined
     schema = ModelConfig().dict()
 
@@ -93,7 +90,9 @@ def test_modelconfig():
         elif type(v) == int:
             test_values.append([1, 2])
         else:
-            raise NotImplementedError(f'Config parameter of type {type(v)} not yet implemented')
+            raise NotImplementedError(
+                f"Config parameter of type {type(v)} not yet implemented"
+            )
     test_combinations = list(itertools.product(*test_values))
 
     # Test load + prediction for each combination
@@ -112,6 +111,7 @@ def test_modelconfig():
 
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
+
 
 @pytest.mark.slow
 def test_score(dataset, model):
