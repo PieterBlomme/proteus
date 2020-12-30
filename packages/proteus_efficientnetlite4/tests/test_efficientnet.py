@@ -20,6 +20,7 @@ for i in range(10):
     except:
         time.sleep(25)
 
+
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
         jsonfiles = {"file": f}
@@ -30,6 +31,7 @@ def get_prediction(fpath, model):
             data=payload,
         )
     return response
+
 
 @pytest.fixture
 def model():
