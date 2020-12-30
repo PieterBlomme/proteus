@@ -8,7 +8,7 @@ from .helpers import read_class_names
 folder_path = Path(__file__).parent
 
 
-class ModelConfig(BaseException):
+class ModelConfig(BaseModelConfig):
     pass
 
 
