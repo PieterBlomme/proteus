@@ -35,12 +35,12 @@ spec:
             - name: TRITON_CONCURRENCY
               value: "1"
             - name: "TRITON_CLIENT_TIMEOUT"
-              value: "300"
+              value: "1000"
             - name: "TIMEOUT"
-              value: "120"
+              value: "1000"
             - name: "KEEP_ALIVE"
-              value: "2"
-          image: pieterblomme/api:0.2
+              value: "1000"
+          image: pieterblomme/api:quantfix-rc0
           name: api
           ports:
             - containerPort: 80
