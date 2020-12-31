@@ -27,7 +27,7 @@ spec:
       containers:
         - env:
             - name: LOGLEVEL
-              value: INFO
+              value: "INFO"
             - name: MAX_ACTIVE_MODELS
               value: "3"
             - name: MODEL_INACTIVITY
@@ -40,6 +40,8 @@ spec:
               value: "1000"
             - name: "KEEP_ALIVE"
               value: "1000"
+            - name: "WEB_CONCURRENCY"
+              value: "4"
           image: pieterblomme/api:quantfix-rc0
           name: api
           ports:
