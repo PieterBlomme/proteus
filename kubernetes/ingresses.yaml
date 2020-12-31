@@ -5,12 +5,12 @@ metadata:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/proxy-body-size: "4000m"
     nginx.ingress.kubernetes.io/proxy-body-size: "4000m"
-    ingress.kubernetes.io/proxy-connect-timeout: "500"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "500"
-    ingress.kubernetes.io/proxy-send-timeout: "500"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "500"
-    ingress.kubernetes.io/proxy-read-timeout: "500"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "500"
+    ingress.kubernetes.io/proxy-connect-timeout: "1000"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "1000"
+    ingress.kubernetes.io/proxy-send-timeout: "1000"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1000"
+    ingress.kubernetes.io/proxy-read-timeout: "1000"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1000"
     nginx.org/mergeable-ingress-type: master
   name: ingress-paths
   labels:

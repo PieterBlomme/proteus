@@ -31,7 +31,7 @@ spec:
             - name: MAX_ACTIVE_MODELS
               value: "3"
             - name: MODEL_INACTIVITY
-              value: "5"
+              value: "60"
             - name: TRITON_CONCURRENCY
               value: "1"
             - name: "TRITON_CLIENT_TIMEOUT"
