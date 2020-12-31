@@ -12,18 +12,18 @@ Score on 100 samples from ImageNette dataset
 Average throughput in FPS on 50 samples from ImageNette dataset
 |    | triton_optimization   | quantize   |   num_workers |   num_instances |   throughput |
 |---:|:----------------------|:-----------|--------------:|----------------:|-------------:|
-|  5 | True                  | False      |             4 |               1 |    104.541   |
-|  4 | True                  | False      |             2 |               1 |    100.454   |
-|  0 | True                  | False      |             1 |               1 |     83.2911  |
-|  3 | True                  | False      |             1 |               2 |     83.2439  |
-|  2 | False                 | False      |             1 |               1 |     16.073   |
-|  1 | True                  | True       |             1 |               1 |      7.86415 |
+|  5 | True                  | False      |             4 |               1 |    219.105   |
+|  4 | True                  | False      |             2 |               1 |    143.642   |
+|  3 | True                  | False      |             1 |               2 |     79.0502  |
+|  0 | True                  | False      |             1 |               1 |     74.3149  |
+|  2 | False                 | False      |             1 |               1 |     18.3322  |
+|  1 | True                  | True       |             1 |               1 |      9.24823 |
 
 ## Latency
 
 Average latency in ms on 10 samples from ImageNette dataset
 |    | triton_optimization   | quantize   |   latency |
 |---:|:----------------------|:-----------|----------:|
-|  0 | True                  | False      |   10.6867 |
-|  1 | True                  | True       |  129.597  |
-|  2 | False                 | False      |  188.911  |
+|  0 | True                  | False      |   11.8885 |
+|  1 | True                  | True       |  114.111  |
+|  2 | False                 | False      |  197.589  |
