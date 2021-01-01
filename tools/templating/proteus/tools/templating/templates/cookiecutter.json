@@ -1,5 +1,6 @@
 {
     "package_name": "retinanet",
     "model_name": "RetinaNet",
-    "test_dataset": "CocoValBBox"
+    "test_dataset": "CocoValBBox",
+    "model_url": ""
 }
