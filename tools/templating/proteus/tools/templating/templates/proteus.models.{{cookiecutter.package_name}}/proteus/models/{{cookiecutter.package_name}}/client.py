@@ -25,7 +25,7 @@ class {{cookiecutter.model_name}}(BaseModel):
     DESCRIPTION = (
         "Description for model goes here"
     )
-    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/super_resolution/sub_pixel_cnn_2016/model/super-resolution-10.onnx"
+    MODEL_URL = "{{cookiecutter.model_url}}"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = None
     OUTPUT_NAMES = None
