@@ -7,7 +7,7 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = []
+requirements = ["python-resize-image==1.1.19"]
 
 test_requirements = ["pytest>=3"]
 

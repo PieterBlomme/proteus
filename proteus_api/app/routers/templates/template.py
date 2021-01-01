@@ -9,7 +9,6 @@ import tritonclient.http as httpclient
 from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
 from fastapi.responses import StreamingResponse
 from PIL import Image
-from io import BytesIO
 from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
@@ -143,11 +142,11 @@ async def predict(file: bytes = File(...)):
     response = model.inference_http(triton_client, img)
 
     if type(response[0]) == Image.Image:
-        logger.warning('returning StreamingResponse')
+        logger.warning("returning StreamingResponse")
         # return file response
         img_byte_arr = BytesIO()
-        response[0].save(img_byte_arr, format='PNG')
-        img_byte_arr.seek(0) # important here!
+        response[0].save(img_byte_arr, format="PNG")
+        img_byte_arr.seek(0)  # important here!
         return StreamingResponse(img_byte_arr, media_type="image/png")
     else:
         return response
