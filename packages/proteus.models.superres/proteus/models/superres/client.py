@@ -36,7 +36,7 @@ class SuperResolution(BaseModel):
     MODEL_CONFIG = ModelConfig
 
     @classmethod
-    def preprocess(cls, img):
+    def preprocess(cls, img, pred_ref):
         """
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
@@ -53,18 +53,31 @@ class SuperResolution(BaseModel):
         img_4 = np.expand_dims(img_ndarray, axis=0)
         img_5 = img_4.astype(np.float32) / 255.0
 
+        # Save some parts in the PREDICTION_DATA store for postprocess
+        cls.PREDICTION_DATA[pred_ref]['img_cb'] = img_cb
+        cls.PREDICTION_DATA[pred_ref]['img_cr'] = img_cr
         return img_5
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching):
+    def postprocess(cls, results, pred_ref, batch_size, batching):
         """
         Post-process results to return valid outputs.
         """
+        # Fetch from the PREDICTION_DATA store
+        img_cb = cls.PREDICTION_DATA[pred_ref]['img_cb']
+        img_cr = cls.PREDICTION_DATA[pred_ref]['img_cr']
+
         output_name = cls.OUTPUT_NAMES[0]
         results = results.as_numpy(output_name)
         logger.debug(results)
-        results = Image.fromarray(
+        img_out_y = Image.fromarray(
             np.uint8((results[0] * 255.0).clip(0, 255)[0]), mode="L"
         )
-        logger.debug(results)
-        return results
+        final_img = Image.merge(
+        "YCbCr", [
+            img_out_y,
+            img_cb.resize(img_out_y.size, Image.BICUBIC),
+            img_cr.resize(img_out_y.size, Image.BICUBIC),
+        ]).convert("RGB")
+        logger.debug(final_img)
+        return final_img
