@@ -25,11 +25,12 @@ class {{cookiecutter.model_name}}(BaseModel):
     DESCRIPTION = (
         "Description for model goes here"
     )
-    MODEL_URL = None
+    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/super_resolution/sub_pixel_cnn_2016/model/super-resolution-10.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = None
     OUTPUT_NAMES = None
     DTYPE = None
+    MODEL_CONFIG = ModelConfig
 
     @classmethod
     def preprocess(cls, img):
