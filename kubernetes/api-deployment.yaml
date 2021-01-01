@@ -27,15 +27,22 @@ spec:
       containers:
         - env:
             - name: LOGLEVEL
-              value: INFO
+              value: "INFO"
             - name: MAX_ACTIVE_MODELS
               value: "3"
             - name: MODEL_INACTIVITY
-              value: "5"
+              value: "600000"
             - name: TRITON_CONCURRENCY
               value: "1"
-
-          image: pieterblomme/api:0.2
+            - name: "TRITON_CLIENT_TIMEOUT"
+              value: "1000"
+            - name: "TIMEOUT"
+              value: "1000"
+            - name: "KEEP_ALIVE"
+              value: "1000"
+            - name: "WEB_CONCURRENCY"
+              value: "4"
+          image: pieterblomme/api:quantfix-rc0
           name: api
           ports:
             - containerPort: 80

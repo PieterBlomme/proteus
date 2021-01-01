@@ -43,10 +43,15 @@ def get_triton_client():
         # Specify large enough concurrency to handle the
         # the number of requests.
         CONCURRENCY = int(os.environ.get("TRITON_CONCURRENCY", "1"))
+        TRITON_CLIENT_TIMEOUT = int(os.environ.get("TRITON_CLIENT_TIMEOUT", "300"))
         triton_client = httpclient.InferenceServerClient(
-            url=TRITONURL, concurrency=CONCURRENCY
+            url=TRITONURL,
+            concurrency=CONCURRENCY,
+            connection_timeout=TRITON_CLIENT_TIMEOUT,
+            network_timeout=TRITON_CLIENT_TIMEOUT,
         )
         logger.info(f"Concurrency set to {CONCURRENCY}")
+        logger.info(f"TritonClient timeout set to {TRITON_CLIENT_TIMEOUT}")
         logger.info(f"Server ready? {triton_client.is_server_ready()}")
     except Exception as e:
         logger.error("client creation failed: " + str(e))
@@ -72,14 +77,14 @@ async def load_model(model_config: config_class):
             status_code=403,
             detail=f"Max active models ({max_active_models}) reached.  A model needs to be unloaded before adding another.",
         )
-    # log prediction call to file
-    logging.getLogger("predictions").info("{{name}}|LOAD")
 
     name = "{{name}}"
     model = model_dict[name]
     try:
         logger.info(f"Loading model {{name}}")
         model.load_model(model_config, triton_client)
+        # log prediction call to file
+        logging.getLogger("predictions").info("{{name}}|LOAD")
 
         if not triton_client.is_model_ready(name):
             raise HTTPException(
