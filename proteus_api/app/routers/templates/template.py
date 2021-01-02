@@ -94,8 +94,11 @@ async def load_model(model_config: config_class):
             )
         else:
             model_config = model.load_model_info(triton_client)
-            return {"success": True, "message": f"model {{name}} loaded",
-            "model_config": model_config}
+            return {
+                "success": True,
+                "message": f"model {{name}} loaded",
+                "model_config": model_config,
+            }
     except ImportError as e:
         logger.info(e)
         raise HTTPException(
