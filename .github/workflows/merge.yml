@@ -23,10 +23,14 @@ jobs:
            python-version: ${{ matrix.python-version }}
 
       # Add a cache to hopefully speed up the install dependencies step
-      - uses: actions/cache@v2
+      - uses: actions/cache@master
+        id: cache
         with:
-          path: ~/.cache/pip
-          key: ${{ hashFiles('test_requirements.txt') }}
+          path: ${{ env.pythonLocation}}/lib/python3.7/site-packages/*
+          key: ${{ runner.os }}-pip-${{ hashFiles('test_requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
 
       # This step should now be faster
       - name: Install dependencies
