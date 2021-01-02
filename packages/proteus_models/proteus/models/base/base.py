@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-import uuid
+
 import numpy as np
 import onnx
 import requests
@@ -39,8 +39,6 @@ class BaseModel:
     INPUT_NAME = None
     OUTPUT_NAMES = None
     DTYPE = None
-
-    PREDICTION_DATA = {}
 
     MODEL_CONFIG = ModelConfig
 
@@ -185,16 +183,13 @@ class BaseModel:
         :return: results
         """
 
-        # Generate an entry in the PREDICTION_DATA store
-        pred_ref = uuid.uuid1()
-        cls.PREDICTION_DATA[pred_ref] = {}
-
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
 
         # Preprocess the images into input data according to model
         # requirements
-        image_data = [cls.preprocess(img, pred_ref)]
+        image_data, extra_data = cls.preprocess(img)
+        image_data = [image_data]
 
         # Send requests of batch_size=1 images. If the number of
         # images isn't an exact multiple of batch_size then just
@@ -232,9 +227,9 @@ class BaseModel:
             logger.debug("Request {}, batch size {}".format(this_id, 1))
             # final_response = cls.postprocess(
             #     response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
-            # )            
+            # )
             final_response = cls.postprocess(
-                response, pred_ref, 1, cls.MAX_BATCH_SIZE > 0
+                response, extra_data, 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
 
