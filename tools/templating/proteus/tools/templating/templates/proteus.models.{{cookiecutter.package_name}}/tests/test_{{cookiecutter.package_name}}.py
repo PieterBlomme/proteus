@@ -10,7 +10,7 @@ from PIL.ImageOps import pad
 from proteus.datasets import {{cookiecutter.test_dataset}}
 from proteus.models.{{cookiecutter.package_name}}.client import ModelConfig
 
-MODEL = {{cookiecutter.model_name}}
+MODEL = '{{cookiecutter.model_name}}'
 
 # Check liveness
 for i in range(10):
