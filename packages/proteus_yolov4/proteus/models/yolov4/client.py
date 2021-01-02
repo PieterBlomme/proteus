@@ -72,7 +72,7 @@ class YoloV4(BaseModel):
         extra_data = {}
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
-        extra_data["original_image_size"] == (h, w)
+        extra_data["original_image_size"] = (h, w)
 
         if cls.SHAPE[2] == 1:
             sample_img = img.convert("L")
@@ -94,7 +94,7 @@ class YoloV4(BaseModel):
         if cls.CHANNEL_FIRST:
             img = np.transpose(img, (2, 0, 1))
 
-        return image
+        return image, extra_data
 
     @classmethod
     def postprocess(cls, results, extra_data, batch_size, batching):

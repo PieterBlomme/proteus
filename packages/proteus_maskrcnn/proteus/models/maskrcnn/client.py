@@ -54,7 +54,7 @@ class MaskRCNN(BaseModel):
         extra_data = {}
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
-        extra_data["original_image_size"] == (h, w)
+        extra_data["original_image_size"] = (h, w)
 
         img = img.convert("RGB")
 
