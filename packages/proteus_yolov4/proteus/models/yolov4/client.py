@@ -63,8 +63,17 @@ class YoloV4(BaseModel):
         requirements specified by the parameters.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/yolov4
 
-        :param img: image as array in HWC format
+        :param img: Pillow image
+
+        :returns:
+            - model_input: input as required by the model
+            - extra_data: dict of data that is needed by the postprocess function
         """
+        extra_data = {}
+        # Careful, Pillow has (w,h) format but most models expect (h,w)
+        w, h = img.size
+        extra_data['original_image_size'] == (h, w)
+        
         if cls.SHAPE[2] == 1:
             sample_img = img.convert("L")
         else:
@@ -88,10 +97,18 @@ class YoloV4(BaseModel):
         return image
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching):
+    def postprocess(cls, results, extra_data, batch_size, batching):
         """
         Post-process results to show bounding boxes.
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+
+        :returns: json result
         """
+        original_image_size = extra_data['original_image_size']
+
         logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         logger.debug(list(map(lambda detection: detection.shape, detections)))

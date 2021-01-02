@@ -38,15 +38,24 @@ class {{cookiecutter.model_name}}(BaseModel):
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
 
-        :param img: image as array in HWC format
+        :param img: Pillow image
 
-        :return: processed image
+        :returns:
+            - model_input: input as required by the model
+            - extra_data: dict of data that is needed by the postprocess function
         """
-        return img
+        extra_data = {}
+        return img, extra_data
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching):
+    def postprocess(cls, results, extra_data, batch_size, batching):
         """
         Post-process results to return valid outputs.
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+
+        :returns: json result
         """
         return results

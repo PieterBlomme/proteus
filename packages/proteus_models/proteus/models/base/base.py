@@ -183,9 +183,6 @@ class BaseModel:
         :return: results
         """
 
-        # Careful, Pillow has (w,h) format but most models expect (h,w)
-        w, h = img.size
-
         # Preprocess the images into input data according to model
         # requirements
         image_data, extra_data = cls.preprocess(img)

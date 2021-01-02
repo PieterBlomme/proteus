@@ -65,6 +65,12 @@ class SuperResolution(BaseModel):
     def postprocess(cls, results, extra_data, batch_size, batching):
         """
         Post-process results to return valid outputs.
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+
+        :returns: json result
         """
         # Fetch from the PREDICTION_DATA store
         img_cb = extra_data["img_cb"]
