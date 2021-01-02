@@ -8,3 +8,5 @@
 ./packages/proteus_efficientdet
 ./packages/proteus_retinanet
 ./packages/proteus_maskrcnn
+./packages/proteus_maskrcnn
+./packages/proteus.models.superres
