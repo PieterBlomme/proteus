@@ -7,3 +7,4 @@
 -e /packages/proteus_efficientdet/.
 -e /packages/proteus_retinanet/.
 -e /packages/proteus_maskrcnn/.
+-e /packages/proteus.models.superres/.

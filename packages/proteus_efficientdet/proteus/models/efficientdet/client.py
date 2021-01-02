@@ -44,8 +44,14 @@ class EfficientDetD0(BaseModel):
         Based on this (very few preprocess needed):
         https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
 
-        :param img: image as array in HWC format
+        :param img: Pillow image
+
+        :returns:
+            - model_input: input as required by the model
+            - extra_data: dict of data that is needed by the postprocess function
         """
+        extra_data = {}
+
         if cls.SHAPE[2] == 1:
             sample_img = img.convert("L")
         else:
@@ -64,15 +70,22 @@ class EfficientDetD0(BaseModel):
         if cls.CHANNEL_FIRST:
             img = np.transpose(img, (2, 0, 1))
 
-        return open_cv_image
+        return open_cv_image, extra_data
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching):
+    def postprocess(cls, results, extra_data, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         Based on this (very few postprocess needed):
         https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+
+        :returns: json result
         """
+
         logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         # only one output, so

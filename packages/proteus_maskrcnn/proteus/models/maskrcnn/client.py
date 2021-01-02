@@ -44,8 +44,18 @@ class MaskRCNN(BaseModel):
         Pre-process an image to meet the size, type and format
         requirements specified by the parameters.
 
-        :param img: image as array in HWC format
+
+        :param img: Pillow image
+
+        :returns:
+            - model_input: input as required by the model
+            - extra_data: dict of data that is needed by the postprocess function
         """
+        extra_data = {}
+        # Careful, Pillow has (w,h) format but most models expect (h,w)
+        w, h = img.size
+        extra_data["original_image_size"] = (h, w)
+
         img = img.convert("RGB")
 
         logger.info(f"Original image size: {img.size}")
@@ -55,14 +65,21 @@ class MaskRCNN(BaseModel):
         npdtype = triton_to_np_dtype(cls.DTYPE)
         img = img.astype(npdtype)
 
-        return img
+        return img, extra_data
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching):
+    def postprocess(cls, results, extra_data, batch_size, batching):
         """
         Post-process results to show bounding boxes.
         https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+
+        :returns: json result
         """
+        original_image_size = extra_data["original_image_size"]
 
         # get outputs
         boxes = results.as_numpy(cls.OUTPUT_NAMES[0])

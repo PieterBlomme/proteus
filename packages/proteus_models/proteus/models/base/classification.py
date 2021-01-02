@@ -93,8 +93,14 @@ class ClassificationModel(BaseModel):
         See details at
         https://github.com/onnx/models/tree/master/vision/classification/efficientnet-lite4
 
-        :param img: image as array in HWC format
+        :param img: Pillow image
+
+        :returns:
+            - model_input: input as required by the model
+            - extra_data: dict of data that is needed by the postprocess function
         """
+        extra_data = {}
+
         if cls.SHAPE[2] == 1:
             sample_img = img.convert("L")
         else:
@@ -112,18 +118,21 @@ class ClassificationModel(BaseModel):
         # channels first if needed
         if cls.CHANNEL_FIRST:
             img = np.transpose(img, (2, 0, 1))
-        return img
+        return img, extra_data
 
     @classmethod
-    def postprocess(cls, results, original_image_size, batch_size, batching, topk=5):
+    def postprocess(cls, results, extra_data, batch_size, batching, topk=5):
         """
         Post-process results to show classifications.
 
         :param results: raw results
-        :param output_name: name of the output to process
-        :param batch_size TODO
-        :param batching TODO
-        :param topk: how many results to return
+        :param results: model outputs
+        :param extra_data: dict of data that is needed by the postprocess function
+        :param batch_size
+        :param batching: boolean flag indicating if batching
+        :param topk: how many resutls to return
+
+        :returns: json result
         """
         output_array = [
             results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES

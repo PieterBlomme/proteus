@@ -1,16 +1,16 @@
 import itertools
-import json
 import tempfile
 import time
+from io import BytesIO
 
 import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
-from proteus.datasets import {{cookiecutter.test_dataset}}
-from proteus.models.{{cookiecutter.package_name}}.client import ModelConfig
+from proteus.datasets import BSDSSuperRes
+from proteus.models.superres.client import ModelConfig
 
-MODEL = '{{cookiecutter.model_name}}'
+MODEL = "SuperResolution"
 
 # Check liveness
 for i in range(10):
@@ -20,6 +20,7 @@ for i in range(10):
             break
     except:
         time.sleep(25)
+
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -49,12 +50,12 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return {{cookiecutter.test_dataset}}(k=100)
+    return BSDSSuperRes(k=100)
 
 
 @pytest.fixture
 def small_dataset():
-    return {{cookiecutter.test_dataset}}(k=10)
+    return BSDSSuperRes(k=10)
 
 
 def test_jpg(model):
@@ -76,6 +77,7 @@ def test_bmp(model):
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
+
 
 def test_modelconfig():
     # Figure out which config parameters are defined
@@ -112,13 +114,18 @@ def test_modelconfig():
 
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
-        
+
+
 @pytest.mark.slow
 def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0]]
-        preds.append(result)
+        img_byte_arr = BytesIO(response.content)
+        img_byte_arr.seek(0)  # important here!
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            Image.open(img_byte_arr).save(tmp.name)
+            preds.append(tmp.name)
+
     score = dataset.eval(preds)
-    assert score > 0.0
+    assert score < 100.0

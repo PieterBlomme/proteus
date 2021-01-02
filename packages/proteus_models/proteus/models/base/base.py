@@ -95,15 +95,7 @@ class BaseModel:
         yield inputs, outputs
 
     @classmethod
-    def load_model(cls, model_config, triton_client):
-        """
-        Download (if needed) model files and load model in Triton
-
-        :param triton_client : the client to use
-        """
-        logger.debug(model_config)
-        cls._maybe_download()
-
+    def generate_config_file(cls, model_config):
         # Generate config
         targetfile = f"/models/{cls.__name__}/config.pbtxt"
         os.makedirs(os.path.dirname(targetfile), exist_ok=True)
@@ -136,13 +128,29 @@ class BaseModel:
             logger.info(rendered_template)
             fh.write(rendered_template)
 
-        if getattr(model_config, "quantize", False):
-            # quantize model and write
-            cls._maybe_quantize()
-        else:
-            cls._write_model()
+    @classmethod
+    def load_model(cls, model_config, triton_client):
+        """
+        Download (if needed) model files and load model in Triton
 
-        triton_client.load_model(cls.__name__)
+        :param triton_client : the client to use
+        """
+        logger.debug(model_config)
+        cls._maybe_download()
+
+        if cls.CONFIG_PATH is None:
+            # Load and get the metadata
+            triton_client.load_model(cls.__name__)
+            logger.info(cls.load_model_info(triton_client))
+        else:
+            cls.generate_config_file(model_config)
+            if getattr(model_config, "quantize", False):
+                # quantize model and write
+                cls._maybe_quantize()
+            else:
+                cls._write_model()
+
+            triton_client.load_model(cls.__name__)
 
     @classmethod
     def load_model_info(cls, triton_client):
@@ -156,6 +164,7 @@ class BaseModel:
             model_metadata = triton_client.get_model_metadata(
                 model_name=cls.__name__, model_version=cls.MODEL_VERSION
             )
+            return model_metadata
         except InferenceServerException as e:
             raise Exception("failed to retrieve the metadata: " + str(e))
 
@@ -174,12 +183,10 @@ class BaseModel:
         :return: results
         """
 
-        # Careful, Pillow has (w,h) format but most models expect (h,w)
-        w, h = img.size
-
         # Preprocess the images into input data according to model
         # requirements
-        image_data = [cls.preprocess(img)]
+        image_data, extra_data = cls.preprocess(img)
+        image_data = [image_data]
 
         # Send requests of batch_size=1 images. If the number of
         # images isn't an exact multiple of batch_size then just
@@ -215,8 +222,11 @@ class BaseModel:
         for response in responses:
             this_id = response.get_response()["id"]
             logger.debug("Request {}, batch size {}".format(this_id, 1))
+            # final_response = cls.postprocess(
+            #     response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
+            # )
             final_response = cls.postprocess(
-                response, (h, w), 1, cls.MAX_BATCH_SIZE > 0
+                response, extra_data, 1, cls.MAX_BATCH_SIZE > 0
             )
             final_responses.append(final_response)
 

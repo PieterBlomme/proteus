@@ -7,6 +7,7 @@ from io import BytesIO
 import proteus.models
 import tritonclient.http as httpclient
 from fastapi import APIRouter, Depends, FastAPI, File, HTTPException
+from fastapi.responses import StreamingResponse
 from PIL import Image
 from starlette.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
@@ -139,4 +140,13 @@ async def predict(file: bytes = File(...)):
             detail="Unable to process file",
         )
     response = model.inference_http(triton_client, img)
-    return response
+
+    if type(response[0]) == Image.Image:
+        logger.warning("returning StreamingResponse")
+        # return file response
+        img_byte_arr = BytesIO()
+        response[0].save(img_byte_arr, format="PNG")
+        img_byte_arr.seek(0)  # important here!
+        return StreamingResponse(img_byte_arr, media_type="image/png")
+    else:
+        return response

@@ -1,0 +1,21 @@
+
+platform: "onnxruntime_onnx"
+max_batch_size : 10
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    format: FORMAT_NONE
+    dims: [1, 224, 224]
+  }
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP32
+    dims: [1, 672, 672]
+  }
+]
+{{triton_optimization}}
+{{dynamic_batching}}
+{{num_instances}}
