@@ -67,8 +67,11 @@ def check_last_active(model):
 
         # getting lines by lines starting from the last line up
         for l in frb:
-            ts, name = l.split("|")[0], l.split("|")[1]
-            if model == name:
+            ts, name, action = l.split("|")[0], l.split("|")[1], l.split("|")[2]
+            if model == name and action == 'LOADING':
+                #Never trigger unload if still loading ...
+                return 0
+            elif model == name:
                 last_call = datetime.datetime.strptime(ts, "%Y-%m-%d %H:%M:%S,%f")
                 elapsed = datetime.datetime.now() - last_call
                 return elapsed.total_seconds() / 60
