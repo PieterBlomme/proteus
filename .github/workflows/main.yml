@@ -24,6 +24,12 @@ jobs:
         with:
            python-version: ${{ matrix.python-version }}
 
+      # Add a cache to hopefully speed up the install dependencies step
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ hashFiles('test_requirements.txt') }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
