@@ -6,7 +6,7 @@ import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
-from proteus.datasets import CocoValBBox
+from proteus.datasets import BSDSSuperRes
 from proteus.models.superres.client import ModelConfig
 
 MODEL = "SuperResolution"
@@ -49,12 +49,12 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return CocoValBBox(k=100)
+    return BSDSSuperRes(k=10)
 
 
 @pytest.fixture
 def small_dataset():
-    return CocoValBBox(k=10)
+    return BSDSSuperRes(k=10)
 
 
 def test_jpg(model):
@@ -120,7 +120,9 @@ def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0]]
-        preds.append(result)
+        img = response.raw.read()
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            tmp.write(img)
+            preds.append(tmp.name)
     score = dataset.eval(preds)
     assert score > 0.0

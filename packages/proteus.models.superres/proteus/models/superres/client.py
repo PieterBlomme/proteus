@@ -54,7 +54,7 @@ class SuperResolution(BaseModel):
         img_y_0, img_cb, img_cr = img_ycbcr.split()
         img_ndarray = np.asarray(img_y_0)
         img_4 = np.expand_dims(img_ndarray, axis=0)
-        processed_image = img_4.astype(np.float32) / 255.0
+        model_input = img_4.astype(np.float32) / 255.0
 
         # Save some parts in the PREDICTION_DATA store for postprocess
         extra_data["img_cb"] = img_cb
