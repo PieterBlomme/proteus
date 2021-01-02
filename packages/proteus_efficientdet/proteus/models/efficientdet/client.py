@@ -85,7 +85,7 @@ class EfficientDetD0(BaseModel):
 
         :returns: json result
         """
-        
+
         logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
         # only one output, so

@@ -54,7 +54,7 @@ class MaskRCNN(BaseModel):
         extra_data = {}
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
-        extra_data['original_image_size'] == (h, w)
+        extra_data["original_image_size"] == (h, w)
 
         img = img.convert("RGB")
 
@@ -79,8 +79,8 @@ class MaskRCNN(BaseModel):
 
         :returns: json result
         """
-        original_image_size = extra_data['original_image_size']
-        
+        original_image_size = extra_data["original_image_size"]
+
         # get outputs
         boxes = results.as_numpy(cls.OUTPUT_NAMES[0])
         labels = results.as_numpy(cls.OUTPUT_NAMES[1])

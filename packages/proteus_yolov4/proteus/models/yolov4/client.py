@@ -72,8 +72,8 @@ class YoloV4(BaseModel):
         extra_data = {}
         # Careful, Pillow has (w,h) format but most models expect (h,w)
         w, h = img.size
-        extra_data['original_image_size'] == (h, w)
-        
+        extra_data["original_image_size"] == (h, w)
+
         if cls.SHAPE[2] == 1:
             sample_img = img.convert("L")
         else:
@@ -107,7 +107,7 @@ class YoloV4(BaseModel):
 
         :returns: json result
         """
-        original_image_size = extra_data['original_image_size']
+        original_image_size = extra_data["original_image_size"]
 
         logger.debug(cls.OUTPUT_NAMES)
         detections = [results.as_numpy(output_name) for output_name in cls.OUTPUT_NAMES]
