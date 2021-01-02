@@ -30,6 +30,7 @@ jobs:
           path: ~/.cache/pip
           key: ${{ hashFiles('test_requirements.txt') }}
 
+      # This step should now be faster
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
