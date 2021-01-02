@@ -9,7 +9,7 @@ from PIL.ImageOps import pad
 from proteus.datasets import CocoValBBox
 from proteus.models.superres.client import ModelConfig
 
-MODEL = 'SuperResolution'
+MODEL = "SuperResolution"
 
 # Check liveness
 for i in range(10):
