@@ -1,12 +1,12 @@
 import itertools
 import tempfile
 import time
+from io import BytesIO
 
 import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
-from io import BytesIO
 from proteus.datasets import BSDSSuperRes
 from proteus.models.superres.client import ModelConfig
 
@@ -50,7 +50,7 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return BSDSSuperRes(k=10)
+    return BSDSSuperRes(k=100)
 
 
 @pytest.fixture
@@ -126,6 +126,6 @@ def test_score(dataset, model):
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
             Image.open(img_byte_arr).save(tmp.name)
             preds.append(tmp.name)
-            
+
     score = dataset.eval(preds)
     assert score < 100.0

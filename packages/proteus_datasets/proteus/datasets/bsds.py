@@ -4,6 +4,7 @@ import random
 import tarfile
 import tempfile
 import urllib.request
+
 import numpy as np
 import requests
 from PIL import Image
@@ -48,7 +49,7 @@ class BSDSSuperRes(Dataset):
         originals = [self.files[i] for i in range(self.__len__())]
         mses = []
         for original, pred in zip(originals, preds):
-            np_original = np.array(Image.open(original).resize((672,672)))
+            np_original = np.array(Image.open(original).resize((672, 672)))
             np_pred = np.array(Image.open(pred))
             mse = np.square(np.subtract(np_original, np_pred)).mean()
             mses.append(mse)
