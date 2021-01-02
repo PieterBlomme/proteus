@@ -6,6 +6,7 @@ import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
+from io import BytesIO
 from proteus.datasets import BSDSSuperRes
 from proteus.models.superres.client import ModelConfig
 
@@ -120,9 +121,11 @@ def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        img = response.raw.read()
+        img_byte_arr = BytesIO(response.content)
+        img_byte_arr.seek(0)  # important here!
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-            tmp.write(img)
+            Image.open(img_byte_arr).save(tmp.name)
             preds.append(tmp.name)
+            
     score = dataset.eval(preds)
-    assert score > 0.0
+    assert score < 100.0

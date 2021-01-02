@@ -4,13 +4,14 @@ import random
 import tarfile
 import tempfile
 import urllib.request
-from PIL import Image
-
+import numpy as np
 import requests
+from PIL import Image
 
 from .datasets import Dataset
 
 tmpfolder = tempfile.gettempdir()
+
 
 class BSDSSuperRes(Dataset):
     """
@@ -28,9 +29,7 @@ class BSDSSuperRes(Dataset):
     def maybe_download(self):
         if not os.path.isdir(f"{tmpfolder}/datasets/BSR"):
             print("Downloading BSDS500")
-            thetarfile = (
-                "http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz"
-            )
+            thetarfile = "http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz"
             ftpstream = urllib.request.urlopen(thetarfile)
             thetarfile = tarfile.open(fileobj=ftpstream, mode="r|gz")
             thetarfile.extractall(path=f"{tmpfolder}/datasets")
@@ -46,8 +45,11 @@ class BSDSSuperRes(Dataset):
         return len(self.files)
 
     def eval(self, preds):
-        originals = [self.__getitem__(i)[0] for i in range(self.__len__())]
-        for original, pred in zip (originals, preds):
-            continue # TODO implement MSE
-
-        return 0
+        originals = [self.files[i] for i in range(self.__len__())]
+        mses = []
+        for original, pred in zip(originals, preds):
+            np_original = np.array(Image.open(original).resize((672,672)))
+            np_pred = np.array(Image.open(pred))
+            mse = np.square(np.subtract(np_original, np_pred)).mean()
+            mses.append(mse)
+        return np.array(mses).mean()
