@@ -26,7 +26,16 @@ class {{cookiecutter.model_name}}(BaseModel):
         "{{cookiecutter.model_description}}"
     )
     MODEL_URL = "{{cookiecutter.model_url}}"
-    CONFIG_PATH = f"{folder_path}/config.template"
+
+    """
+    Note: if CONFIG_PATH is None, Triton will figure out a default configuration from the ONNX file.  
+    The {{cookiecutter.model_name}}/load endpoint will return the used configuration, which can then be
+    used to fill the actual config.template.  It is not recommended to leave CONFIG_PATH empty in production
+    because it will not support features like batching, num_instances and TritonOptimization.
+    """
+    CONFIG_PATH = None
+    #CONFIG_PATH = f"{folder_path}/config.template"
+    
     INPUT_NAME = None
     OUTPUT_NAMES = None
     DTYPE = None

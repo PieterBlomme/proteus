@@ -138,11 +138,8 @@ class BaseModel:
         logger.debug(model_config)
         cls._maybe_download()
 
-        if cls.CONFIG_PATH is None:
-            # Load and get the metadata
-            triton_client.load_model(cls.__name__)
-            logger.info(cls.load_model_info(triton_client))
-        else:
+        if cls.CONFIG_PATH is not None:
+            # Create a config file
             cls.generate_config_file(model_config)
             if getattr(model_config, "quantize", False):
                 # quantize model and write
