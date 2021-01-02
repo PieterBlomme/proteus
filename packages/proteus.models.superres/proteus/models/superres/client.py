@@ -27,7 +27,7 @@ class ModelConfig(
 
 class SuperResolution(BaseModel):
 
-    DESCRIPTION = "Description for model goes here"
+    DESCRIPTION = "Implementation of Sub-Pixel CNN (2016) - https://arxiv.org/abs/1609.05158"
     MODEL_URL = "https://github.com/onnx/models/raw/master/vision/super_resolution/sub_pixel_cnn_2016/model/super-resolution-10.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input"

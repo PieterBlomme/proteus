@@ -23,7 +23,7 @@ class ModelConfig(
 class {{cookiecutter.model_name}}(BaseModel):
 
     DESCRIPTION = (
-        "Description for model goes here"
+        "{{cookiecutter.model_description}}"
     )
     MODEL_URL = "{{cookiecutter.model_url}}"
     CONFIG_PATH = f"{folder_path}/config.template"
