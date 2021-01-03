@@ -146,8 +146,9 @@ class BaseModel:
                 cls._maybe_quantize()
             else:
                 cls._write_model()
-
-            triton_client.load_model(cls.__name__)
+        else:
+            cls._write_model()
+        triton_client.load_model(cls.__name__)
 
     @classmethod
     def load_model_info(cls, triton_client):
