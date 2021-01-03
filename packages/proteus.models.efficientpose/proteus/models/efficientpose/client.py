@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from pathlib import Path
 
 from proteus.models.base import BaseModel
@@ -7,16 +8,13 @@ from proteus.models.base.modelconfigs import (
     BatchingModelConfig,
     TritonOptimizationModelConfig,
 )
+from .helpers import preprocess, extract_coordinates
 
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
 
-class ModelConfig(
-    BaseModelConfig,
-    TritonOptimizationModelConfig,
-    BatchingModelConfig
-):
+class ModelConfig(BaseModelConfig, TritonOptimizationModelConfig, BatchingModelConfig):
     pass
 
 
@@ -39,6 +37,7 @@ class EfficientPose(BaseModel):
     OUTPUT_NAMES = ["output"]
     DTYPE = "FP32"
     MODEL_CONFIG = ModelConfig
+    RESOLUTION = 224
 
     @classmethod
     def preprocess(cls, img):
@@ -53,7 +52,24 @@ class EfficientPose(BaseModel):
             - extra_data: dict of data that is needed by the postprocess function
         """
         extra_data = {}
-        return img, extra_data
+
+        # Load image
+        image = np.array(img)
+        image_height, image_width = image.shape[:2]
+        extra_data['image_height'] = image_height
+        extra_data['image_width'] = image_width
+
+        # For simplicity so we don't have to rewrite the original code
+        batch = np.expand_dims(image, axis=0)
+        # Preprocess batch
+        batch = preprocess(batch, cls.RESOLUTION)
+        # Pull single image out of batch
+        image = batch[0]
+
+        # Channel first
+        image = np.transpose(image, (2, 0, 1))
+
+        return image, extra_data
 
     @classmethod
     def postprocess(cls, results, extra_data, batch_size, batching):
@@ -66,4 +82,12 @@ class EfficientPose(BaseModel):
 
         :returns: json result
         """
-        return results
+        image_height = extra_data['image_height']
+        image_width = extra_data['image_width']
+
+        batch_outputs = results.as_numpy(cls.OUTPUT_NAMES[0])
+        batch_outputs = np.rollaxis(batch_outputs, 1, 4)
+        logger.debug(f'Shape of outputs: {batch_outputs.shape}')
+        coordinates = [extract_coordinates(batch_outputs[0,...], image_height, image_width)]
+        logger.debug(f'Coordinates: {coordinates}')
+        return 'test'

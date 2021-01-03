@@ -7,7 +7,16 @@ from setuptools import find_namespace_packages, setup
 with open("README.rst") as readme_file:
     readme = readme_file.read()
 
-requirements = []
+requirements = [
+    "pymediainfo==4.1",
+    "numpy==1.16.0",
+    "tensorflow==1.15.4",
+    "scikit-image==0.16.2",
+    "opencv-python-headless>=3.3.1.11",
+    "sk-video==1.1.10",
+    "torch==1.4.0",
+    "h5py==2.10.0"
+]
 
 test_requirements = ["pytest>=3"]
 
