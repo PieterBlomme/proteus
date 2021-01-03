@@ -1,5 +1,4 @@
 import itertools
-import json
 import tempfile
 import time
 
@@ -10,7 +9,7 @@ from PIL.ImageOps import pad
 from proteus.datasets import Dataset
 from proteus.models.efficientpose.client import ModelConfig
 
-MODEL = 'EfficientPose'
+MODEL = "EfficientPose"
 
 # Check liveness
 for i in range(10):
@@ -20,6 +19,7 @@ for i in range(10):
             break
     except:
         time.sleep(25)
+
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -77,6 +77,7 @@ def test_bmp(model):
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
 
+
 def test_modelconfig():
     # Figure out which config parameters are defined
     schema = ModelConfig().dict()
@@ -112,7 +113,8 @@ def test_modelconfig():
 
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
-        
+
+
 @pytest.mark.slow
 def test_score(dataset, model):
     preds = []

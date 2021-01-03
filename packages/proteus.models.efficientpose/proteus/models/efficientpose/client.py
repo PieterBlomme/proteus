@@ -5,20 +5,20 @@ from proteus.models.base import BaseModel
 from proteus.models.base.modelconfigs import (
     BaseModelConfig,
     BatchingModelConfig,
-    QuantizationModelConfig,
     TritonOptimizationModelConfig,
 )
 
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
+
 class ModelConfig(
     BaseModelConfig,
     TritonOptimizationModelConfig,
-    BatchingModelConfig,
-    QuantizationModelConfig, # this will require ONNX opset 11
+    BatchingModelConfig
 ):
     pass
+
 
 class EfficientPose(BaseModel):
 
@@ -33,12 +33,11 @@ class EfficientPose(BaseModel):
     used to fill the actual config.template.  It is not recommended to leave CONFIG_PATH empty in production
     because it will not support features like batching, num_instances and TritonOptimization.
     """
-    CONFIG_PATH = None
-    #CONFIG_PATH = f"{folder_path}/config.template"
-    
-    INPUT_NAME = None
-    OUTPUT_NAMES = None
-    DTYPE = None
+    CONFIG_PATH = f"{folder_path}/config.template"
+
+    INPUT_NAME = "input"
+    OUTPUT_NAMES = ["output"]
+    DTYPE = "FP32"
     MODEL_CONFIG = ModelConfig
 
     @classmethod
