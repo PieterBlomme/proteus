@@ -90,11 +90,14 @@ class EfficientPose(BaseModel):
         batch_outputs = results.as_numpy(cls.OUTPUT_NAMES[0])
         batch_outputs = np.rollaxis(batch_outputs, 1, 4)
         logger.debug(f"Shape of outputs: {batch_outputs.shape}")
-        coordinates = extract_coordinates(batch_outputs[0, ...], image_height, image_width)
+        coordinates = extract_coordinates(
+            batch_outputs[0, ...], image_height, image_width
+        )
         logger.debug(f"Coordinates: {coordinates}")
 
         # Convert to Proteus type for JSON response
-        proteus_coords = [Coordinate(name=name, x=x, y=y) for (name, x, y) in coordinates]
-        logger.info(f"Proteus coordinates: {proteus_coords}")
+        proteus_coords = [
+            Coordinate(name=name, x=x, y=y) for (name, x, y) in coordinates
+        ]
 
         return proteus_coords
