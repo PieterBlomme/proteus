@@ -1,14 +1,16 @@
 import logging
-import numpy as np
 from pathlib import Path
 
+import numpy as np
 from proteus.models.base import BaseModel
 from proteus.models.base.modelconfigs import (
     BaseModelConfig,
     BatchingModelConfig,
     TritonOptimizationModelConfig,
 )
-from .helpers import preprocess, extract_coordinates
+from proteus.types import Coordinate
+
+from .helpers import extract_coordinates, preprocess
 
 folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
@@ -56,8 +58,8 @@ class EfficientPose(BaseModel):
         # Load image
         image = np.array(img)
         image_height, image_width = image.shape[:2]
-        extra_data['image_height'] = image_height
-        extra_data['image_width'] = image_width
+        extra_data["image_height"] = image_height
+        extra_data["image_width"] = image_width
 
         # For simplicity so we don't have to rewrite the original code
         batch = np.expand_dims(image, axis=0)
@@ -82,12 +84,17 @@ class EfficientPose(BaseModel):
 
         :returns: json result
         """
-        image_height = extra_data['image_height']
-        image_width = extra_data['image_width']
+        image_height = extra_data["image_height"]
+        image_width = extra_data["image_width"]
 
         batch_outputs = results.as_numpy(cls.OUTPUT_NAMES[0])
         batch_outputs = np.rollaxis(batch_outputs, 1, 4)
-        logger.debug(f'Shape of outputs: {batch_outputs.shape}')
-        coordinates = [extract_coordinates(batch_outputs[0,...], image_height, image_width)]
-        logger.debug(f'Coordinates: {coordinates}')
-        return 'test'
+        logger.debug(f"Shape of outputs: {batch_outputs.shape}")
+        coordinates = extract_coordinates(batch_outputs[0, ...], image_height, image_width)
+        logger.debug(f"Coordinates: {coordinates}")
+
+        # Convert to Proteus type for JSON response
+        proteus_coords = [Coordinate(name=name, x=x, y=y) for (name, x, y) in coordinates]
+        logger.info(f"Proteus coordinates: {proteus_coords}")
+
+        return proteus_coords

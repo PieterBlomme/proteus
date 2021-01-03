@@ -15,7 +15,7 @@ requirements = [
     "opencv-python-headless>=3.3.1.11",
     "sk-video==1.1.10",
     "torch==1.4.0",
-    "h5py==2.10.0"
+    "h5py==2.10.0",
 ]
 
 test_requirements = ["pytest>=3"]

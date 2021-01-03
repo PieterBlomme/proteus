@@ -32,3 +32,14 @@ class Segmentation:
         self.segmentation = segmentation
         self.class_name = class_name
         self.score = score
+
+class Coordinate:
+    def __init__(
+        self,
+        name: str,
+        x: int,
+        y: int
+    ):
+        self.name = name
+        self.x = x
+        self.y = y
