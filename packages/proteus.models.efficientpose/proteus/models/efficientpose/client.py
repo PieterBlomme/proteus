@@ -109,6 +109,7 @@ class EfficientPoseRT(BaseModel):
 
         return proteus_coords
 
+
 class EfficientPoseI(EfficientPoseRT):
 
     DESCRIPTION = (
@@ -118,6 +119,7 @@ class EfficientPoseI(EfficientPoseRT):
 
     CONFIG_PATH = f"{folder_path}/config_I.template"
     RESOLUTION = 256
+
 
 class EfficientPoseII(EfficientPoseRT):
 
@@ -129,6 +131,7 @@ class EfficientPoseII(EfficientPoseRT):
     CONFIG_PATH = f"{folder_path}/config_II.template"
     RESOLUTION = 368
 
+
 class EfficientPoseIII(EfficientPoseRT):
 
     DESCRIPTION = (
@@ -138,6 +141,7 @@ class EfficientPoseIII(EfficientPoseRT):
 
     CONFIG_PATH = f"{folder_path}/config_III.template"
     RESOLUTION = 480
+
 
 class EfficientPoseIV(EfficientPoseRT):
 
