@@ -10,7 +10,7 @@ class TritonOptimizationModelConfig(pydantic.BaseModel):
 
 
 class QuantizationModelConfig(pydantic.BaseModel):
-    quantize: bool = True
+    quantize: bool = False
 
 
 class BatchingModelConfig(pydantic.BaseModel):

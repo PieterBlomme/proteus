@@ -83,9 +83,9 @@ async def load_model(model_config: config_class):
     model = model_dict[name]
     try:
         logger.info(f"Loading model {{name}}")
+        logging.getLogger("predictions").info("{{name}}|LOADING")
         model.load_model(model_config, triton_client)
-        # log prediction call to file
-        logging.getLogger("predictions").info("{{name}}|LOAD")
+        logging.getLogger("predictions").info("{{name}}|LOADED")
 
         if not triton_client.is_model_ready(name):
             raise HTTPException(
