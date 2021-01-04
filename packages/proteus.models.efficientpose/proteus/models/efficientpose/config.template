@@ -3,17 +3,17 @@ platform: "onnxruntime_onnx"
 max_batch_size : 10
 input [
   {
-    name: "input"
+    name: "input_res1:0"
     data_type: TYPE_FP32
     format: FORMAT_NONE
-    dims: [3, 224, 224]
+    dims: [224, 224, 3]
   }
 ]
 output [
   {
-    name: "output"
+    name: "upscaled_confs/BiasAdd:0"
     data_type: TYPE_FP32
-    dims: [16, 224, 224]
+    dims: [-1, -1, 16]
   }
 ]
 {{triton_optimization}}

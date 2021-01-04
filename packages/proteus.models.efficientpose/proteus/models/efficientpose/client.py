@@ -35,8 +35,8 @@ class EfficientPose(BaseModel):
     """
     CONFIG_PATH = f"{folder_path}/config.template"
 
-    INPUT_NAME = "input"
-    OUTPUT_NAMES = ["output"]
+    INPUT_NAME = "input_res1:0"
+    OUTPUT_NAMES = ["upscaled_confs/BiasAdd:0"]
     DTYPE = "FP32"
     MODEL_CONFIG = ModelConfig
     RESOLUTION = 224
@@ -68,9 +68,6 @@ class EfficientPose(BaseModel):
         # Pull single image out of batch
         image = batch[0]
 
-        # Channel first
-        image = np.transpose(image, (2, 0, 1))
-
         return image, extra_data
 
     @classmethod
@@ -88,12 +85,16 @@ class EfficientPose(BaseModel):
         image_width = extra_data["image_width"]
 
         batch_outputs = results.as_numpy(cls.OUTPUT_NAMES[0])
-        batch_outputs = np.rollaxis(batch_outputs, 1, 4)
         logger.debug(f"Shape of outputs: {batch_outputs.shape}")
         coordinates = extract_coordinates(
             batch_outputs[0, ...], image_height, image_width
         )
         logger.debug(f"Coordinates: {coordinates}")
+
+        # Coordinates are normalized, so convert to real pixel values
+        coordinates = [ (name, x*image_width, y*image_height)
+             for (name, x, y) in coordinates
+        ]    
 
         # Convert to Proteus type for JSON response
         proteus_coords = [
