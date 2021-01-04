@@ -92,9 +92,9 @@ class EfficientPose(BaseModel):
         logger.debug(f"Coordinates: {coordinates}")
 
         # Coordinates are normalized, so convert to real pixel values
-        coordinates = [ (name, x*image_width, y*image_height)
-             for (name, x, y) in coordinates
-        ]    
+        coordinates = [
+            (name, x * image_width, y * image_height) for (name, x, y) in coordinates
+        ]
 
         # Convert to Proteus type for JSON response
         proteus_coords = [
