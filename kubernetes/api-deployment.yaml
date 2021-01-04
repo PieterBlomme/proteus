@@ -31,7 +31,7 @@ spec:
             - name: MAX_ACTIVE_MODELS
               value: "3"
             - name: MODEL_INACTIVITY
-              value: "600000"
+              value: "1"
             - name: TRITON_CONCURRENCY
               value: "1"
             - name: "TRITON_CLIENT_TIMEOUT"
@@ -42,7 +42,7 @@ spec:
               value: "1000"
             - name: "WEB_CONCURRENCY"
               value: "4"
-          image: pieterblomme/api:quantfix-rc0
+          image: pieterblomme/api:quantfix-rc1
           name: api
           ports:
             - containerPort: 80
