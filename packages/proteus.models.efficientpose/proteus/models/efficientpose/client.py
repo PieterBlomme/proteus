@@ -6,6 +6,7 @@ from proteus.models.base import BaseModel
 from proteus.models.base.modelconfigs import (
     BaseModelConfig,
     BatchingModelConfig,
+    QuantizationModelConfig,
     TritonOptimizationModelConfig,
 )
 from proteus.types import Coordinate
@@ -16,7 +17,7 @@ folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
 
-class ModelConfig(BaseModelConfig, TritonOptimizationModelConfig, BatchingModelConfig):
+class ModelConfig(BaseModelConfig, TritonOptimizationModelConfig, BatchingModelConfig, QuantizationModelConfig):
     pass
 
 
