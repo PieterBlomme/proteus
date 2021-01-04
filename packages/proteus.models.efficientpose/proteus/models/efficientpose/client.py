@@ -17,14 +17,19 @@ folder_path = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
 
-class ModelConfig(BaseModelConfig, TritonOptimizationModelConfig, BatchingModelConfig, QuantizationModelConfig):
+class ModelConfig(
+    BaseModelConfig,
+    TritonOptimizationModelConfig,
+    BatchingModelConfig,
+    QuantizationModelConfig,
+):
     pass
 
 
-class EfficientPose(BaseModel):
+class EfficientPoseRT(BaseModel):
 
     DESCRIPTION = (
-        "EfficientPose implementation from https://github.com/daniegr/EfficientPose"
+        "EfficientPoseRT implementation from https://github.com/daniegr/EfficientPose"
     )
     MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseRT.onnx"
 
@@ -34,7 +39,7 @@ class EfficientPose(BaseModel):
     used to fill the actual config.template.  It is not recommended to leave CONFIG_PATH empty in production
     because it will not support features like batching, num_instances and TritonOptimization.
     """
-    CONFIG_PATH = f"{folder_path}/config.template"
+    CONFIG_PATH = f"{folder_path}/config_RT.template"
 
     INPUT_NAME = "input_res1:0"
     OUTPUT_NAMES = ["upscaled_confs/BiasAdd:0"]
@@ -103,3 +108,43 @@ class EfficientPose(BaseModel):
         ]
 
         return proteus_coords
+
+class EfficientPoseI(EfficientPoseRT):
+
+    DESCRIPTION = (
+        "EfficientPoseI implementation from https://github.com/daniegr/EfficientPose"
+    )
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseI.onnx"
+
+    CONFIG_PATH = f"{folder_path}/config_I.template"
+    RESOLUTION = 256
+
+class EfficientPoseII(EfficientPoseRT):
+
+    DESCRIPTION = (
+        "EfficientPoseII implementation from https://github.com/daniegr/EfficientPose"
+    )
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseII.onnx"
+
+    CONFIG_PATH = f"{folder_path}/config_II.template"
+    RESOLUTION = 368
+
+class EfficientPoseIII(EfficientPoseRT):
+
+    DESCRIPTION = (
+        "EfficientPoseIII implementation from https://github.com/daniegr/EfficientPose"
+    )
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseIII.onnx"
+
+    CONFIG_PATH = f"{folder_path}/config_III.template"
+    RESOLUTION = 480
+
+class EfficientPoseIV(EfficientPoseRT):
+
+    DESCRIPTION = (
+        "EfficientPoseIV implementation from https://github.com/daniegr/EfficientPose"
+    )
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseIV.onnx"
+
+    CONFIG_PATH = f"{folder_path}/config_IV.template"
+    RESOLUTION = 600
