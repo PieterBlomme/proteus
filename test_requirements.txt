@@ -10,3 +10,4 @@
 ./packages/proteus_maskrcnn
 ./packages/proteus_maskrcnn
 ./packages/proteus.models.superres
+./packages/proteus.models.efficientpose
