@@ -1,9 +1,4 @@
-import glob
-import os
-import random
-import tarfile
 import tempfile
-import urllib.request
 
 import numpy as np
 import requests
