@@ -6,7 +6,7 @@ import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
-from proteus.datasets import Dataset
+from proteus.datasets import MPIIPoseEstimation
 from proteus.models.efficientpose.client import ModelConfig
 
 MODEL = "EfficientPose"
@@ -49,12 +49,12 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return Dataset(k=100)
+    return MPIIPoseEstimation(k=100)
 
 
 @pytest.fixture
 def small_dataset():
-    return Dataset(k=10)
+    return MPIIPoseEstimation(k=10)
 
 
 def test_jpg(model):
