@@ -4,7 +4,7 @@ __version__ = "0.0.1"
 
 from .bsds import BSDSSuperRes
 from .coco import CocoValBBox, CocoValMask
-from .dataset import Dataset
+from .datasets import Dataset
 from .imagenette import ImageNette
 from .mpii import MPIIPoseEstimation
 
