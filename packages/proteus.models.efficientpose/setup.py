@@ -7,27 +7,33 @@ from setuptools import find_namespace_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = ["cookiecutter==1.7.2"]
-test_requirements = []
+requirements = [
+    "pymediainfo==4.1",
+    "numpy>=1.16.0",
+    "tensorflow==1.15.4",
+    "scikit-image==0.16.2",
+    "opencv-python-headless>=3.3.1.11",
+    "sk-video==1.1.10",
+    "torch==1.4.0",
+    "h5py==2.10.0",
+]
+
+test_requirements = ["pytest>=3"]
 
 setup(
-    name="proteus.tools.templating",
+    name="proteus.models.efficientpose",
     version="0.0.1",
-    description="Proteus RetinaNet",
+    description="Proteus EfficientPose",
     author="Pieter Blomme",
     author_email="pieter.blomme@gmail.com",
     python_requires=">=3.6",
     classifiers=[],
     keywords="",
-    entry_points={
-        "console_scripts": [
-            "proteus.template=proteus.tools.templating.command_line:main"
-        ],
-    },
+    entry_points={},
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    namespace_packages=["proteus.tools"],
+    namespace_packages=["proteus", "proteus.models"],
     packages=find_namespace_packages(exclude=["tests"]),
     test_suite="tests",
     tests_require=test_requirements,

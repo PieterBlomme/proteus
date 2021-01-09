@@ -4,6 +4,15 @@ __version__ = "0.0.1"
 
 from .bsds import BSDSSuperRes
 from .coco import CocoValBBox, CocoValMask
+from .datasets import Dataset
 from .imagenette import ImageNette
+from .mpii import MPIIPoseEstimation
 
-__all__ = ["ImageNette", "CocoValBBox", "CocoValMask", "BSDSSuperRes"]
+__all__ = [
+    "Dataset",
+    "ImageNette",
+    "CocoValBBox",
+    "CocoValMask",
+    "BSDSSuperRes",
+    "MPIIPoseEstimation",
+]
