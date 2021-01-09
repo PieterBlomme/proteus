@@ -9,7 +9,7 @@ from PIL.ImageOps import pad
 from proteus.datasets import MPIIPoseEstimation
 from proteus.models.efficientpose.client import ModelConfig
 
-MODEL = "EfficientPose"
+MODEL = "EfficientPoseI"
 
 # Check liveness
 for i in range(10):
