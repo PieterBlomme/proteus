@@ -3,8 +3,8 @@
 -e /packages/proteus_mobilenet/.
 -e /packages/proteus_resnet50/.
 -e /packages/proteus_efficientnetlite4/.
--e /packages/proteus_retinanet/.
 -e /packages/proteus_maskrcnn/.
+-e ./packages/proteus.models.retinanet/.
 -e /packages/proteus.models.efficientdet/.
 -e /packages/proteus.models.superres/.
 -e /packages/proteus.models.efficientpose/.
