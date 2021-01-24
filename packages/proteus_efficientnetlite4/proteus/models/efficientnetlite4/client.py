@@ -29,7 +29,7 @@ class EfficientNetLite4(ClassificationModel):
         "(e.g. 30ms/image) on a Pixel 4 CPU.  Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
-    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/efficientnet-lite4/model/efficientnet-lite4-11.onnx"
+    MODEL_PATH = "efficientnet-lite4-11.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "images:0"
     OUTPUT_NAMES = ["Softmax:0"]

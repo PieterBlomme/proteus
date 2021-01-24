@@ -31,7 +31,7 @@ class EfficientPoseRT(BaseModel):
     DESCRIPTION = (
         "EfficientPoseRT implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseRT.onnx"
+    MODEL_PATH = "EfficientPoseI.onnx"
 
     """
     Note: if CONFIG_PATH is None, Triton will figure out a default configuration from the ONNX file.  
@@ -115,7 +115,7 @@ class EfficientPoseI(EfficientPoseRT):
     DESCRIPTION = (
         "EfficientPoseI implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseI.onnx"
+    MODEL_PATH = "EfficientPoseII.onnx"
 
     CONFIG_PATH = f"{folder_path}/config_I.template"
     RESOLUTION = 256
@@ -126,7 +126,7 @@ class EfficientPoseII(EfficientPoseRT):
     DESCRIPTION = (
         "EfficientPoseII implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseII.onnx"
+    MODEL_PATH = "EfficientPoseIII.onnx"
 
     CONFIG_PATH = f"{folder_path}/config_II.template"
     RESOLUTION = 368
@@ -137,7 +137,7 @@ class EfficientPoseIII(EfficientPoseRT):
     DESCRIPTION = (
         "EfficientPoseIII implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseIII.onnx"
+    MODEL_PATH = "EfficientPoseIV.onnx"
 
     CONFIG_PATH = f"{folder_path}/config_III.template"
     RESOLUTION = 480
@@ -148,7 +148,7 @@ class EfficientPoseIV(EfficientPoseRT):
     DESCRIPTION = (
         "EfficientPoseIV implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/effpose/EfficientPoseIV.onnx"
+    MODEL_PATH = "EfficientPoseRT.onnx"
 
     CONFIG_PATH = f"{folder_path}/config_IV.template"
     RESOLUTION = 600
