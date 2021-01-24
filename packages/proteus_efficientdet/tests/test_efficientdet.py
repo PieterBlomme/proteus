@@ -124,7 +124,7 @@ def test_score(dataset, model):
         preds.append(result)
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
-    assert mAP > 0.41
+    assert mAP > 0.39
 
 
 @pytest.mark.slow
