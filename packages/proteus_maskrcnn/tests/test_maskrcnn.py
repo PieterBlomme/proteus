@@ -130,7 +130,13 @@ def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
         response = get_prediction(fpath, model)
-        result = [ann for ann in response.json()[0]]
+        try:
+            result = [ann for ann in response.json()[0]]
+        except:
+            print(response.status_code)
+            print(response.content)
+            print(response.json())
+            raise
         preds.append(result)
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
