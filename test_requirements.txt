@@ -1,6 +1,6 @@
-./packages/proteus_types
+./packages/proteus.types
 ./packages/proteus.datasets
-./packages/proteus_models
+./packages/proteus.models
 ./packages/proteus.models.maskrcnn
 ./packages/proteus.models.mobilenet
 ./packages/proteus.models.resnet50
