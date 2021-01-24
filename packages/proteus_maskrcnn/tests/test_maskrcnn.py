@@ -135,7 +135,7 @@ def test_score(dataset, model):
         except:
             print(response.status_code)
             print(response.content)
-            print(response.json())
+            print(fpath)
             raise
         preds.append(result)
     mAP = dataset.eval(preds)
