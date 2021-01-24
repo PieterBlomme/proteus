@@ -38,7 +38,7 @@ class RetinaNet(BaseModel):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     SHAPE = (3, 480, 640)
-    MODEL_PATH = "retinanet-9.onnx"
+    MODEL_PATH = f"{folder_path}/retinanet-9.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input"
     OUTPUT_NAMES = [

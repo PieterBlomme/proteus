@@ -31,7 +31,7 @@ class MaskRCNN(BaseModel):
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     NUM_OUTPUTS = 4
     MAX_BATCH_SIZE = 0
-    MODEL_PATH = "MaskRCNN-10.onnx"
+    MODEL_PATH = f"{folder_path}/MaskRCNN-10.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "image"
     OUTPUT_NAMES = ["6568", "6570", "6572", "6887"]

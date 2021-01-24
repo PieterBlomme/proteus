@@ -48,7 +48,7 @@ class YoloV4(BaseModel):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     ANCHORS = get_anchors(f"{folder_path}/yolov4_anchors.txt")
-    MODEL_PATH = "yolov4.onnx"
+    MODEL_PATH = f"{folder_path}/yolov4.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input_1:0"
     OUTPUT_NAMES = ["Identity:0", "Identity_1:0", "Identity_2:0"]
