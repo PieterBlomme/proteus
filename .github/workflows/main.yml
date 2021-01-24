@@ -16,9 +16,6 @@ jobs:
         python-version: [3.7]
 
     steps:
-      - name: Trying to make space
-        run: apt-get clean
-        
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout github repo (+ download lfs dependencies)
         uses: actions/checkout@v2
