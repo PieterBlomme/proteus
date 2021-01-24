@@ -1,6 +1,6 @@
-# Proteus EfficientPose
+# Proteus RetinaNet
 
-Package for EfficientPose model usage in Proteus
+Package for RetinaNet model usage in Proteus
 
 Model and implementation taken from https://github.com/onnx/models/tree/master/vision/object_detection_segmentation/retinanet,
 which bases its code on https://github.com/NVIDIA/retinanet-examples
