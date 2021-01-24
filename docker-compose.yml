@@ -31,19 +31,19 @@ services:
       - TRITON_CLIENT_TIMEOUT=300
       - TIMEOUT=120 # gunicorn setting
       - KEEP_ALIVE=2 # gunicorn setting
-  prometheus:
-    image: prom/prometheus:v2.21.0
-    ports:
-      - 9090:9090
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prometheus-data:/prometheus
-    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
-  grafana:
-    build: './grafana'
-    container_name: 'grafana'
-    ports:
-      - '3000:3000'
+  # prometheus:
+  #   image: prom/prometheus:v2.21.0
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus
+  #     - prometheus-data:/prometheus
+  #   command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+  # grafana:
+  #   build: './grafana'
+  #   container_name: 'grafana'
+  #   ports:
+  #     - '3000:3000'
 
 volumes:
   model-repository: 
