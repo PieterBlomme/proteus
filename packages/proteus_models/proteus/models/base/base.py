@@ -25,13 +25,13 @@ class BaseModel:
     Submodels should:
     - implement preprocess classmethod to prepare an image
     - implement postprocess classmethod to parse results
-    - define DESCRIPTION, MODEL_URL and some other parameters
+    - define DESCRIPTION, MODEL_PATH and some other parameters
     """
 
     # Defaults
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1
-    MODEL_URL = ""
+    MODEL_PATH = ""
     CONFIG_PATH = None
     DESCRIPTION = "This is a model"
     CHANNEL_FIRST = False
@@ -49,10 +49,7 @@ class BaseModel:
         os.makedirs(os.path.dirname(target_path), exist_ok=True)
 
         if not os.path.isfile(target_path):
-            url = cls.MODEL_URL
-            r = requests.get(url)
-            with open(target_path, "wb") as f:
-                f.write(r.content)
+            shutil.copyfile(cls.MODEL_PATH, target_path)
 
     @classmethod
     def _maybe_quantize(cls):
@@ -62,8 +59,6 @@ class BaseModel:
         model_quant = f"/models/{cls.__name__}/1/model.onnx"
         os.makedirs(os.path.dirname(model_quant), exist_ok=True)
 
-        url = cls.MODEL_URL
-        r = requests.get(url)
         quantize_dynamic(model_fp32, model_quant, weight_type=QuantType.QUInt8)
         logger.info(f"Quantized model saved to:{model_quant}")
         full_size = os.path.getsize(model_fp32) / (1024 * 1024)

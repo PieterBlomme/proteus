@@ -1,1 +1,1 @@
-recursive-include proteus/models//* *.txt *.py *.pbtxt
+recursive-include proteus/models/* *.txt *.py *.pbtxt *.onnx *.onnx
