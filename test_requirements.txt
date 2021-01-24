@@ -4,10 +4,10 @@
 ./packages/proteus_mobilenet
 ./packages/proteus_resnet50
 ./packages/proteus_efficientnetlite4
-./packages/proteus_efficientdet
 ./packages/proteus_retinanet
 ./packages/proteus_maskrcnn
 ./packages/proteus_maskrcnn
+./packages/proteus.models.efficientdet
 ./packages/proteus.models.yolov4
 ./packages/proteus.models.superres
 ./packages/proteus.models.efficientpose
