@@ -1,7 +1,7 @@
 -e /packages/proteus_types/.
 -e /packages/proteus_models/.
--e /packages/proteus_mobilenet/.
 -e /packages/proteus_maskrcnn/.
+-e ./packages/proteus.models.mobilenet/.
 -e ./packages/proteus.models.resnet50/.
 -e ./packages/proteus.models.efficientnetlite4/.
 -e ./packages/proteus.models.retinanet/.

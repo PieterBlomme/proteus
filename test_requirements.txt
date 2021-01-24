@@ -1,8 +1,8 @@
 ./packages/proteus_types
 ./packages/proteus_datasets
 ./packages/proteus_models
-./packages/proteus_mobilenet
 ./packages/proteus_maskrcnn
+./packages/proteus.models.mobilenet
 ./packages/proteus.models.resnet50
 ./packages/proteus.models.efficientnetlite4
 ./packages/proteus.models.retinanet
