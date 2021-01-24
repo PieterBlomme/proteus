@@ -1,5 +1,7 @@
 FROM python:3.7
 
+RUN apt-get clean
+
 RUN pip install fastapi uvicorn
 
 COPY proteus_api/requirements.txt ./requirements.txt
