@@ -23,7 +23,7 @@ class BSDSSuperRes(Dataset):
 
     def __init__(self, k=50):
         self.maybe_download()
-        files = glob.glob(f"{tmpfolder}/datasets/BSR/BSDS500/data/images/test/*")
+        files = glob.glob(f"{tmpfolder}/datasets/BSR/BSDS500/data/images/test/*.jpg")
         random.shuffle(files)
         self.files = files[:k]
 
