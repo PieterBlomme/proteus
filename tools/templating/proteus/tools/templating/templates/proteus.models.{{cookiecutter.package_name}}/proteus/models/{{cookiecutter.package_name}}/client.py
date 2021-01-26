@@ -25,7 +25,7 @@ class {{cookiecutter.model_name}}(BaseModel):
     DESCRIPTION = (
         "{{cookiecutter.model_description}}"
     )
-    MODEL_PATH = "{{cookiecutter.model_path}}"
+    MODEL_URL = "{{cookiecutter.model_url}}"
 
     """
     Note: if CONFIG_PATH is None, Triton will figure out a default configuration from the ONNX file.  
