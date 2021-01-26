@@ -28,7 +28,7 @@ class EfficientDetD0(BaseModel):
         "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    MODEL_PATH = "efficientdet-d0.onnx"
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d0.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "image_arrays:0"
     OUTPUT_NAMES = ["detections:0"]
@@ -120,4 +120,4 @@ class EfficientDetD2(EfficientDetD0):
         "Converted using https://github.com/onnx/tensorflow-onnx/blob/master/tutorials/efficientdet.ipynb"
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
-    MODEL_PATH = "efficientdet-d2.onnx"
+    MODEL_URL = "https://pieterblomme-models.s3.us-east-2.amazonaws.com/efficientdet/efficientdet-d2.onnx"
