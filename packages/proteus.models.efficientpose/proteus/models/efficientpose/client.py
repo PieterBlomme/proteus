@@ -126,7 +126,7 @@ class EfficientPoseII(EfficientPoseRT):
     DESCRIPTION = (
         "EfficientPoseII implementation from https://github.com/daniegr/EfficientPose"
     )
-    MODEL_URL = "https://github.com/PieterBlomme/proteus/raw/TRIT-92/packages/proteus.models.efficientpose/proteus/models/efficientpose/EfficientPoseII.onnx
+    MODEL_URL = "https://github.com/PieterBlomme/proteus/raw/TRIT-92/packages/proteus.models.efficientpose/proteus/models/efficientpose/EfficientPoseII.onnx"
 
     CONFIG_PATH = f"{folder_path}/config_II.template"
     RESOLUTION = 368
