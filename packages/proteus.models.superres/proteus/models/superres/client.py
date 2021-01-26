@@ -30,7 +30,7 @@ class SuperResolution(BaseModel):
     DESCRIPTION = (
         "Implementation of Sub-Pixel CNN (2016) - https://arxiv.org/abs/1609.05158"
     )
-    MODEL_PATH = f"{folder_path}/super-resolution-10.onnx"
+    MODEL_PATH = "super-resolution-10.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input"
     OUTPUT_NAMES = ["output"]
