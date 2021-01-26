@@ -17,10 +17,7 @@ jobs:
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout github repo (+ download lfs dependencies)
-        uses: actions/checkout@v2
-        with:
-          lfs: true
+      - uses: actions/checkout@v2
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
