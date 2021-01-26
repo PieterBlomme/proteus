@@ -124,6 +124,7 @@ def test_modelconfig():
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
 
+
 @pytest.mark.xfail
 @pytest.mark.slow
 def test_score(dataset, model):
@@ -144,6 +145,7 @@ def test_score(dataset, model):
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
     assert mAP > 0.30
+
 
 @pytest.mark.slow
 def test_resize(small_dataset, model):
