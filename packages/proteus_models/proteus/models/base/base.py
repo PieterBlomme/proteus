@@ -31,7 +31,7 @@ class BaseModel:
     # Defaults
     MODEL_VERSION = "1"
     MAX_BATCH_SIZE = 1
-    MODEL_PATH = ""
+    MODEL_PATH = f"{folder_path}/"
     CONFIG_PATH = None
     DESCRIPTION = "This is a model"
     CHANNEL_FIRST = False
