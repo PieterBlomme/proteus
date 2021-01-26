@@ -114,7 +114,6 @@ def test_modelconfig():
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
 
-
 @pytest.mark.slow
 def test_score(dataset, model):
     pass
