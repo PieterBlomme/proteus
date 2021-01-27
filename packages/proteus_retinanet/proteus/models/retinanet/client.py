@@ -38,7 +38,7 @@ class RetinaNet(BaseModel):
     )
     CLASSES = read_class_names(f"{folder_path}/coco_names.txt")
     SHAPE = (3, 480, 640)
-    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/object_detection_segmentation/retinanet/model/retinanet-9.onnx"
+    MODEL_URL = "https://github.com/PieterBlomme/proteus/raw/TRIT-92/packages/proteus_retinanet/proteus/models/retinanet/retinanet-9.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input"
     OUTPUT_NAMES = [

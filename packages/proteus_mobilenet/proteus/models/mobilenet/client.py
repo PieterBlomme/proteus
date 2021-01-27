@@ -20,7 +20,7 @@ class MobileNetV2(ClassificationModel):
         " Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
-    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/mobilenet/model/mobilenetv2-7.onnx"
+    MODEL_URL = "https://github.com/PieterBlomme/proteus/raw/TRIT-92/packages/proteus_mobilenet/proteus/models/mobilenet/mobilenetv2-7.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "input"
     OUTPUT_NAMES = ["output"]

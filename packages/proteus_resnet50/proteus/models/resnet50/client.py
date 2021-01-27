@@ -21,7 +21,7 @@ class Resnet50V2(ClassificationModel):
         "Taken from https://github.com/onnx/models."
     )
     CLASSES = read_class_names(f"{folder_path}/imagenet_labels.txt")
-    MODEL_URL = "https://github.com/onnx/models/raw/master/vision/classification/resnet/model/resnet50-v2-7.onnx"
+    MODEL_URL = "https://github.com/PieterBlomme/proteus/raw/TRIT-92/packages/proteus_resnet50/proteus/models/resnet50/resnet50-v2-7.onnx"
     CONFIG_PATH = f"{folder_path}/config.template"
     INPUT_NAME = "data"
     OUTPUT_NAMES = ["resnetv24_dense0_fwd"]
