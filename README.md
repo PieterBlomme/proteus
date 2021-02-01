@@ -39,10 +39,26 @@ For production, you need to build using proteus_api/Dockerfile.prod.  This will 
 I am also providing a Kubernetes example, this is the recommended way to deploy in production.  
 
 ## Available models
+
+### Classification
 MobileNetV2
 Resnet50V2
 EfficientNetLite4
+
+### Instance Segmentation
 MaskRCNN
+
+### Detection
 RetinaNet
 EfficientDetD0
 EfficientDetD2
+
+### Pose Estimation
+EfficientPoseRT
+EfficientPoseI
+EfficientPoseII
+EfficientPoseIII
+EfficientPoseIV
+
+### Misc
+SuperResolution
