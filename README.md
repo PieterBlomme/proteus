@@ -52,6 +52,7 @@ MaskRCNN
 RetinaNet
 EfficientDetD0
 EfficientDetD2
+YoloV4
 
 ### Pose Estimation
 EfficientPoseRT
