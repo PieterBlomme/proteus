@@ -1,6 +1,7 @@
 {
-"Model": "MobileNetV2",
-"Dataset": "ImageNette",
+"BasePath": "http://proteus.localhost",
+"Model": "RetinaNet",
+"Dataset": "CocoValBBox",
 "Throughput" : [
     {"triton_optimization": true, "num_workers": 1, "num_instances": 1 },
     {"triton_optimization": false,  "num_workers": 1, "num_instances": 1 },

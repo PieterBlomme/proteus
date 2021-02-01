@@ -1,6 +1,7 @@
 {
-"Model": "EfficientNetLite4",
-"Dataset": "ImageNette",
+"BasePath": "http://proteus.localhost",
+"Model": "EfficientPoseIV",
+"Dataset": "MPIIPoseEstimation",
 "Throughput" : [
     {"triton_optimization": true, "quantize": false, "num_workers": 1, "num_instances": 1 },
     {"triton_optimization": true, "quantize": true, "num_workers": 1, "num_instances": 1 },

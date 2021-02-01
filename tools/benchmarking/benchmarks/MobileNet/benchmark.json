@@ -1,5 +1,6 @@
 {
-"Model": "Resnet50V2",
+"BasePath": "http://proteus.localhost",
+"Model": "MobileNetV2",
 "Dataset": "ImageNette",
 "Throughput" : [
     {"triton_optimization": true, "num_workers": 1, "num_instances": 1 },

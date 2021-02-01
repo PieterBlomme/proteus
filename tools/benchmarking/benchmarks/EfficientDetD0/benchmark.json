@@ -1,4 +1,5 @@
 {
+"BasePath": "http://proteus.localhost",
 "Model": "EfficientDetD0",
 "Dataset": "CocoValBBox",
 "Throughput" : [
