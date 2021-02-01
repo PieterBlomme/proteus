@@ -163,6 +163,7 @@ def main():
             raise Exception(f"Could not read json.  Is {args[0]} a valid json file?")
 
         model = data["Model"]
+        print(model)
         BASE_PATH = data.get("BasePath", "http://api.localhost")
 
         test_server(BASE_PATH)
@@ -199,7 +200,8 @@ def main():
         with open(TEMPLATE_PATH) as f:
             template = Template(f.read())
 
-        targetfile = "Benchmark.md"
+        targetfolder = Path(TEMPLATE_PATH).parent
+        targetfile = f"{targetfolder}/Benchmark.md"
         with open(targetfile, "w") as fh:
             rendered_template = template.render(
                 score_table=score_df.to_markdown(),
