@@ -129,8 +129,17 @@ def test_modelconfig():
 def test_score(dataset, model):
     preds = []
     for (fpath, img) in dataset:
+        if fpath in ["/tmp/coco_imgs/000000546556.jpg"]:
+            preds.append([])
+            continue
         response = get_prediction(fpath, model)
-        result = [ann for ann in response.json()[0]]
+        try:
+            result = [ann for ann in response.json()[0]]
+        except:
+            print(response.status_code)
+            print(response.content)
+            print(fpath)
+            raise
         preds.append(result)
     mAP = dataset.eval(preds)
     print(f"mAP score: {mAP}")
