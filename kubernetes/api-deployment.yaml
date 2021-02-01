@@ -42,7 +42,7 @@ spec:
               value: "1000"
             - name: "WEB_CONCURRENCY"
               value: "4"
-          image: pieterblomme/api:quantfix-rc1
+          image: pieterblomme/api:0.3
           name: api
           ports:
             - containerPort: 80

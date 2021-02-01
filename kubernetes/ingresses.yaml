@@ -17,24 +17,10 @@ metadata:
     name: ingress-paths
 spec:
   rules:
-    - host: api.localhost
+    - host: proteus.link
       http:
         paths:
         - path: /
           backend:
             serviceName: api
             servicePort: 80
-    - host: grafana.localhost
-      http:
-        paths:
-        - path: /
-          backend:
-            serviceName: grafana
-            servicePort: 3000
-    - host: prometheus.localhost
-      http:
-        paths:
-        - path: /
-          backend:
-            serviceName: prometheus
-            servicePort: 9090

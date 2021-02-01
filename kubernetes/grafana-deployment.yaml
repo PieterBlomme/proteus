@@ -9,7 +9,7 @@ metadata:
     io.kompose.service: grafana
   name: grafana
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       io.kompose.service: grafana

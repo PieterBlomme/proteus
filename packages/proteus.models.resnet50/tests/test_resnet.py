@@ -1,5 +1,4 @@
 import itertools
-import json
 import tempfile
 import time
 
@@ -7,10 +6,10 @@ import pytest
 import requests
 from PIL import Image
 from PIL.ImageOps import pad
-from proteus.datasets import {{cookiecutter.test_dataset}}
-from proteus.models.{{cookiecutter.package_name}}.client import ModelConfig
+from proteus.datasets import ImageNette
+from proteus.models.resnet50.client import ModelConfig
 
-MODEL = '{{cookiecutter.model_name}}'
+MODEL = "Resnet50V2"
 
 # Check liveness
 for i in range(10):
@@ -20,6 +19,7 @@ for i in range(10):
             break
     except:
         time.sleep(25)
+
 
 def get_prediction(fpath, model):
     with open(fpath, "rb") as f:
@@ -49,12 +49,7 @@ def model():
 
 @pytest.fixture
 def dataset():
-    return {{cookiecutter.test_dataset}}(k=100)
-
-
-@pytest.fixture
-def small_dataset():
-    return {{cookiecutter.test_dataset}}(k=10)
+    return ImageNette(k=500)
 
 
 def test_jpg(model):
@@ -76,6 +71,7 @@ def test_bmp(model):
         Image.new("RGB", (800, 1280)).save(tmp.name)
         response = get_prediction(tmp.name, model)
     assert response.status_code == requests.codes.ok
+
 
 def test_modelconfig():
     # Figure out which config parameters are defined
@@ -113,13 +109,65 @@ def test_modelconfig():
         response = requests.post(f"http://localhost/{MODEL}/unload")
         assert response.status_code == requests.codes.ok
 
-@pytest.mark.xfail 
+
+@pytest.mark.xfail
 @pytest.mark.slow
 def test_score(dataset, model):
     preds = []
-    for (fpath, img) in dataset:
+    for fpath, target in dataset:
         response = get_prediction(fpath, model)
-        result = [box for box in response.json()[0]]
-        preds.append(result)
+        preds.append(response.json()[0])
+
     score = dataset.eval(preds)
-    assert score > 0.0
+    print(f"Accuracy: {score}")
+    assert score >= 0.67
+
+
+@pytest.mark.slow
+def test_resize(dataset, model):
+    # mAP should be similar after increasing image size
+    preds_normal = []
+    preds_resize = []
+    for fpath, img in dataset:
+        response = get_prediction(fpath, model)
+        preds_normal.append(response.json()[0])
+
+        tmp_img = Image.open(fpath)
+        w, h = tmp_img.size
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            resize_path = tmp.name
+        tmp_img.resize((w * 2, h * 2)).save(resize_path)
+        response = get_prediction(resize_path, model)
+        preds_resize.append(response.json()[0])
+
+    score_normal = dataset.eval(preds_normal)
+    score_resize = dataset.eval(preds_resize)
+    print(f"Resize diff: {abs(score_normal - score_resize)}")
+    assert abs(score_normal - score_resize) < 0.025  # 2% diff seems acceptable
+
+
+@pytest.mark.slow
+def test_padding(dataset, model):
+    # mAP should be similar after padding to a square
+    preds_normal = []
+    preds_padded = []
+    for fpath, img in dataset:
+        response = get_prediction(fpath, model)
+        preds_normal.append(response.json()[0])
+
+        tmp_img = Image.open(fpath)
+        w, h = tmp_img.size
+        target = max((w, h))
+        dw = (target - w) / 2
+        dh = (target - h) / 2
+        tmp_img = pad(tmp_img, (target, target))
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            padded_path = tmp.name
+        tmp_img.save(padded_path)
+        response = get_prediction(padded_path, model)
+        preds_padded.append(response.json()[0])
+
+    score_normal = dataset.eval(preds_normal)
+    score_padded = dataset.eval(preds_padded)
+    print(f"Padding diff: {abs(score_normal - score_padded)}")
+    assert abs(score_normal - score_padded) < 0.1  # 10% diff seems acceptable

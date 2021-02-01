@@ -7,33 +7,24 @@ from setuptools import find_namespace_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = [
-    "proteus.datasets==0.0.1",
-    "requests==2.25.1",
-    "jinja2==2.11.2",
-    "pandas==1.2.0",
-    "tabulate==0.8.7",
-]
-test_requirements = []
+requirements = []
+
+test_requirements = ["pytest>=3"]
 
 setup(
-    name="proteus.tools.benchmarking",
+    name="proteus.types",
     version="0.0.1",
-    description="Proteus benchmarking tool",
+    description="Proteus types",
     author="Pieter Blomme",
     author_email="pieter.blomme@gmail.com",
     python_requires=">=3.6",
     classifiers=[],
     keywords="",
-    entry_points={
-        "console_scripts": [
-            "proteus.benchmark=proteus.tools.benchmarking.suite:main",
-        ],
-    },
+    entry_points={},
     install_requires=requirements,
     long_description=readme,
     include_package_data=True,
-    namespace_packages=["proteus.tools"],
+    namespace_packages=["proteus"],
     packages=find_namespace_packages(exclude=["tests"]),
     test_suite="tests",
     tests_require=test_requirements,
