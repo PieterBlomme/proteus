@@ -16,6 +16,7 @@ TEMPLATE_PATH = f"{folder_path}/templates/Benchmark.md"
 mod = importlib.import_module("proteus.datasets")
 
 
+
 def test_server(base_path):
     response = requests.get(f"{base_path}/health")
     if response.status_code == requests.codes.service_unavailable:
