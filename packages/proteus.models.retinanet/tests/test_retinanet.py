@@ -127,6 +127,7 @@ def test_score(dataset, model):
     print(f"mAP score: {mAP}")
     assert mAP > 0.31
 
+
 @pytest.mark.xfail
 @pytest.mark.slow
 def test_resize(small_dataset, model):
@@ -158,6 +159,7 @@ def test_resize(small_dataset, model):
     mAP_resize = small_dataset.eval(preds_resize)
     print(f"Resize diff: {abs(mAP_normal - mAP_resize)}")
     assert abs(mAP_normal - mAP_resize) < 0.025  # 2% diff seems acceptable
+
 
 @pytest.mark.xfail
 @pytest.mark.slow
