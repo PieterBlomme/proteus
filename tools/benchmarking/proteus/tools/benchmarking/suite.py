@@ -4,8 +4,9 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
+import tempfile
 import pandas as pd
+import numpy as np
 import requests
 from jinja2 import Template
 
@@ -63,7 +64,6 @@ def get_prediction(base_path, fpath, model, i):
         raise Exception(
             f"Inference failed.  Code: {response.status_code} Reason: {response.reason}"
         )
-
     return response, i
 
 
@@ -89,7 +89,13 @@ def calculate_throughput(base_path, model, dataset, parms):
 
         for fut in as_completed(futures):
             response, i = fut.result()
-            preds[i] = response.json()[0]
+            try:
+                preds[i] = response.json()[0]
+            except:
+                # not a json
+                with tempfile.NamedTemporaryFile(delete=False) as f:
+                    f.write(response.content)
+                    preds[i] = f.name
     end = time.time()
     throughput = num_samples / (end - start)
     unload_model(base_path, model)
@@ -142,7 +148,13 @@ def calculate_score(base_path, model, dataset, parms):
 
         for fut in as_completed(futures):
             response, i = fut.result()
-            preds[i] = response.json()[0]
+            try:
+                preds[i] = response.json()[0]
+            except:
+                # not a json
+                with tempfile.NamedTemporaryFile(delete=False) as f:
+                    f.write(response.content)
+                    preds[i] = f.name
     score = dataset.eval(preds)
     end = time.time()
     unload_model(base_path, model)
@@ -217,3 +229,4 @@ def main():
             fh.write(rendered_template)
     except Exception as e:
         print(f"Error: {e}")
+        raise e
