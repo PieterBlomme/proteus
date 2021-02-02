@@ -1,12 +1,13 @@
 import importlib
 import json
 import sys
+import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-import tempfile
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 import requests
 from jinja2 import Template
 
@@ -14,7 +15,6 @@ folder_path = Path(__file__).parent
 TEMPLATE_PATH = f"{folder_path}/templates/Benchmark.md"
 
 mod = importlib.import_module("proteus.datasets")
-
 
 
 def test_server(base_path):
@@ -177,7 +177,7 @@ def main():
 
         targetfolder = Path(args[0]).parent
         targetfile = f"{targetfolder}/Benchmark.md"
-        
+
         model = data["Model"]
         print(model)
         BASE_PATH = data.get("BasePath", "http://api.localhost")
@@ -215,7 +215,7 @@ def main():
 
         with open(TEMPLATE_PATH) as f:
             template = Template(f.read())
-            
+
         with open(targetfile, "w") as fh:
             rendered_template = template.render(
                 score_table=score_df.to_markdown(),
