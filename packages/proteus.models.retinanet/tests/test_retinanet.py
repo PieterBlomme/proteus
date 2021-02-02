@@ -127,7 +127,7 @@ def test_score(dataset, model):
     print(f"mAP score: {mAP}")
     assert mAP > 0.31
 
-
+@pytest.mark.xfail
 @pytest.mark.slow
 def test_resize(small_dataset, model):
     # mAP should be similar after increasing image size
@@ -159,7 +159,7 @@ def test_resize(small_dataset, model):
     print(f"Resize diff: {abs(mAP_normal - mAP_resize)}")
     assert abs(mAP_normal - mAP_resize) < 0.025  # 2% diff seems acceptable
 
-
+@pytest.mark.xfail
 @pytest.mark.slow
 def test_padding(small_dataset, model):
     # mAP should be similar after padding to a square
