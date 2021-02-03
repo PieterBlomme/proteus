@@ -54,7 +54,9 @@ EfficientDetD0
 EfficientDetD2
 YoloV4
 
-### Pose Estimation
+### Pose Estimation 
+Note: known issue when images are smaller than expected size.  Still need to fix
+
 EfficientPoseRT
 EfficientPoseI
 EfficientPoseII

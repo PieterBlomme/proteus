@@ -1,10 +1,12 @@
 import importlib
 import json
 import sys
+import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import requests
 from jinja2 import Template
@@ -63,7 +65,6 @@ def get_prediction(base_path, fpath, model, i):
         raise Exception(
             f"Inference failed.  Code: {response.status_code} Reason: {response.reason}"
         )
-
     return response, i
 
 
@@ -89,7 +90,13 @@ def calculate_throughput(base_path, model, dataset, parms):
 
         for fut in as_completed(futures):
             response, i = fut.result()
-            preds[i] = response.json()[0]
+            try:
+                preds[i] = response.json()[0]
+            except:
+                # not a json
+                with tempfile.NamedTemporaryFile(delete=False) as f:
+                    f.write(response.content)
+                    preds[i] = f.name
     end = time.time()
     throughput = num_samples / (end - start)
     unload_model(base_path, model)
@@ -142,7 +149,13 @@ def calculate_score(base_path, model, dataset, parms):
 
         for fut in as_completed(futures):
             response, i = fut.result()
-            preds[i] = response.json()[0]
+            try:
+                preds[i] = response.json()[0]
+            except:
+                # not a json
+                with tempfile.NamedTemporaryFile(delete=False) as f:
+                    f.write(response.content)
+                    preds[i] = f.name
     score = dataset.eval(preds)
     end = time.time()
     unload_model(base_path, model)
@@ -162,7 +175,11 @@ def main():
         except:
             raise Exception(f"Could not read json.  Is {args[0]} a valid json file?")
 
+        targetfolder = Path(args[0]).parent
+        targetfile = f"{targetfolder}/Benchmark.md"
+
         model = data["Model"]
+        print(model)
         BASE_PATH = data.get("BasePath", "http://api.localhost")
 
         test_server(BASE_PATH)
@@ -199,7 +216,6 @@ def main():
         with open(TEMPLATE_PATH) as f:
             template = Template(f.read())
 
-        targetfile = "Benchmark.md"
         with open(targetfile, "w") as fh:
             rendered_template = template.render(
                 score_table=score_df.to_markdown(),
@@ -214,3 +230,4 @@ def main():
             fh.write(rendered_template)
     except Exception as e:
         print(f"Error: {e}")
+        raise e

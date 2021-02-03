@@ -11,15 +11,15 @@ Score on 100 samples from CocoValBBox dataset
 Average throughput in FPS on 50 samples from CocoValBBox dataset
 |    |   num_workers |   num_instances |   throughput |
 |---:|--------------:|----------------:|-------------:|
-|  1 |             2 |               1 |      7.55327 |
-|  2 |             4 |               1 |      7.26256 |
-|  0 |             1 |               1 |      6.80081 |
-|  3 |             2 |               2 |      4.96837 |
-|  4 |             1 |               2 |      4.26833 |
+|  2 |             4 |               1 |      7.58956 |
+|  1 |             2 |               1 |      7.29533 |
+|  0 |             1 |               1 |      6.95794 |
+|  3 |             2 |               2 |      4.91367 |
+|  4 |             1 |               2 |      4.42691 |
 
 ## Latency
 
 Average latency in ms on 10 samples from CocoValBBox dataset
 |    | triton_optimization   |   latency |
 |---:|:----------------------|----------:|
-|  0 | True                  |   475.957 |
+|  0 | True                  |   472.207 |
