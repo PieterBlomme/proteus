@@ -10,7 +10,7 @@ with open("README.md") as readme_file:
 requirements = [
     "pymediainfo==4.1",
     "numpy>=1.16.0",
-    "tensorflow==2.4.0",
+    "tensorflow==2.5.3",
     "scikit-image==0.16.2",
     "opencv-python-headless>=3.3.1.11",
     "sk-video==1.1.10",
