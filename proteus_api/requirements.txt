@@ -12,7 +12,7 @@ httptools==0.1.1
 jinja2==2.11.2
 numpy==1.19.2
 nvidia-pyindex==1.0.4
-Pillow==7.2.0
+Pillow==9.0.1
 protobuf==3.15.0
 pydantic==1.5.1
 python-multipart==0.0.5
