@@ -7,7 +7,7 @@ from setuptools import find_namespace_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = ["cookiecutter==1.7.2"]
+requirements = ["cookiecutter==2.1.1"]
 test_requirements = []
 
 setup(
